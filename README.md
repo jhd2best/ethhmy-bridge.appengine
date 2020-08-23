@@ -24,6 +24,7 @@ npm install
 * Develop
 
 ```
+npm run build
 npm run start:watch
 ```
 
@@ -33,7 +34,7 @@ npm run start:watch
 npm run build
 ```
 
-* Start
+* Start prod
 
 ```
 npm run start:prod
