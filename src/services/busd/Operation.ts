@@ -2,6 +2,7 @@ import { uuidv4 } from '../utils';
 import { ACTION_TYPE, OPERATION_TYPE, STATUS } from './interfaces';
 import { Action } from './Action';
 import * as eth from '../../blockchain/busd/eth';
+import * as hmy from '../../blockchain/busd/hmy';
 
 export interface IOperationInitParams {
   type: OPERATION_TYPE;
@@ -22,6 +23,12 @@ export class Operation {
   oneAddress: string;
   amount: string;
   actions: Action[];
+  lockedEvent: {
+    status: boolean;
+    transactionHash: string;
+    returnValues: { recipient: string };
+    blockNumber: number;
+  };
 
   constructor(params: IOperationInitParams) {
     this.id = uuidv4();
@@ -40,15 +47,37 @@ export class Operation {
 
         const lockTokenAction = new Action({
           type: ACTION_TYPE.lockToken,
-          callFunction: () => eth.lockToken(this.ethAddress, this.amount),
+          callFunction: async () => {
+            this.lockedEvent = await eth.lockToken(this.ethAddress, this.amount);
+            return this.lockedEvent;
+          },
         });
 
         const waitingBlockNumberAction = new Action({
           type: ACTION_TYPE.waitingBlockNumber,
-          callFunction: async () => eth.waitingBlockNumber(),
+          callFunction: () =>
+            eth.waitingBlockNumber(
+              this.lockedEvent,
+              msg => (waitingBlockNumberAction.message = msg)
+            ),
         });
 
-        this.actions = [approveEthMangerAction, lockTokenAction, waitingBlockNumberAction];
+        const mintTokenAction = new Action({
+          type: ACTION_TYPE.mintToken,
+          callFunction: () =>
+            hmy.mintToken(
+              this.lockedEvent.returnValues.recipient,
+              this.amount,
+              this.lockedEvent.transactionHash
+            ),
+        });
+
+        this.actions = [
+          approveEthMangerAction,
+          lockTokenAction,
+          waitingBlockNumberAction,
+          mintTokenAction,
+        ];
         break;
 
       case OPERATION_TYPE.BUSD_ONE_ETH:

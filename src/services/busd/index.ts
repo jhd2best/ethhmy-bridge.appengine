@@ -1,5 +1,7 @@
 import { DBService } from '../database';
 import { IOperationInitParams, Operation } from './Operation';
+import { createError } from '../../routes/helpers';
+import { STATUS } from './interfaces';
 
 export interface IBUSDService {
   database: DBService;
@@ -15,6 +17,14 @@ export class BUSDService {
   }
 
   create = (params: IOperationInitParams) => {
+    if (
+      this.operations.some(
+        op => op.ethAddress === params.ethAddress && op.status === STATUS.IN_PROGRESS
+      )
+    ) {
+      throw createError(500, 'This operations already in progress');
+    }
+
     const operation = new Operation(params);
 
     this.operations.push(operation);

@@ -13,6 +13,7 @@ export const ethBUSDContract = new web3.eth.Contract(
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const EthManagerJson = require('../contracts/BUSDEthManager.json');
+
 export const managerContract = new web3.eth.Contract(
   EthManagerJson.abi,
   process.env.ETH_MANAGER_CONTRACT

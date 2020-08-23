@@ -17,6 +17,8 @@ export class Action {
   status: STATUS;
   transactionHash: string;
   error: string;
+  message: string;
+  timestamp: number;
   payload: any;
 
   callFunction: TActionCallFunction;
@@ -30,6 +32,7 @@ export class Action {
 
   public call = async () => {
     this.status = STATUS.IN_PROGRESS;
+    this.timestamp = Math.round(+new Date() / 1000);
 
     try {
       const res = await this.callFunction();
@@ -57,6 +60,8 @@ export class Action {
     status: this.status,
     transactionHash: this.transactionHash,
     error: this.error,
-    payload: this.payload,
+    message: this.message,
+    timestamp: this.timestamp,
+    // payload: this.payload,
   });
 }

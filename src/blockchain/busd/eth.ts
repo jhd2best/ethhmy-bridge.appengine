@@ -22,11 +22,13 @@ export async function approveEthManger(amount) {
 export async function lockToken(userAddr, amount) {
   const account = addAccount('0x694f76fae42a33b853054e950699de8e552e2e6b5bb7178404c73095c648da21');
 
-  return await managerContract.methods.lockToken(amount, userAddr).send({
+  const transaction = await managerContract.methods.lockToken(amount, userAddr).send({
     from: account.address,
     gas: process.env.ETH_GAS_LIMIT,
     gasPrice: new BN(await web3.eth.getGasPrice()).mul(new BN(1)),
   });
+
+  return { ...transaction.events.Locked, status: transaction.status };
 }
 
 export async function unlockToken(userAddr, amount, receiptId) {
@@ -39,15 +41,14 @@ export async function unlockToken(userAddr, amount, receiptId) {
   });
 }
 
-export async function waitingBlockNumber() {
+export async function waitingBlockNumber({ blockNumber }, callbackMessage) {
   {
-    const lockedEventBlockNumber = await web3.eth.getBlockNumber();
-    const expectedBlockNumber = lockedEventBlockNumber + BLOCK_TO_FINALITY;
+    const expectedBlockNumber = blockNumber + BLOCK_TO_FINALITY;
 
     while (true) {
       const blockNumber = await web3.eth.getBlockNumber();
       if (blockNumber <= expectedBlockNumber) {
-        console.log(
+        callbackMessage(
           `Currently at block ${blockNumber}, waiting for block ${expectedBlockNumber} to be confirmed`
         );
 
