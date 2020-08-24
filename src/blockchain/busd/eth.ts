@@ -9,6 +9,10 @@ const addAccount = (privateKey: string) => {
   return ethMasterAccount;
 };
 
+export async function sendSignedTransaction(rawTransaction: string) {
+  return await web3.eth.sendSignedTransaction(rawTransaction);
+}
+
 export async function approveEthManger(amount) {
   const account = addAccount('0x694f76fae42a33b853054e950699de8e552e2e6b5bb7178404c73095c648da21');
 

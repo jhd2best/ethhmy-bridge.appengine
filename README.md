@@ -47,7 +47,7 @@ npm run start:prod
 curl --location --request POST 'http://localhost:8080/busd/operations' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-    "type": "busd_eth_one",
+    "type": "busd_eth_one_test",
     "ethAddress": "0x0FBb9C31eabc2EdDbCF59c03E76ada36f5AB8723",
     "oneAddress": "0x203fc3cA24D4194A4CD1614Fec186a7951Bb0244",
     "amount": "1"

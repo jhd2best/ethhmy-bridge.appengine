@@ -8,10 +8,7 @@ export interface IOperationInitParams {
   type: OPERATION_TYPE;
   ethAddress: string;
   oneAddress: string;
-  actions: Array<{
-    type: ACTION_TYPE;
-    raw: string;
-  }>;
+  actions: Record<ACTION_TYPE, string>;
   amount: string;
 }
 
@@ -40,44 +37,11 @@ export class Operation {
 
     switch (params.type) {
       case OPERATION_TYPE.BUSD_ETH_ONE:
-        const approveEthMangerAction = new Action({
-          type: ACTION_TYPE.approveEthManger,
-          callFunction: () => eth.approveEthManger(this.amount),
-        });
+        this.BUSD_ETH_ONE(params);
+        break;
 
-        const lockTokenAction = new Action({
-          type: ACTION_TYPE.lockToken,
-          callFunction: async () => {
-            this.lockedEvent = await eth.lockToken(this.ethAddress, this.amount);
-            return this.lockedEvent;
-          },
-        });
-
-        const waitingBlockNumberAction = new Action({
-          type: ACTION_TYPE.waitingBlockNumber,
-          callFunction: () =>
-            eth.waitingBlockNumber(
-              this.lockedEvent,
-              msg => (waitingBlockNumberAction.message = msg)
-            ),
-        });
-
-        const mintTokenAction = new Action({
-          type: ACTION_TYPE.mintToken,
-          callFunction: () =>
-            hmy.mintToken(
-              this.lockedEvent.returnValues.recipient,
-              this.amount,
-              this.lockedEvent.transactionHash
-            ),
-        });
-
-        this.actions = [
-          approveEthMangerAction,
-          lockTokenAction,
-          waitingBlockNumberAction,
-          mintTokenAction,
-        ];
+      case OPERATION_TYPE.BUSD_ETH_ONE_TEST:
+        this.BUSD_ETH_ONE_TEST();
         break;
 
       case OPERATION_TYPE.BUSD_ONE_ETH:
@@ -86,6 +50,53 @@ export class Operation {
 
     this.startActionsPool();
   }
+
+  BUSD_ETH_ONE = (params: IOperationInitParams) => {
+    const approveEthMangerAction = new Action({
+      type: ACTION_TYPE.approveEthManger,
+      callFunction: () => eth.sendSignedTransaction(params.actions.approveEthManger),
+    });
+
+    this.actions = [approveEthMangerAction];
+  };
+
+  BUSD_ETH_ONE_TEST = () => {
+    const approveEthMangerAction = new Action({
+      type: ACTION_TYPE.approveEthManger,
+      callFunction: () => eth.approveEthManger(this.amount),
+    });
+
+    const lockTokenAction = new Action({
+      type: ACTION_TYPE.lockToken,
+      callFunction: async () => {
+        this.lockedEvent = await eth.lockToken(this.ethAddress, this.amount);
+        return this.lockedEvent;
+      },
+    });
+
+    const waitingBlockNumberAction = new Action({
+      type: ACTION_TYPE.waitingBlockNumber,
+      callFunction: () =>
+        eth.waitingBlockNumber(this.lockedEvent, msg => (waitingBlockNumberAction.message = msg)),
+    });
+
+    const mintTokenAction = new Action({
+      type: ACTION_TYPE.mintToken,
+      callFunction: () =>
+        hmy.mintToken(
+          this.lockedEvent.returnValues.recipient,
+          this.amount,
+          this.lockedEvent.transactionHash
+        ),
+    });
+
+    this.actions = [
+      approveEthMangerAction,
+      lockTokenAction,
+      waitingBlockNumberAction,
+      mintTokenAction,
+    ];
+  };
 
   startActionsPool = async () => {
     let actionIndex = 0;
