@@ -34,10 +34,6 @@ export class Operation {
         this.BUSD_ETH_ONE(params);
         break;
 
-      // case OPERATION_TYPE.BUSD_ETH_ONE_TEST:
-      //   this.BUSD_ETH_ONE_TEST();
-      //   break;
-
       case OPERATION_TYPE.BUSD_ONE_ETH:
         break;
     }
@@ -49,28 +45,30 @@ export class Operation {
     const approveEthMangerAction = new Action({
       type: ACTION_TYPE.approveEthManger,
       awaitConfirmation: true,
-      callFunction: props => eth.getTransactionReceipt(props),
+      callFunction: hash => eth.getTransactionReceipt(hash),
     });
 
     const lockTokenAction = new Action({
       type: ACTION_TYPE.approveEthManger,
       awaitConfirmation: true,
-      callFunction: props => eth.getTransactionReceipt(props),
+      callFunction: hash => eth.getTransactionReceipt(hash),
     });
 
     const waitingBlockNumberAction = new Action({
       type: ACTION_TYPE.waitingBlockNumber,
       callFunction: () =>
         eth.waitingBlockNumber(
-          lockTokenAction.payload,
+          lockTokenAction.payload.blockNumber,
           msg => (waitingBlockNumberAction.message = msg)
         ),
     });
 
+    // TODO: get past logs to fetch the lockToken tx hash and recipient
+
     const mintTokenAction = new Action({
       type: ACTION_TYPE.mintToken,
       callFunction: () =>
-        hmy.mintToken(lockTokenAction.payload.to, this.amount, lockTokenAction.transactionHash),
+        hmy.mintToken(params.oneAddress, params.amount, lockTokenAction.transactionHash),
     });
 
     this.actions = [
@@ -80,44 +78,6 @@ export class Operation {
       mintTokenAction,
     ];
   };
-
-  // BUSD_ETH_ONE_TEST = () => {
-  //   const approveEthMangerAction = new Action({
-  //     type: ACTION_TYPE.approveEthManger,
-  //     callFunction: () => eth.approveEthManger(this.amount),
-  //   });
-  //
-  //   const lockTokenAction = new Action({
-  //     type: ACTION_TYPE.lockToken,
-  //     callFunction: async () => {
-  //       this.lockedEvent = await eth.lockToken(this.ethAddress, this.amount);
-  //       return this.lockedEvent;
-  //     },
-  //   });
-  //
-  //   const waitingBlockNumberAction = new Action({
-  //     type: ACTION_TYPE.waitingBlockNumber,
-  //     callFunction: () =>
-  //       eth.waitingBlockNumber(this.lockedEvent, msg => (waitingBlockNumberAction.message = msg)),
-  //   });
-  //
-  //   const mintTokenAction = new Action({
-  //     type: ACTION_TYPE.mintToken,
-  //     callFunction: () =>
-  //       hmy.mintToken(
-  //         this.lockedEvent.returnValues.recipient,
-  //         this.amount,
-  //         this.lockedEvent.transactionHash
-  //       ),
-  //   });
-  //
-  //   this.actions = [
-  //     approveEthMangerAction,
-  //     lockTokenAction,
-  //     waitingBlockNumberAction,
-  //     mintTokenAction,
-  //   ];
-  // };
 
   startActionsPool = async () => {
     let actionIndex = 0;

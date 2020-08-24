@@ -53,7 +53,7 @@ export async function unlockToken(userAddr, amount, receiptId) {
   });
 }
 
-export async function waitingBlockNumber({ blockNumber }, callbackMessage) {
+export async function waitingBlockNumber(blockNumber, callbackMessage) {
   {
     const expectedBlockNumber = blockNumber + BLOCK_TO_FINALITY;
 
