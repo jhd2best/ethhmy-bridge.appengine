@@ -17,13 +17,13 @@ export class OperationService {
   }
 
   create = (params: IOperationInitParams) => {
-    if (
-      this.operations.some(
-        op => op.ethAddress === params.ethAddress && op.status === STATUS.IN_PROGRESS
-      )
-    ) {
-      throw createError(500, 'This operations already in progress');
-    }
+    // if (
+    //   this.operations.some(
+    //     op => op.ethAddress === params.ethAddress && op.status === STATUS.IN_PROGRESS
+    //   )
+    // ) {
+    //   throw createError(500, 'This operations already in progress');
+    // }
 
     const operation = new Operation(params);
 

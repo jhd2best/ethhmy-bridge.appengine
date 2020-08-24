@@ -3,6 +3,8 @@ import { ACTION_TYPE, OPERATION_TYPE, STATUS } from './interfaces';
 import { Action } from './Action';
 import * as eth from '../../blockchain/busd/eth';
 import * as hmy from '../../blockchain/busd/hmy';
+import { error } from 'util';
+import { createError } from '../../routes/helpers';
 
 export interface IOperationInitParams {
   type: OPERATION_TYPE;
@@ -36,6 +38,9 @@ export class Operation {
 
       case OPERATION_TYPE.BUSD_ONE_ETH:
         break;
+
+      default:
+        throw createError(500, 'Action type not found');
     }
 
     this.startActionsPool();
@@ -49,7 +54,7 @@ export class Operation {
     });
 
     const lockTokenAction = new Action({
-      type: ACTION_TYPE.approveEthManger,
+      type: ACTION_TYPE.lockToken,
       awaitConfirmation: true,
       callFunction: hash => eth.getTransactionReceipt(hash),
     });
