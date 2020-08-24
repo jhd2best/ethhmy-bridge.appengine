@@ -1,9 +1,9 @@
 import { uuidv4 } from '../utils';
 import { ACTION_TYPE, OPERATION_TYPE, STATUS } from './interfaces';
 import { Action } from './Action';
-import * as eth from '../../blockchain/busd/eth';
-import * as hmy from '../../blockchain/busd/hmy';
-import { error } from 'util';
+import * as ethActions from '../../blockchain/busd/eth';
+import * as hmyActions from '../../blockchain/busd/hmy';
+import {hmy} from '../../blockchain/hmySdk';
 import { createError } from '../../routes/helpers';
 
 export interface IOperationInitParams {
@@ -50,19 +50,19 @@ export class Operation {
     const approveEthMangerAction = new Action({
       type: ACTION_TYPE.approveEthManger,
       awaitConfirmation: true,
-      callFunction: hash => eth.getTransactionReceipt(hash),
+      callFunction: hash => ethActions.getTransactionReceipt(hash),
     });
 
     const lockTokenAction = new Action({
       type: ACTION_TYPE.lockToken,
       awaitConfirmation: true,
-      callFunction: hash => eth.getTransactionReceipt(hash),
+      callFunction: hash => ethActions.getTransactionReceipt(hash),
     });
 
     const waitingBlockNumberAction = new Action({
       type: ACTION_TYPE.waitingBlockNumber,
       callFunction: () =>
-        eth.waitingBlockNumber(
+        ethActions.waitingBlockNumber(
           lockTokenAction.payload.blockNumber,
           msg => (waitingBlockNumberAction.message = msg)
         ),
@@ -70,10 +70,12 @@ export class Operation {
 
     // TODO: get past logs to fetch the lockToken tx hash and recipient
 
+    const hmyAddrHex = hmy.crypto.getAddress(params.oneAddress).checksum;
+
     const mintTokenAction = new Action({
       type: ACTION_TYPE.mintToken,
       callFunction: () =>
-        hmy.mintToken(params.oneAddress, params.amount, lockTokenAction.transactionHash),
+        hmyActions.mintToken(hmyAddrHex, params.amount, lockTokenAction.transactionHash),
     });
 
     this.actions = [
