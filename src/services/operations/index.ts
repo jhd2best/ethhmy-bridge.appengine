@@ -42,6 +42,24 @@ export class OperationService {
     return null;
   };
 
+  setActionHash = (params: { operationId: string; actionId: string; transactionHash: string }) => {
+    const operation = this.operations.find(o => o.id === params.operationId);
+
+    if (!operation) {
+      throw createError(400, 'Operation not found');
+    }
+
+    const action = operation.actions.find(a => a.id === params.actionId);
+
+    if (!action) {
+      throw createError(400, 'Action not found');
+    }
+
+    action.setTransactionHash(params.transactionHash);
+
+    return operation.toObject();
+  };
+
   getAllOperations = (params: { ethAddress?: string; oneAddress?: string }) => {
     return this.operations
       .filter(operation => {

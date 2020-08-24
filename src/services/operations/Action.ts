@@ -1,7 +1,12 @@
 import { uuidv4 } from '../utils';
 import { ACTION_TYPE, STATUS } from './interfaces';
+import { createError } from '../../routes/helpers';
+import { sleep } from '../../blockchain/utils';
+import { TransactionReceipt } from 'web3-core';
 
-export type TActionCallFunction = () => Promise<{
+export type TActionCallFunction = (
+  props?: any
+) => Promise<{
   status: boolean;
   transactionHash?: string;
 }>;
@@ -9,6 +14,7 @@ export type TActionCallFunction = () => Promise<{
 export interface IActionInitParams {
   type: ACTION_TYPE;
   callFunction: TActionCallFunction;
+  awaitConfirmation?: boolean;
 }
 
 export class Action {
@@ -19,7 +25,8 @@ export class Action {
   error: string;
   message: string;
   timestamp: number;
-  payload: any;
+  payload: TransactionReceipt;
+  awaitConfirmation: boolean;
 
   callFunction: TActionCallFunction;
 
@@ -28,14 +35,30 @@ export class Action {
     this.status = STATUS.WAITING;
     this.type = params.type;
     this.callFunction = params.callFunction;
+    this.awaitConfirmation = !!params.awaitConfirmation;
   }
 
   public call = async () => {
+    if (this.awaitConfirmation) {
+      while (!this.transactionHash) {
+        await sleep(1000);
+      }
+    }
+
     this.status = STATUS.IN_PROGRESS;
     this.timestamp = Math.round(+new Date() / 1000);
 
     try {
-      const res = await this.callFunction();
+      let res;
+
+      if (this.awaitConfirmation) {
+        while (!res) {
+          res = await this.callFunction(this.transactionHash);
+          await sleep(1000);
+        }
+      } else {
+        res = await this.callFunction();
+      }
 
       this.transactionHash = res.transactionHash;
       this.payload = res;
@@ -44,6 +67,8 @@ export class Action {
         this.status = STATUS.SUCCESS;
 
         return true;
+      } else {
+        this.error = 'Tx status not success';
       }
     } catch (e) {
       this.error = e.message;
@@ -52,6 +77,14 @@ export class Action {
     this.status = STATUS.ERROR;
 
     return false;
+  };
+
+  public setTransactionHash = (transactionHash: string) => {
+    if (this.awaitConfirmation && !this.transactionHash) {
+      this.transactionHash = transactionHash;
+    } else {
+      throw createError(500, 'Transaction hash already saved');
+    }
   };
 
   public toObject = () => ({
