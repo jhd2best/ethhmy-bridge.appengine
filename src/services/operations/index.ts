@@ -3,16 +3,16 @@ import { IOperationInitParams, Operation } from './Operation';
 import { createError } from '../../routes/helpers';
 import { STATUS } from './interfaces';
 
-export interface IBUSDService {
+export interface IOperationService {
   database: DBService;
 }
 
-export class BUSDService {
+export class OperationService {
   database: DBService;
 
   operations: Operation[] = [];
 
-  constructor(params: IBUSDService) {
+  constructor(params: IOperationService) {
     this.database = params.database;
   }
 

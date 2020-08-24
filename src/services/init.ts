@@ -1,18 +1,18 @@
 import { DBService } from './database';
-import { BUSDService } from './busd';
+import { OperationService } from './operations';
 
 export interface IServices {
-  busd: BUSDService;
+  operations: OperationService;
   database: DBService;
 }
 
 export const InitServices = async (): Promise<IServices> => {
   const database = new DBService();
 
-  const busd = new BUSDService({ database });
+  const operations = new OperationService({ database });
 
   return {
-    busd,
+    operations,
     database,
   };
 };
