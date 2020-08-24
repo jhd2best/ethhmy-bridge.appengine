@@ -3,7 +3,7 @@ import { ACTION_TYPE, OPERATION_TYPE, STATUS } from './interfaces';
 import { Action } from './Action';
 import * as ethActions from '../../blockchain/busd/eth';
 import * as hmyActions from '../../blockchain/busd/hmy';
-import {hmy} from '../../blockchain/hmySdk';
+import { hmy } from '../../blockchain/hmySdk';
 import { createError } from '../../routes/helpers';
 
 export interface IOperationInitParams {
