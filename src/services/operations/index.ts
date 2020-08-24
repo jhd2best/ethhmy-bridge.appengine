@@ -29,6 +29,8 @@ export class OperationService {
 
     this.operations.push(operation);
 
+    // TODO: store in DB
+
     return operation.toObject();
   };
 

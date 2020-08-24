@@ -97,6 +97,8 @@ export class Operation {
     this.status = STATUS.IN_PROGRESS;
 
     while (this.actions[actionIndex]) {
+      // TODO: patch operation in DB
+
       const action = this.actions[actionIndex];
 
       const res = await action.call();
