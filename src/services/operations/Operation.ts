@@ -30,6 +30,7 @@ export class Operation {
     this.oneAddress = params.oneAddress;
     this.ethAddress = params.ethAddress;
     this.amount = params.amount;
+    this.type = params.type;
 
     switch (params.type) {
       case OPERATION_TYPE.BUSD_ETH_ONE:
@@ -37,10 +38,11 @@ export class Operation {
         break;
 
       case OPERATION_TYPE.BUSD_ONE_ETH:
+        this.BUSD_ONE_ETH(params);
         break;
 
       default:
-        throw createError(500, 'Action type not found');
+        throw createError(500, 'Operation type not found');
     }
 
     this.startActionsPool();
@@ -84,6 +86,28 @@ export class Operation {
       waitingBlockNumberAction,
       mintTokenAction,
     ];
+  };
+
+  BUSD_ONE_ETH = (params: IOperationInitParams) => {
+    const approveHmyMangerAction = new Action({
+      type: ACTION_TYPE.approveHmyManger,
+      awaitConfirmation: true,
+      callFunction: hash => hmyActions.getTransactionReceipt(hash),
+    });
+
+    const burnTokenAction = new Action({
+      type: ACTION_TYPE.burnToken,
+      awaitConfirmation: true,
+      callFunction: hash => hmyActions.getTransactionReceipt(hash),
+    });
+
+    const unlockTokenAction = new Action({
+      type: ACTION_TYPE.unlockToken,
+      callFunction: () =>
+        hmyActions.mintToken(params.ethAddress, params.amount, burnTokenAction.transactionHash),
+    });
+
+    this.actions = [approveHmyMangerAction, burnTokenAction, unlockTokenAction];
   };
 
   startActionsPool = async () => {
