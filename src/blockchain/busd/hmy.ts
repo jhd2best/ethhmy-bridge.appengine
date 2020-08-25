@@ -15,7 +15,9 @@ export async function mintToken(userAddr, amount, receiptId) {
 export async function getTransactionReceipt(txnHash) {
   const res = await hmy.blockchain.getTransactionReceipt({ txnHash });
 
-  console.log(res);
+  if (!res.result) {
+    return res.result;
+  }
 
-  return res;
+  return { ...res.result, status: res.result.status === '0x1' };
 }
