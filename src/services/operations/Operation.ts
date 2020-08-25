@@ -101,6 +101,8 @@ export class Operation {
       callFunction: hash => hmyActions.getTransactionReceipt(hash),
     });
 
+    // TODO: unlockToken return success status, but tokens not transfer
+
     const unlockTokenAction = new Action({
       type: ACTION_TYPE.unlockToken,
       callFunction: () =>
