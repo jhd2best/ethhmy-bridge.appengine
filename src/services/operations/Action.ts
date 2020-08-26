@@ -30,13 +30,24 @@ export class Action {
 
   callFunction: TActionCallFunction;
 
-  constructor(params: IActionInitParams) {
+  constructor(params: IActionInitParams, initParam?: Action) {
     this.id = uuidv4();
     this.status = STATUS.WAITING;
     this.type = params.type;
     this.callFunction = params.callFunction;
     this.awaitConfirmation = !!params.awaitConfirmation;
   }
+
+  public setParams = (action: Action) => {
+    this.id = action.id;
+    this.type = action.type;
+    this.status = action.status;
+    this.transactionHash = action.transactionHash;
+    this.message = action.message;
+    this.error = action.error;
+    this.timestamp = action.timestamp;
+    this.payload = action.payload;
+  };
 
   public call = async () => {
     if (this.awaitConfirmation) {
@@ -87,14 +98,28 @@ export class Action {
     }
   };
 
-  public toObject = () => ({
-    id: this.id,
-    type: this.type,
-    status: this.status,
-    transactionHash: this.transactionHash,
-    error: this.error,
-    message: this.message,
-    timestamp: this.timestamp,
-    // payload: this.payload,
-  });
+  public toObject = (params?: { payload?: boolean }) => {
+    const obj = {
+      id: this.id,
+      type: this.type,
+      status: this.status,
+      transactionHash: this.transactionHash,
+      error: this.error,
+      message: this.message,
+      timestamp: this.timestamp,
+      payload: this.payload,
+    };
+
+    if (!params || !params.payload) {
+      delete obj.payload;
+    }
+
+    for (const key in obj) {
+      if (obj[key] === undefined) {
+        delete obj[key];
+      }
+    }
+
+    return obj;
+  };
 }

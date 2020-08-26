@@ -8,7 +8,7 @@ export class DBService {
   constructor() {
     // Init admin
     try {
-      const serviceAccount = require('../../db_keys/keys.json');
+      const serviceAccount = require('../../keys/keys.json');
 
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
@@ -17,7 +17,7 @@ export class DBService {
 
       this.db = admin.firestore();
     } catch (e) {
-      // console.error(e);
+      console.error(e);
     }
   }
 

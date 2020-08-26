@@ -1,7 +1,6 @@
 import { DBService } from '../database';
 import { IOperationInitParams, Operation } from './Operation';
 import { createError } from '../../routes/helpers';
-import { STATUS } from './interfaces';
 
 export interface IOperationService {
   database: DBService;
@@ -10,13 +9,31 @@ export interface IOperationService {
 export class OperationService {
   database: DBService;
 
+  dbCollectionName = 'operations';
+
   operations: Operation[] = [];
 
   constructor(params: IOperationService) {
     this.database = params.database;
+
+    this.restoreOperationsFromDB();
   }
 
-  create = (params: IOperationInitParams) => {
+  restoreOperationsFromDB = async () => {
+    const operations = await this.database.getCollectionData(this.dbCollectionName);
+
+    operations.forEach(operationDB => {
+      const operation = new Operation(operationDB, this.saveOperationToDB);
+
+      this.operations.push(operation);
+    });
+  };
+
+  saveOperationToDB = async (operation: Operation) => {
+    await this.database.updateDocument(this.dbCollectionName, operation.id, operation.toObject());
+  };
+
+  create = async (params: IOperationInitParams) => {
     // if (
     //   this.operations.some(
     //     op => op.ethAddress === params.ethAddress && op.status === STATUS.IN_PROGRESS
@@ -25,11 +42,20 @@ export class OperationService {
     //   throw createError(500, 'This operations already in progress');
     // }
 
-    const operation = new Operation(params);
+    const operation = new Operation(
+      {
+        type: params.type,
+        ethAddress: params.ethAddress,
+        oneAddress: params.oneAddress,
+        actions: params.actions,
+        amount: params.amount,
+      },
+      this.saveOperationToDB
+    );
+
+    await this.saveOperationToDB(operation);
 
     this.operations.push(operation);
-
-    // TODO: store in DB
 
     return operation.toObject();
   };

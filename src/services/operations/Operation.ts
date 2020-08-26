@@ -6,12 +6,16 @@ import * as hmyActions from '../../blockchain/busd/hmy';
 import { createError } from '../../routes/helpers';
 
 export interface IOperationInitParams {
+  id?: string;
+  status?: STATUS;
   type: OPERATION_TYPE;
   ethAddress: string;
   oneAddress: string;
-  actions: Record<ACTION_TYPE, string>;
+  actions?: Array<Action>;
   amount: string;
 }
+
+export type TSyncOperationCallback = (operation: Operation) => Promise<void>;
 
 export class Operation {
   id: string;
@@ -22,14 +26,15 @@ export class Operation {
   amount: string;
   actions: Action[];
 
-  constructor(params: IOperationInitParams) {
-    this.id = uuidv4();
-    this.status = STATUS.WAITING;
+  syncOperationCallback: TSyncOperationCallback;
 
+  constructor(params: IOperationInitParams, callback: TSyncOperationCallback) {
     this.oneAddress = params.oneAddress;
     this.ethAddress = params.ethAddress;
     this.amount = params.amount;
     this.type = params.type;
+
+    this.syncOperationCallback = callback;
 
     switch (params.type) {
       case OPERATION_TYPE.BUSD_ETH_ONE:
@@ -44,8 +49,31 @@ export class Operation {
         throw createError(500, 'Operation type not found');
     }
 
-    this.startActionsPool();
+    if (params.id) {
+      // init from DB
+      this.id = params.id;
+      this.status = params.status;
+
+      this.actions.forEach(action => {
+        const actionFromDB = params.actions.find(a => a.type === action.type);
+
+        if (actionFromDB) {
+          action.setParams(actionFromDB);
+        }
+      });
+    } else {
+      this.id = uuidv4();
+      this.status = STATUS.WAITING;
+    }
+
+    if (this.status === STATUS.WAITING || this.status === STATUS.IN_PROGRESS) {
+      this.startActionsPool();
+    }
   }
+
+  initActionParams = (actions: Array<Action>, type: ACTION_TYPE) => {
+    return actions ? actions.find(a => a.type === type) : null;
+  };
 
   BUSD_ETH_ONE = (params: IOperationInitParams) => {
     const approveEthMangerAction = new Action({
@@ -152,24 +180,29 @@ export class Operation {
     this.status = STATUS.IN_PROGRESS;
 
     while (this.actions[actionIndex]) {
-      // TODO: patch operation in DB
-
       const action = this.actions[actionIndex];
 
-      const res = await action.call();
+      if (action.status === STATUS.WAITING) {
+        const res = await action.call();
 
-      if (!res) {
-        this.status = STATUS.ERROR;
-        return;
+        if (!res) {
+          this.status = STATUS.ERROR;
+          await this.syncOperationCallback(this);
+          return;
+        }
+
+        await this.syncOperationCallback(this);
       }
 
       actionIndex++;
     }
 
     this.status = STATUS.SUCCESS;
+
+    await this.syncOperationCallback(this);
   };
 
-  toObject = () => {
+  toObject = (params?: { payload?: boolean }) => {
     return {
       id: this.id,
       type: this.type,
@@ -177,7 +210,7 @@ export class Operation {
       amount: this.amount,
       ethAddress: this.ethAddress,
       oneAddress: this.oneAddress,
-      actions: this.actions.map(a => a.toObject()),
+      actions: this.actions.map(a => a.toObject(params)),
     };
   };
 }
