@@ -70,14 +70,27 @@ export class Operation {
         ),
     });
 
-    // TODO: get past logs to fetch the lockToken tx hash and recipient
-
-    const hmyAddrHex = hmy.crypto.getAddress(params.oneAddress).checksum;
-
     const mintTokenAction = new Action({
       type: ACTION_TYPE.mintToken,
-      callFunction: () =>
-        hmyActions.mintToken(hmyAddrHex, params.amount, lockTokenAction.transactionHash),
+      callFunction: () => {
+        let approvalLog = ethActions.decodeApprovalLog(approveEthMangerAction.payload);
+        if (approvalLog.spender != process.env.ETH_MANAGER_CONTRACT) {
+          return new Promise(resolve => {
+            resolve(null);
+          });
+        }
+        let lockTokenLog = ethActions.decodeLockTokenLog(lockTokenAction.payload);
+        if (lockTokenLog.amount != approvalLog.value) {
+          return new Promise(resolve => {
+            resolve(null);
+          });
+        }
+        return hmyActions.mintToken(
+          lockTokenLog.recipient,
+          lockTokenLog.amount,
+          lockTokenAction.transactionHash
+        );
+      },
     });
 
     this.actions = [
@@ -105,8 +118,25 @@ export class Operation {
 
     const unlockTokenAction = new Action({
       type: ACTION_TYPE.unlockToken,
-      callFunction: () =>
-        hmyActions.mintToken(params.ethAddress, params.amount, burnTokenAction.transactionHash),
+      callFunction: () => {
+        let approvalLog = hmyActions.decodeApprovalLog(approveHmyMangerAction.payload);
+        if (approvalLog.spender.toUpperCase() != process.env.HMY_MANAGER_CONTRACT.toUpperCase()) {
+          return new Promise(resolve => {
+            resolve(null);
+          });
+        }
+        let burnTokenLog = hmyActions.decodeBurnTokenLog(burnTokenAction.payload);
+        if (burnTokenLog.amount != approvalLog.value) {
+          return new Promise(resolve => {
+            resolve(null);
+          });
+        }
+        return ethActions.unlockToken(
+          burnTokenLog.recipient,
+          burnTokenLog.amount,
+          burnTokenAction.transactionHash
+        );
+      },
     });
 
     this.actions = [approveHmyMangerAction, burnTokenAction, unlockTokenAction];
