@@ -3,7 +3,6 @@ import { ACTION_TYPE, OPERATION_TYPE, STATUS } from './interfaces';
 import { Action } from './Action';
 import * as ethActions from '../../blockchain/busd/eth';
 import * as hmyActions from '../../blockchain/busd/hmy';
-import { hmy } from '../../blockchain/hmySdk';
 import { createError } from '../../routes/helpers';
 
 export interface IOperationInitParams {
@@ -73,13 +72,13 @@ export class Operation {
     const mintTokenAction = new Action({
       type: ACTION_TYPE.mintToken,
       callFunction: () => {
-        let approvalLog = ethActions.decodeApprovalLog(approveEthMangerAction.payload);
+        const approvalLog = ethActions.decodeApprovalLog(approveEthMangerAction.payload);
         if (approvalLog.spender != process.env.ETH_MANAGER_CONTRACT) {
           return new Promise(resolve => {
             resolve(null);
           });
         }
-        let lockTokenLog = ethActions.decodeLockTokenLog(lockTokenAction.payload);
+        const lockTokenLog = ethActions.decodeLockTokenLog(lockTokenAction.payload);
         if (lockTokenLog.amount != approvalLog.value) {
           return new Promise(resolve => {
             resolve(null);
@@ -119,13 +118,13 @@ export class Operation {
     const unlockTokenAction = new Action({
       type: ACTION_TYPE.unlockToken,
       callFunction: () => {
-        let approvalLog = hmyActions.decodeApprovalLog(approveHmyMangerAction.payload);
+        const approvalLog = hmyActions.decodeApprovalLog(approveHmyMangerAction.payload);
         if (approvalLog.spender.toUpperCase() != process.env.HMY_MANAGER_CONTRACT.toUpperCase()) {
           return new Promise(resolve => {
             resolve(null);
           });
         }
-        let burnTokenLog = hmyActions.decodeBurnTokenLog(burnTokenAction.payload);
+        const burnTokenLog = hmyActions.decodeBurnTokenLog(burnTokenAction.payload);
         if (burnTokenLog.amount != approvalLog.value) {
           return new Promise(resolve => {
             resolve(null);
