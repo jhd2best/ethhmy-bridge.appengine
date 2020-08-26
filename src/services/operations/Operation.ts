@@ -71,10 +71,6 @@ export class Operation {
     }
   }
 
-  initActionParams = (actions: Array<Action>, type: ACTION_TYPE) => {
-    return actions ? actions.find(a => a.type === type) : null;
-  };
-
   BUSD_ETH_ONE = (params: IOperationInitParams) => {
     const approveEthMangerAction = new Action({
       type: ACTION_TYPE.approveEthManger,
