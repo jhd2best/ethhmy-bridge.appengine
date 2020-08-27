@@ -1,10 +1,10 @@
-import { hmyManagerContract, hmy } from '../hmySdk';
+import { hmyManager, hmy } from '../hmySdk';
 import { TransactionReceipt } from 'web3-core';
 
 const options = { gasPrice: 1000000000, gasLimit: 6721900 };
 
 export async function mintToken(userAddr, amount, receiptId) {
-  const res = await hmyManagerContract.methods.mintToken(amount, userAddr, receiptId).send(options);
+  const res = await hmyManager.contract.methods.mintToken(amount, userAddr, receiptId).send(options);
 
   return {
     ...res.transaction,
@@ -26,8 +26,8 @@ export function decodeApprovalLog(receipt: TransactionReceipt) {
 }
 
 export function decodeBurnTokenLog(receipt: TransactionReceipt) {
-  return hmyManagerContract.abiCoder.decodeLog(
-    hmyManagerContract.abiModel.getEvent('Burned').inputs,
+  return hmyManager.contract.abiCoder.decodeLog(
+    hmyManager.contract.abiModel.getEvent('Burned').inputs,
     receipt.logs[3].data,
     receipt.logs[3].topics.slice(1)
   );

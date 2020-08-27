@@ -1,14 +1,7 @@
-import { managerContract, web3 } from '../ethSdk';
+import { ethManager, web3 } from '../ethSdk';
 import BN from 'bn.js';
 import { AVG_BLOCK_TIME, BLOCK_TO_FINALITY, sleep } from '../utils';
 import { TransactionReceipt } from 'web3-core';
-
-const addAccount = (privateKey: string) => {
-  const ethMasterAccount = web3.eth.accounts.privateKeyToAccount(privateKey);
-  web3.eth.accounts.wallet.add(ethMasterAccount);
-
-  return ethMasterAccount;
-};
 
 export async function getTransactionByHash(transactionHash: string) {
   return await web3.eth.getTransaction(transactionHash);
@@ -64,10 +57,8 @@ export function decodeLockTokenLog(receipt: TransactionReceipt) {
 }
 
 export async function unlockToken(userAddr, amount, receiptId) {
-  const ethMasterAccount = addAccount(process.env.ETH_MASTER_PRIVATE_KEY);
-
-  return await managerContract.methods.unlockToken(amount, userAddr, receiptId).send({
-    from: ethMasterAccount.address,
+  return await ethManager.contract.methods.unlockToken(amount, userAddr, receiptId).send({
+    from: ethManager.account.address,
     gas: process.env.ETH_GAS_LIMIT,
     gasPrice: new BN(await web3.eth.getGasPrice()).mul(new BN(1)), //new BN(process.env.ETH_GAS_PRICE)
   });

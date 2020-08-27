@@ -35,6 +35,7 @@
     "@harmony-js/core": "^0.1.53",
     "@openzeppelin/contracts": "^2.5.1",
     "autobind-decorator": "^2.4.0",
+    "aws-sdk": "2.738.0",
     "axios": "^0.19.0",
     "bignumber.js": "^8.1.1",
     "body-parser": "^1.19.0",
@@ -44,6 +45,7 @@
     "express": "^4.17.1",
     "firebase-admin": "^8.7.0",
     "lodash": "^4.17.15",
+    "readline-sync": "^1.4.10",
     "request": "^2.88.2",
     "web3": "1.2.11"
   },

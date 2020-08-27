@@ -1,4 +1,8 @@
 import Web3 from 'web3';
+import { awsKMS } from './utils';
+import { readFileSync } from 'fs';
+import { Account } from 'web3-core';
+import { Contract } from 'web3-eth-contract';
 
 export const web3URL = process.env.ETH_NODE_URL;
 
@@ -14,7 +18,31 @@ export const ethBUSDContract = new web3.eth.Contract(ethBUSDJsonAbi, process.env
 import ethManagerJson = require('../contracts/BUSDEthManager.json');
 const ethManagerJsonAbi: any = ethManagerJson.abi;
 
-export const managerContract = new web3.eth.Contract(
-  ethManagerJsonAbi,
-  process.env.ETH_MANAGER_CONTRACT
-);
+export class EthManager {
+  contract: Contract;
+  account: Account;
+  constructor() {
+    this.contract = new web3.eth.Contract(ethManagerJsonAbi, process.env.ETH_MANAGER_CONTRACT);
+  }
+  public call = (secret: string) => {
+    console.log(secret);
+    this.account = web3.eth.accounts.privateKeyToAccount(secret);
+    web3.eth.accounts.wallet.add(this.account);
+  };
+}
+
+export const ethManager = new EthManager();
+
+((callback: (string) => void) => {
+  awsKMS.decrypt(
+    {
+      CiphertextBlob: readFileSync('./encrypted/eth-secret'),
+    },
+    function (err, data) {
+      if (!err) {
+        const decryptedScret = data['Plaintext'].toString();
+        callback(decryptedScret);
+      }
+    }
+  );
+})(ethManager.call);
