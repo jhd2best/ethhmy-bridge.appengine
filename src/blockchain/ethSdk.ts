@@ -25,7 +25,6 @@ export class EthManager {
     this.contract = new web3.eth.Contract(ethManagerJsonAbi, process.env.ETH_MANAGER_CONTRACT);
   }
   public call = (secret: string) => {
-    console.log(secret);
     this.account = web3.eth.accounts.privateKeyToAccount(secret);
     web3.eth.accounts.wallet.add(this.account);
   };
