@@ -1,4 +1,4 @@
-import { ethManager, web3 } from '../ethSdk';
+import { ethManagerBUSD, ethManagerLINK, web3 } from '../ethSdk';
 import BN from 'bn.js';
 import { AVG_BLOCK_TIME, BLOCK_TO_FINALITY, sleep } from '../utils';
 import { TransactionReceipt } from 'web3-core';
@@ -56,14 +56,6 @@ export function decodeLockTokenLog(receipt: TransactionReceipt) {
   );
 }
 
-export async function unlockToken(userAddr, amount, receiptId) {
-  return await ethManager.contract.methods.unlockToken(amount, userAddr, receiptId).send({
-    from: ethManager.account.address,
-    gas: process.env.ETH_GAS_LIMIT,
-    gasPrice: new BN(await web3.eth.getGasPrice()).mul(new BN(1)), //new BN(process.env.ETH_GAS_PRICE)
-  });
-}
-
 export async function waitingBlockNumber(blockNumber, callbackMessage) {
   {
     const expectedBlockNumber = blockNumber + BLOCK_TO_FINALITY;
@@ -82,4 +74,20 @@ export async function waitingBlockNumber(blockNumber, callbackMessage) {
     }
     return { status: true };
   }
+}
+
+export async function unlockTokenBUSD(userAddr, amount, receiptId) {
+  return await ethManagerBUSD.contract.methods.unlockToken(amount, userAddr, receiptId).send({
+    from: ethManagerBUSD.account.address,
+    gas: process.env.ETH_GAS_LIMIT,
+    gasPrice: new BN(await web3.eth.getGasPrice()).mul(new BN(1)), //new BN(process.env.ETH_GAS_PRICE)
+  });
+}
+
+export async function unlockTokenLINK(userAddr, amount, receiptId) {
+  return await ethManagerLINK.contract.methods.unlockToken(amount, userAddr, receiptId).send({
+    from: ethManagerLINK.account.address,
+    gas: process.env.ETH_GAS_LIMIT,
+    gasPrice: new BN(await web3.eth.getGasPrice()).mul(new BN(1)), //new BN(process.env.ETH_GAS_PRICE)
+  });
 }

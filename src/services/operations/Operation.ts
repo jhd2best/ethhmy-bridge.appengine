@@ -1,8 +1,8 @@
 import { uuidv4 } from '../utils';
 import { ACTION_TYPE, OPERATION_TYPE, STATUS } from './interfaces';
 import { Action } from './Action';
-import * as ethActions from '../../blockchain/busd/eth';
-import * as hmyActions from '../../blockchain/busd/hmy';
+import * as ethMethods from '../../blockchain/busd/eth';
+import { hmyBUSDMethods, hmyLINKMethods } from '../../blockchain/busd/hmy';
 import { createError } from '../../routes/helpers';
 
 export interface IOperationInitParams {
@@ -75,19 +75,19 @@ export class Operation {
     const approveEthMangerAction = new Action({
       type: ACTION_TYPE.approveEthManger,
       awaitConfirmation: true,
-      callFunction: hash => ethActions.getTransactionReceipt(hash),
+      callFunction: hash => ethMethods.getTransactionReceipt(hash),
     });
 
     const lockTokenAction = new Action({
       type: ACTION_TYPE.lockToken,
       awaitConfirmation: true,
-      callFunction: hash => ethActions.getTransactionReceipt(hash),
+      callFunction: hash => ethMethods.getTransactionReceipt(hash),
     });
 
     const waitingBlockNumberAction = new Action({
       type: ACTION_TYPE.waitingBlockNumber,
       callFunction: () =>
-        ethActions.waitingBlockNumber(
+        ethMethods.waitingBlockNumber(
           lockTokenAction.payload.blockNumber,
           msg => (waitingBlockNumberAction.message = msg)
         ),
@@ -96,19 +96,19 @@ export class Operation {
     const mintTokenAction = new Action({
       type: ACTION_TYPE.mintToken,
       callFunction: () => {
-        const approvalLog = ethActions.decodeApprovalLog(approveEthMangerAction.payload);
+        const approvalLog = ethMethods.decodeApprovalLog(approveEthMangerAction.payload);
         if (approvalLog.spender != process.env.ETH_MANAGER_CONTRACT) {
           return new Promise(resolve => {
             resolve(null);
           });
         }
-        const lockTokenLog = ethActions.decodeLockTokenLog(lockTokenAction.payload);
+        const lockTokenLog = ethMethods.decodeLockTokenLog(lockTokenAction.payload);
         if (lockTokenLog.amount != approvalLog.value) {
           return new Promise(resolve => {
             resolve(null);
           });
         }
-        return hmyActions.mintToken(
+        return hmyBUSDMethods.mintToken(
           lockTokenLog.recipient,
           lockTokenLog.amount,
           lockTokenAction.transactionHash
@@ -128,13 +128,13 @@ export class Operation {
     const approveHmyMangerAction = new Action({
       type: ACTION_TYPE.approveHmyManger,
       awaitConfirmation: true,
-      callFunction: hash => hmyActions.getTransactionReceipt(hash),
+      callFunction: hash => hmyBUSDMethods.getTransactionReceipt(hash),
     });
 
     const burnTokenAction = new Action({
       type: ACTION_TYPE.burnToken,
       awaitConfirmation: true,
-      callFunction: hash => hmyActions.getTransactionReceipt(hash),
+      callFunction: hash => hmyBUSDMethods.getTransactionReceipt(hash),
     });
 
     // TODO: unlockToken return success status, but tokens not transfer
@@ -142,19 +142,19 @@ export class Operation {
     const unlockTokenAction = new Action({
       type: ACTION_TYPE.unlockToken,
       callFunction: () => {
-        const approvalLog = hmyActions.decodeApprovalLog(approveHmyMangerAction.payload);
+        const approvalLog = hmyBUSDMethods.decodeApprovalLog(approveHmyMangerAction.payload);
         if (approvalLog.spender.toUpperCase() != process.env.HMY_MANAGER_CONTRACT.toUpperCase()) {
           return new Promise(resolve => {
             resolve(null);
           });
         }
-        const burnTokenLog = hmyActions.decodeBurnTokenLog(burnTokenAction.payload);
+        const burnTokenLog = hmyBUSDMethods.decodeBurnTokenLog(burnTokenAction.payload);
         if (burnTokenLog.amount != approvalLog.value) {
           return new Promise(resolve => {
             resolve(null);
           });
         }
-        return ethActions.unlockToken(
+        return ethMethods.unlockTokenBUSD(
           burnTokenLog.recipient,
           burnTokenLog.amount,
           burnTokenAction.transactionHash

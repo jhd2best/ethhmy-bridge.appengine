@@ -9,20 +9,16 @@ export const web3URL = process.env.ETH_NODE_URL;
 export const web3 = new Web3(web3URL);
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-import ethBUSDJson = require('../contracts/BUSDImplementation.json');
-const ethBUSDJsonAbi: any = ethBUSDJson.abi;
-
-export const ethBUSDContract = new web3.eth.Contract(ethBUSDJsonAbi, process.env.ETH_BUSD_CONTRACT);
+import ethBUSDManagerJson = require('../contracts/BUSDEthManager.json');
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-import ethManagerJson = require('../contracts/BUSDEthManager.json');
-const ethManagerJsonAbi: any = ethManagerJson.abi;
+import ethLINKManagerJson = require('../contracts/LINKEthManager.json');
 
 export class EthManager {
   contract: Contract;
   account: Account;
-  constructor() {
-    this.contract = new web3.eth.Contract(ethManagerJsonAbi, process.env.ETH_MANAGER_CONTRACT);
+  constructor(contractJson, contractAddr) {
+    this.contract = new web3.eth.Contract(contractJson.abi, contractAddr);
   }
   public call = (secret: string) => {
     this.account = web3.eth.accounts.privateKeyToAccount(secret);
@@ -30,7 +26,12 @@ export class EthManager {
   };
 }
 
-export const ethManager = new EthManager();
+export const ethManagerBUSD = new EthManager(ethBUSDManagerJson, process.env.ETH_MANAGER_CONTRACT);
+
+export const ethManagerLINK = new EthManager(
+  ethLINKManagerJson,
+  process.env.HMY_LINK_MANAGER_CONTRACT
+);
 
 ((callback: (string) => void) => {
   awsKMS.decrypt(
@@ -44,4 +45,18 @@ export const ethManager = new EthManager();
       }
     }
   );
-})(ethManager.call);
+})(ethManagerBUSD.call);
+
+((callback: (string) => void) => {
+  awsKMS.decrypt(
+    {
+      CiphertextBlob: readFileSync('./encrypted/eth-secret'),
+    },
+    function (err, data) {
+      if (!err) {
+        const decryptedScret = data['Plaintext'].toString();
+        callback(decryptedScret);
+      }
+    }
+  );
+})(ethManagerLINK.call);
