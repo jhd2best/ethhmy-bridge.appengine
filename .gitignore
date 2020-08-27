@@ -103,3 +103,6 @@ public
 # firebase key
 keys/
 dist/
+
+# encrypted keys
+encrypted/
