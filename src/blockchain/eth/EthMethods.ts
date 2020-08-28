@@ -1,8 +1,7 @@
-import { ethManagerBUSD, ethManagerLINK, web3 } from '../ethSdk';
 import BN from 'bn.js';
 import { AVG_BLOCK_TIME, BLOCK_TO_FINALITY, sleep } from '../utils';
 import { TransactionReceipt } from 'web3-core';
-import { EthManager } from '../ethSdk';
+import { EthManager } from './EthManager';
 import Web3 from 'web3';
 
 export interface IEthMethodsInitParams {
@@ -104,6 +103,3 @@ export class EthMethods {
     return res;
   };
 }
-
-export const ethMethodsBUSD = new EthMethods({ web3, ethManager: ethManagerBUSD });
-export const ethMethodsLINK = new EthMethods({ web3, ethManager: ethManagerLINK });

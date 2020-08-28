@@ -1,11 +1,11 @@
 import { Action } from './Action';
 import { ACTION_TYPE, OPERATION_TYPE } from './interfaces';
-import { HarmonyMethods, hmyMethodsBUSD, hmyMethodsLINK } from '../../blockchain/busd/hmy';
-import { ethMethodsBUSD, ethMethodsLINK, EthMethods } from '../../blockchain/busd/eth';
+import { HmyMethods, hmyMethodsBUSD, hmyMethodsLINK } from '../../blockchain/hmy';
+import { ethMethodsBUSD, ethMethodsLINK, EthMethods } from '../../blockchain/eth';
 import { IOperationInitParams } from './Operation';
 import { createError } from '../../routes/helpers';
 
-const ethToOne = (hmyMethods: HarmonyMethods, ethMethods: EthMethods) => {
+const ethToOne = (hmyMethods: HmyMethods, ethMethods: EthMethods) => {
   const approveEthMangerAction = new Action({
     type: ACTION_TYPE.approveEthManger,
     awaitConfirmation: true,
@@ -49,7 +49,7 @@ const ethToOne = (hmyMethods: HarmonyMethods, ethMethods: EthMethods) => {
   return [approveEthMangerAction, lockTokenAction, waitingBlockNumberAction, mintTokenAction];
 };
 
-const hmyToEth = (hmyMethods: HarmonyMethods, ethMethods: EthMethods) => {
+const hmyToEth = (hmyMethods: HmyMethods, ethMethods: EthMethods) => {
   const approveHmyMangerAction = new Action({
     type: ACTION_TYPE.approveHmyManger,
     awaitConfirmation: true,

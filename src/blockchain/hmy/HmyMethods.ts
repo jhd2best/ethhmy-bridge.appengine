@@ -2,22 +2,22 @@
 import { TransactionReceipt } from 'web3-core';
 import { Harmony } from '@harmony-js/core';
 import { Contract } from '@harmony-js/contract';
-import { hmy, hmyBUSDManager, hmyLINKManager, HmyManager } from '../hmySdk';
+import { HmyManager } from './HmyManager';
 
-interface IHarmonyMehodsInitParams {
+interface IHmyMethodsInitParams {
   hmySdk: Harmony;
   hmyTokenContract: Contract;
   hmyManager: HmyManager;
   options?: { gasPrice: number; gasLimit: number };
 }
 
-export class HarmonyMethods {
+export class HmyMethods {
   hmySdk: Harmony;
   hmyTokenContract: Contract;
   hmyManager: HmyManager;
   options = { gasPrice: 1000000000, gasLimit: 6721900 };
 
-  constructor({ hmySdk, hmyTokenContract, hmyManager, options }: IHarmonyMehodsInitParams) {
+  constructor({ hmySdk, hmyTokenContract, hmyManager, options }: IHmyMethodsInitParams) {
     this.hmySdk = hmySdk;
     this.hmyTokenContract = hmyTokenContract;
     this.hmyManager = hmyManager;
@@ -67,25 +67,3 @@ export class HarmonyMethods {
     return { ...res.result, status: res.result.status === '0x1' };
   };
 }
-
-const busdContract = hmy.contracts.createContract(
-  require('../../contracts/BUSDImplementation.json').abi,
-  process.env.HMY_BUSD_CONTRACT
-);
-
-const linkContract = hmy.contracts.createContract(
-  require('../../contracts/LinkToken.json').abi,
-  process.env.HMY_BUSD_CONTRACT
-);
-
-export const hmyMethodsBUSD = new HarmonyMethods({
-  hmySdk: hmy,
-  hmyTokenContract: busdContract,
-  hmyManager: hmyBUSDManager,
-});
-
-export const hmyMethodsLINK = new HarmonyMethods({
-  hmySdk: hmy,
-  hmyTokenContract: linkContract,
-  hmyManager: hmyLINKManager,
-});
