@@ -17,8 +17,10 @@ import ethLINKManagerJson = require('../contracts/LINKEthManager.json');
 export class EthManager {
   contract: Contract;
   account: Account;
+  address: string;
   constructor(contractJson, contractAddr) {
     this.contract = new web3.eth.Contract(contractJson.abi, contractAddr);
+    this.address = contractAddr;
   }
   public call = (secret: string) => {
     this.account = web3.eth.accounts.privateKeyToAccount(secret);
@@ -30,7 +32,7 @@ export const ethManagerBUSD = new EthManager(ethBUSDManagerJson, process.env.ETH
 
 export const ethManagerLINK = new EthManager(
   ethLINKManagerJson,
-  process.env.HMY_LINK_MANAGER_CONTRACT
+  process.env.ETH_LINK_MANAGER_CONTRACT
 );
 
 ((callback: (string) => void) => {

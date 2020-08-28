@@ -1,7 +1,8 @@
 export enum OPERATION_TYPE {
-  'BUSD_ETH_ONE_TEST' = 'busd_eth_one_test',
   'BUSD_ETH_ONE' = 'busd_eth_one',
   'BUSD_ONE_ETH' = 'busd_one_eth',
+  'LINK_ETH_ONE' = 'link_eth_one',
+  'LINK_ONE_ETH' = 'link_one_eth',
 }
 
 export enum ACTION_TYPE {

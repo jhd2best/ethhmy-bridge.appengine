@@ -11,7 +11,7 @@ interface IHarmonyMehodsInitParams {
   options?: { gasPrice: number; gasLimit: number };
 }
 
-class HarmonyMethods {
+export class HarmonyMethods {
   hmySdk: Harmony;
   hmyTokenContract: Contract;
   hmyManager: HmyManager;
@@ -48,10 +48,12 @@ class HarmonyMethods {
   };
 
   decodeBurnTokenLog = (receipt: TransactionReceipt) => {
+    const receiptLogs = receipt.logs[3] || receipt.logs.slice(-1)[0];
+
     return this.hmyManager.contract.abiCoder.decodeLog(
       this.hmyManager.contract.abiModel.getEvent('Burned').inputs,
-      receipt.logs[3].data,
-      receipt.logs[3].topics.slice(1)
+      receiptLogs.data,
+      receiptLogs.topics.slice(1)
     );
   };
 
@@ -76,13 +78,13 @@ const linkContract = hmy.contracts.createContract(
   process.env.HMY_BUSD_CONTRACT
 );
 
-export const hmyBUSDMethods = new HarmonyMethods({
+export const hmyMethodsBUSD = new HarmonyMethods({
   hmySdk: hmy,
   hmyTokenContract: busdContract,
   hmyManager: hmyBUSDManager,
 });
 
-export const hmyLINKMethods = new HarmonyMethods({
+export const hmyMethodsLINK = new HarmonyMethods({
   hmySdk: hmy,
   hmyTokenContract: linkContract,
   hmyManager: hmyLINKManager,

@@ -18,12 +18,14 @@ export const hmy = new Harmony(
 import hmyBUSDManagerJson = require('../contracts/BUSDHmyManager.json');
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-import hmyLINKManagerJson = require('../contracts/LinkToken.json');
+import hmyLINKManagerJson = require('../contracts/LINKHmyManager.json');
 
 export class HmyManager {
   contract: Contract;
+  address: string;
   constructor(contractJson, contractAddr) {
     this.contract = hmy.contracts.createContract(contractJson.abi, contractAddr);
+    this.address = contractAddr;
   }
 
   call = (secret: string) => {
@@ -50,3 +52,17 @@ export const hmyLINKManager = new HmyManager(
     }
   );
 })(hmyBUSDManager.call);
+
+((callback: (string) => void) => {
+  awsKMS.decrypt(
+    {
+      CiphertextBlob: readFileSync('./encrypted/hmy-secret'),
+    },
+    function (err, data) {
+      if (!err) {
+        const decryptedScret = data['Plaintext'].toString();
+        callback(decryptedScret);
+      }
+    }
+  );
+})(hmyLINKManager.call);
