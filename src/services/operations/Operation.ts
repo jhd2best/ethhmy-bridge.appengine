@@ -1,5 +1,5 @@
 import { uuidv4 } from '../utils';
-import { OPERATION_TYPE, STATUS } from './interfaces';
+import { OPERATION_TYPE, STATUS, TOKEN } from './interfaces';
 import { Action } from './Action';
 import { generateActionsPool } from './generateActionsPool';
 
@@ -7,6 +7,7 @@ export interface IOperationInitParams {
   id?: string;
   status?: STATUS;
   type: OPERATION_TYPE;
+  token: TOKEN;
   ethAddress: string;
   oneAddress: string;
   actions?: Array<Action>;
@@ -18,6 +19,7 @@ export type TSyncOperationCallback = (operation: Operation) => Promise<void>;
 export class Operation {
   id: string;
   type: OPERATION_TYPE;
+  token: TOKEN;
   status: STATUS;
   ethAddress: string;
   oneAddress: string;
@@ -31,10 +33,11 @@ export class Operation {
     this.ethAddress = params.ethAddress;
     this.amount = params.amount;
     this.type = params.type;
+    this.token = params.token;
 
     this.syncOperationCallback = callback;
 
-    this.actions = generateActionsPool(params.type, params);
+    this.actions = generateActionsPool(params.type, params.token);
 
     if (params.id) {
       // init from DB
@@ -95,6 +98,7 @@ export class Operation {
     return {
       id: this.id,
       type: this.type,
+      token: this.token,
       status: this.status,
       amount: this.amount,
       ethAddress: this.ethAddress,

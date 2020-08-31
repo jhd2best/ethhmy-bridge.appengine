@@ -1,8 +1,11 @@
 export enum OPERATION_TYPE {
-  'BUSD_ETH_ONE' = 'busd_eth_one',
-  'BUSD_ONE_ETH' = 'busd_one_eth',
-  'LINK_ETH_ONE' = 'link_eth_one',
-  'LINK_ONE_ETH' = 'link_one_eth',
+  ETH_ONE = 'eth_to_one',
+  ONE_ETH = 'one_to_eth',
+}
+
+export enum TOKEN {
+  BUSD = 'busd',
+  LINK = 'link',
 }
 
 export enum ACTION_TYPE {

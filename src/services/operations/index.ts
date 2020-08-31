@@ -45,6 +45,7 @@ export class OperationService {
     const operation = new Operation(
       {
         type: params.type,
+        token: params.token,
         ethAddress: params.ethAddress,
         oneAddress: params.oneAddress,
         actions: params.actions,
