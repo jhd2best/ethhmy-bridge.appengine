@@ -11,7 +11,9 @@ export interface IOperationInitParams {
   ethAddress: string;
   oneAddress: string;
   actions?: Array<Action>;
+  timestamp?: number;
   amount: string;
+  fee: string;
 }
 
 export type TSyncOperationCallback = (operation: Operation) => Promise<void>;
@@ -24,6 +26,8 @@ export class Operation {
   ethAddress: string;
   oneAddress: string;
   amount: string;
+  fee: string;
+  timestamp: number;
   actions: Action[];
 
   syncOperationCallback: TSyncOperationCallback;
@@ -32,8 +36,11 @@ export class Operation {
     this.oneAddress = params.oneAddress;
     this.ethAddress = params.ethAddress;
     this.amount = params.amount;
+    this.fee = params.fee;
     this.type = params.type;
     this.token = params.token;
+
+    this.timestamp = params.id ? params.timestamp : Math.round(+new Date() / 1000);
 
     this.syncOperationCallback = callback;
 
@@ -101,8 +108,10 @@ export class Operation {
       token: this.token,
       status: this.status,
       amount: this.amount,
+      fee: this.fee,
       ethAddress: this.ethAddress,
       oneAddress: this.oneAddress,
+      timestamp: this.timestamp,
       actions: this.actions.map(a => a.toObject(params)),
     };
   };

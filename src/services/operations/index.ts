@@ -50,6 +50,7 @@ export class OperationService {
         oneAddress: params.oneAddress,
         actions: params.actions,
         amount: params.amount,
+        fee: params.fee,
       },
       this.saveOperationToDB
     );
@@ -97,6 +98,7 @@ export class OperationService {
 
         return hasEthAddress && hasOneAddress;
       })
-      .map(operation => operation.toObject());
+      .map(operation => operation.toObject())
+      .sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1));
   };
 }
