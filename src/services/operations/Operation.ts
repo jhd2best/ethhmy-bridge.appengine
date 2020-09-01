@@ -111,7 +111,7 @@ export class Operation {
       fee: this.fee,
       ethAddress: this.ethAddress,
       oneAddress: this.oneAddress,
-      timestamp: this.timestamp,
+      timestamp: this.timestamp || this.actions[0].timestamp,
       actions: this.actions.map(a => a.toObject(params)),
     };
   };
