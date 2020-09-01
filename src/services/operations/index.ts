@@ -45,10 +45,12 @@ export class OperationService {
     const operation = new Operation(
       {
         type: params.type,
+        token: params.token,
         ethAddress: params.ethAddress,
         oneAddress: params.oneAddress,
         actions: params.actions,
         amount: params.amount,
+        fee: params.fee,
       },
       this.saveOperationToDB
     );
@@ -96,6 +98,7 @@ export class OperationService {
 
         return hasEthAddress && hasOneAddress;
       })
-      .map(operation => operation.toObject());
+      .map(operation => operation.toObject())
+      .sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1));
   };
 }

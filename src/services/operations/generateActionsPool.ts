@@ -1,8 +1,7 @@
 import { Action } from './Action';
-import { ACTION_TYPE, OPERATION_TYPE } from './interfaces';
+import { ACTION_TYPE, OPERATION_TYPE, TOKEN } from './interfaces';
 import { HmyMethods, hmyMethodsBUSD, hmyMethodsLINK } from '../../blockchain/hmy';
 import { ethMethodsBUSD, ethMethodsLINK, EthMethods } from '../../blockchain/eth';
-import { IOperationInitParams } from './Operation';
 import { createError } from '../../routes/helpers';
 
 const ethToOne = (hmyMethods: HmyMethods, ethMethods: EthMethods) => {
@@ -88,22 +87,27 @@ const hmyToEth = (hmyMethods: HmyMethods, ethMethods: EthMethods) => {
   return [approveHmyMangerAction, burnTokenAction, unlockTokenAction];
 };
 
-export const generateActionsPool = (
-  type: OPERATION_TYPE,
-  params: IOperationInitParams
-): Array<Action> => {
-  switch (params.type) {
-    case OPERATION_TYPE.BUSD_ETH_ONE:
-      return ethToOne(hmyMethodsBUSD, ethMethodsBUSD);
+export const generateActionsPool = (type: OPERATION_TYPE, token: TOKEN): Array<Action> => {
+  let hmyMethods, ethMethods;
 
-    case OPERATION_TYPE.LINK_ETH_ONE:
-      return ethToOne(hmyMethodsLINK, ethMethodsLINK);
+  switch (token) {
+    case TOKEN.BUSD:
+      hmyMethods = hmyMethodsBUSD;
+      ethMethods = ethMethodsBUSD;
+      break;
 
-    case OPERATION_TYPE.BUSD_ONE_ETH:
-      return hmyToEth(hmyMethodsBUSD, ethMethodsBUSD);
+    case TOKEN.LINK:
+      hmyMethods = hmyMethodsLINK;
+      ethMethods = ethMethodsLINK;
+      break;
+  }
 
-    case OPERATION_TYPE.LINK_ONE_ETH:
-      return hmyToEth(hmyMethodsLINK, ethMethodsLINK);
+  switch (type) {
+    case OPERATION_TYPE.ETH_ONE:
+      return ethToOne(hmyMethods, ethMethods);
+
+    case OPERATION_TYPE.ONE_ETH:
+      return hmyToEth(hmyMethods, ethMethods);
 
     default:
       throw createError(500, 'Operation type not found');
