@@ -30,8 +30,8 @@ export class MintTokens {
     if (lastMintDiff < 1000 * 60 * 60) {
       throw createError(
         400,
-        `The mint ${params.token} tokens limit is exceeded for your address, left min: ` +
-          String(60 - lastMintDiff / (1000 * 60))
+        `The limit for getting ${params.token} tokens is exceeded for your address, min's left: ` +
+          Math.round(60 - lastMintDiff / (1000 * 60))
       );
     }
 
