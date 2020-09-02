@@ -56,7 +56,7 @@ export const routes = (app, services: IServices) => {
 
   // mint tokens
   app.post(
-    '/mint-token',
+    '/get-token',
     asyncHandler(async (req, res) => {
       const data = await services.mintTokens.mint({
         amount: 100,
