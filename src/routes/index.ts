@@ -53,4 +53,18 @@ export const routes = (app, services: IServices) => {
       return res.json(data);
     })
   );
+
+  // mint tokens
+  app.post(
+    '/mint-token',
+    asyncHandler(async (req, res) => {
+      const data = await services.mintTokens.mint({
+        amount: 100,
+        address: req.body.address,
+        token: req.body.token,
+      });
+
+      return res.json(data);
+    })
+  );
 };
