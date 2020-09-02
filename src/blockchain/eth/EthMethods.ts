@@ -7,15 +7,18 @@ import Web3 from 'web3';
 export interface IEthMethodsInitParams {
   web3: Web3;
   ethManager: EthManager;
+  ethToken: EthManager;
 }
 
 export class EthMethods {
   web3: Web3;
   ethManager: EthManager;
+  ethToken: EthManager;
 
   constructor(params: IEthMethodsInitParams) {
     this.web3 = params.web3;
     this.ethManager = params.ethManager;
+    this.ethToken = params.ethToken;
   }
 
   // getTransactionByHash = async (transactionHash: string) => {
@@ -99,6 +102,30 @@ export class EthMethods {
         gas: process.env.ETH_GAS_LIMIT,
         gasPrice: new BN(await this.web3.eth.getGasPrice()).mul(new BN(1)), //new BN(process.env.ETH_GAS_PRICE)
       });
+
+    return res;
+  };
+
+  mintToken = async (accountAddr: string, amount: number) => {
+    if (!this.web3.utils.isAddress(accountAddr)) {
+      throw new Error('Invalid account address');
+    }
+
+    let res = await this.ethToken.contract.methods.increaseSupply(amount).send({
+      from: this.ethToken.account.address,
+      gas: process.env.ETH_GAS_LIMIT,
+      gasPrice: new BN(await this.web3.eth.getGasPrice()).mul(new BN(1)),
+    });
+
+    if (res.status !== true) {
+      return res;
+    }
+
+    res = await this.ethToken.contract.methods.transfer(accountAddr, amount).send({
+      from: this.ethToken.account.address,
+      gas: process.env.ETH_GAS_LIMIT,
+      gasPrice: new BN(await this.web3.eth.getGasPrice()).mul(new BN(1)),
+    });
 
     return res;
   };
