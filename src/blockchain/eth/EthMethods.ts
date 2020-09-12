@@ -26,7 +26,15 @@ export class EthMethods {
   // };
 
   getTransactionReceipt = async (transactionHash: string) => {
-    return await this.web3.eth.getTransactionReceipt(transactionHash);
+    const res = await this.web3.eth.getTransactionReceipt(transactionHash);
+
+    if (!res) {
+      return res;
+    }
+
+    const txInfo = await this.web3.eth.getTransaction(transactionHash);
+
+    return { ...txInfo, ...res };
   };
 
   decodeApprovalLog = (receipt: TransactionReceipt) => {
@@ -103,7 +111,13 @@ export class EthMethods {
         gasPrice: new BN(await this.web3.eth.getGasPrice()).mul(new BN(1)), //new BN(process.env.ETH_GAS_PRICE)
       });
 
-    return res;
+    if (!res.transactionHash) {
+      return res;
+    }
+
+    const txInfoRes = await this.web3.eth.getTransaction(res.transactionHash);
+
+    return { ...res, ...txInfoRes };
   };
 
   mintToken = async (accountAddr: string, amount: number) => {

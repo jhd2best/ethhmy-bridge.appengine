@@ -34,7 +34,11 @@ export class OperationService {
   };
 
   saveOperationToDB = async (operation: Operation) => {
-    await this.database.updateDocument(this.dbCollectionName, operation.id, operation.toObject());
+    await this.database.updateDocument(
+      this.dbCollectionName,
+      operation.id,
+      operation.toObject({ payload: true })
+    );
   };
 
   validateOperationBeforeCreate = async (params: IOperationInitParams) => {
@@ -47,7 +51,8 @@ export class OperationService {
           normalizeOne(op.oneAddress) === normalizeOne(params.oneAddress) &&
           op.type === params.type &&
           op.token === params.token &&
-          op.status === STATUS.IN_PROGRESS
+          op.status === STATUS.IN_PROGRESS &&
+          Date.now() - op.timestamp * 1000 < 1000 * 120 // 120 sec
       )
     ) {
       throw createError(500, 'This operation already in progress');
@@ -126,7 +131,7 @@ export class OperationService {
 
         return hasEthAddress && hasOneAddress;
       })
-      .map(operation => operation.toObject())
+      .map(operation => operation.toObject({ payload: true }))
       .sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1));
   };
 }
