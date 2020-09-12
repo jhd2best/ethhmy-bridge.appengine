@@ -1,6 +1,10 @@
 import { DBService } from '../database';
 import { IOperationInitParams, Operation } from './Operation';
 import { createError } from '../../routes/helpers';
+import { STATUS, OPERATION_TYPE } from './interfaces';
+import { hmy } from '../../blockchain/hmy';
+import { normalizeEthKey } from '../../blockchain/utils';
+import { validateEthBalanceNonZero, validateOneBalanceNonZero } from './validations';
 
 export interface IOperationService {
   database: DBService;
@@ -30,17 +34,46 @@ export class OperationService {
   };
 
   saveOperationToDB = async (operation: Operation) => {
-    await this.database.updateDocument(this.dbCollectionName, operation.id, operation.toObject());
+    await this.database.updateDocument(
+      this.dbCollectionName,
+      operation.id,
+      operation.toObject({ payload: true })
+    );
+  };
+
+  validateOperationBeforeCreate = async (params: IOperationInitParams) => {
+    const normalizeOne = v => hmy.crypto.getAddress(v).checksum;
+
+    if (
+      this.operations.some(
+        op =>
+          normalizeEthKey(op.ethAddress) === normalizeEthKey(params.ethAddress) &&
+          normalizeOne(op.oneAddress) === normalizeOne(params.oneAddress) &&
+          op.type === params.type &&
+          op.token === params.token &&
+          op.status === STATUS.IN_PROGRESS &&
+          Date.now() - op.timestamp * 1000 < 1000 * 120 // 120 sec
+      )
+    ) {
+      throw createError(500, 'This operation already in progress');
+    }
+
+    switch (params.type) {
+      case OPERATION_TYPE.ONE_ETH:
+        await validateOneBalanceNonZero(params.oneAddress);
+        break;
+      case OPERATION_TYPE.ETH_ONE:
+        await validateEthBalanceNonZero(params.ethAddress);
+        break;
+      default:
+        throw createError(400, 'Invalid operation type');
+    }
+
+    return true;
   };
 
   create = async (params: IOperationInitParams) => {
-    // if (
-    //   this.operations.some(
-    //     op => op.ethAddress === params.ethAddress && op.status === STATUS.IN_PROGRESS
-    //   )
-    // ) {
-    //   throw createError(500, 'This operations already in progress');
-    // }
+    await this.validateOperationBeforeCreate(params);
 
     const operation = new Operation(
       {
@@ -98,7 +131,7 @@ export class OperationService {
 
         return hasEthAddress && hasOneAddress;
       })
-      .map(operation => operation.toObject())
+      .map(operation => operation.toObject({ payload: true }))
       .sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1));
   };
 }

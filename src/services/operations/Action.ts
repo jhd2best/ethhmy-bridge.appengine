@@ -1,4 +1,4 @@
-import { uuidv4 } from '../utils';
+import { clearPayload, uuidv4 } from '../utils';
 import { ACTION_TYPE, STATUS } from './interfaces';
 import { createError } from '../../routes/helpers';
 import { sleep } from '../../blockchain/utils';
@@ -25,7 +25,8 @@ export class Action {
   error: string;
   message: string;
   timestamp: number;
-  payload: TransactionReceipt;
+  fee: string;
+  payload: TransactionReceipt | any;
   awaitConfirmation: boolean;
 
   callFunction: TActionCallFunction;
@@ -107,11 +108,13 @@ export class Action {
       error: this.error,
       message: this.message,
       timestamp: this.timestamp,
-      payload: this.payload,
+      payload: null,
     };
 
-    if (!params || !params.payload) {
-      delete obj.payload;
+    // generate payload object - root level
+    if (params && params.payload && this.payload) {
+      obj.payload = clearPayload(this.payload);
+      // obj.payload = this.payload;
     }
 
     for (const key in obj) {

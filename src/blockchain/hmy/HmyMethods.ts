@@ -64,6 +64,8 @@ export class HmyMethods {
       return res.result;
     }
 
-    return { ...res.result, status: res.result.status === '0x1' };
+    const txInfoRes = await this.hmySdk.blockchain.getTransactionByHash({ txnHash });
+
+    return { ...res.result, ...txInfoRes.result, status: res.result.status === '0x1' };
   };
 }
