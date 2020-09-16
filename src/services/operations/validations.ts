@@ -11,14 +11,14 @@ export const validateOneBalanceNonZero = async address => {
 };
 
 export const validateEthBalanceNonZero = ethAddress => {
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     web3.eth.getBalance(ethAddress, (err, balance) => {
       if (err) {
-        throw createError(500, 'Error to get eth balance');
+        return reject(false);
       }
 
       if (!Number(balance)) {
-        throw createError(500, 'User eth balance is to low');
+        return reject(false);
       }
 
       resolve(Number(balance));
