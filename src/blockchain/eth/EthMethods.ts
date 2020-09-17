@@ -75,8 +75,8 @@ export class EthMethods {
           type: 'address',
         },
       ],
-      receipt.logs[1].data,
-      receipt.logs[1].topics.slice(1)
+      receipt.logs[2].data,
+      receipt.logs[2].topics.slice(1)
     );
   };
 
@@ -100,11 +100,11 @@ export class EthMethods {
     }
   };
 
-  unlockToken = async (ethToken, userAddr, amount, receiptId) => {
-    console.log(3, ethToken, userAddr, amount, receiptId);
+  unlockToken = async (erc20Address, userAddr, amount, receiptId) => {
+    console.log(3, erc20Address, userAddr, amount, receiptId);
 
     const res = await this.ethManager.contract.methods
-      .unlockToken(ethToken, amount, userAddr, receiptId)
+      .unlockToken(erc20Address, amount, userAddr, receiptId)
       .send({
         from: this.ethManager.account.address,
         gas: process.env.ETH_GAS_LIMIT,

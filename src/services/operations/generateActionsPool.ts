@@ -30,22 +30,28 @@ const ethToOne = (hmyMethods: HmyMethods, ethMethods: EthMethods, params: IOpera
 
   const lockTokenAction = new Action({
     type: ACTION_TYPE.lockToken,
-    callFunction: () => {
-      const approvalLog = ethMethods.decodeApprovalLog(approveEthMangerAction.payload);
-      if (approvalLog.spender != ethMethods.ethManager.address) {
-        throw new Error('approvalLog.spender != process.env.ETH_MANAGER_CONTRACT');
-      }
-
-      const hmyAddrHex = hmyMethods.hmySdk.crypto.getAddress(params.oneAddress).checksum;
-
-      return ethMethods.lockTokenFor(
-        params.erc20Address,
-        params.ethAddress,
-        params.amount,
-        hmyAddrHex
-      );
-    },
+    awaitConfirmation: true,
+    callFunction: hash => ethMethods.getTransactionReceipt(hash),
   });
+
+  // const lockTokenAction = new Action({
+  //   type: ACTION_TYPE.lockToken,
+  //   callFunction: () => {
+  //     const approvalLog = ethMethods.decodeApprovalLog(approveEthMangerAction.payload);
+  //     if (approvalLog.spender != ethMethods.ethManager.address) {
+  //       throw new Error('approvalLog.spender != process.env.ETH_MANAGER_CONTRACT');
+  //     }
+  //
+  //     const hmyAddrHex = hmyMethods.hmySdk.crypto.getAddress(params.oneAddress).checksum;
+  //
+  //     return ethMethods.lockTokenFor(
+  //       params.erc20Address,
+  //       params.ethAddress,
+  //       params.amount,
+  //       hmyAddrHex
+  //     );
+  //   },
+  // });
 
   const waitingBlockNumberAction = new Action({
     type: ACTION_TYPE.waitingBlockNumber,
@@ -59,12 +65,22 @@ const ethToOne = (hmyMethods: HmyMethods, ethMethods: EthMethods, params: IOpera
   const mintTokenAction = new Action({
     type: ACTION_TYPE.mintToken,
     callFunction: () => {
-      const { amount, recipient } = lockTokenAction.payload.returnValues;
+      const approvalLog = ethMethods.decodeApprovalLog(approveEthMangerAction.payload);
+
+      if (approvalLog.spender != ethMethods.ethManager.address) {
+        throw new Error('approvalLog.spender != process.env.ETH_MANAGER_CONTRACT');
+      }
+
+      const lockTokenLog = ethMethods.decodeLockTokenLog(lockTokenAction.payload);
+
+      if (lockTokenLog.amount != approvalLog.value) {
+        throw new Error('lockTokenLog.amount != approvalLog.value');
+      }
 
       return hmyMethods.mintToken(
         getHRC20AddressAction.payload.hrc20Address,
-        recipient,
-        amount,
+        lockTokenLog.recipient,
+        lockTokenLog.amount,
         lockTokenAction.transactionHash
       );
     },
@@ -80,19 +96,21 @@ const ethToOne = (hmyMethods: HmyMethods, ethMethods: EthMethods, params: IOpera
 };
 
 const hmyToEth = (hmyMethods: HmyMethods, ethMethods: EthMethods, params: IOperationInitParams) => {
-  const getHRC20AddressAction = new Action({
-    type: ACTION_TYPE.getHRC20Address,
-    callFunction: async () => {
-      let hrc20Address = await hmyMethods.getMappingFor(params.erc20Address);
-
-      if (!hrc20Address) {
-        const [name, symbol, decimals] = await ethMethods.tokenDetails(params.erc20Address);
-        hrc20Address = await hmyMethods.addToken(params.erc20Address, name, symbol, decimals);
-      }
-
-      return { status: true, hrc20Address };
-    },
-  });
+  // const getHRC20AddressAction = new Action({
+  //   type: ACTION_TYPE.getHRC20Address,
+  //   callFunction: async () => {
+  //     let transaction = {};
+  //     let hrc20Address = await hmyMethods.getMappingFor(params.erc20Address);
+  //
+  //     if (!Number(hrc20Address)) {
+  //       const [name, symbol, decimals] = await ethMethods.tokenDetails(params.erc20Address);
+  //       transaction = await hmyMethods.addToken(params.erc20Address, name, symbol, decimals);
+  //       hrc20Address = await hmyMethods.getMappingFor(params.erc20Address);
+  //     }
+  //
+  //     return { ...transaction, status: true, hrc20Address };
+  //   },
+  // });
 
   const approveHmyMangerAction = new Action({
     type: ACTION_TYPE.approveHmyManger,
@@ -115,14 +133,11 @@ const hmyToEth = (hmyMethods: HmyMethods, ethMethods: EthMethods, params: IOpera
         throw new Error('approvalLog.spender != hmyManager.address');
       }
 
-      console.log(1);
       const burnTokenLog = hmyMethods.decodeBurnTokenLog(burnTokenAction.payload);
 
       if (burnTokenLog.amount != approvalLog.value) {
         throw new Error('burnTokenLog.amount != approvalLog.value');
       }
-
-      console.log(2);
 
       return ethMethods.unlockToken(
         params.erc20Address,
