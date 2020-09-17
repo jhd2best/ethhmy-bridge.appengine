@@ -22,7 +22,8 @@ const hmyManager = new HmyManager(hmyManagerJson, process.env.HMY_MANAGER_CONTRA
 const hmyTokenManager = new HmyManager(TokenManagerJson, process.env.TOKEN_MANAGER_CONTRACT);
 
 // fake address - using only for logs decode
-const hmyTokenContract = hmy.contracts.createContract(erc20Json.abi, '');
+const erc20JS: any = erc20Json;
+const hmyTokenContract = hmy.contracts.createContract(erc20JS.abi, '');
 
 export const hmyMethods = new HmyMethods({
   hmySdk: hmy,

@@ -37,8 +37,6 @@ export class HmyMethods {
   }
 
   mintToken = async (oneTokenAddr, userAddr, amount, receiptId) => {
-    console.log(3, oneTokenAddr, userAddr, amount, receiptId);
-
     const res = await this.hmyManager.contract.methods
       .mintToken(oneTokenAddr, amount, userAddr, receiptId)
       .send(this.options);
