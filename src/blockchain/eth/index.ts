@@ -1,17 +1,39 @@
 import Web3 from 'web3';
 import { EthMethods } from './EthMethods';
+import { EthMethodsERC20 } from './EthMethodsERC20';
 import { EthManager } from './EthManager';
 
-import ethManagerJson = require('../contracts/EthManager.json');
+import ethManagerJson = require('../contracts/LINKEthManager.json');
+import erc20Json = require('../contracts/MyERC20.json');
+import ethManagerERC20Json = require('../contracts/EthManagerERC20.json');
 
 export * from './EthMethods';
+export * from './EthMethodsERC20';
 
 export const web3URL = process.env.ETH_NODE_URL;
 export const web3 = new Web3(web3URL);
 
-const ethManager = new EthManager(ethManagerJson, process.env.ETH_MANAGER_CONTRACT);
+const ethManagerBUSD = new EthManager(ethManagerJson, process.env.ETH_BUSD_MANAGER_CONTRACT);
+const ethTokenBUSD = new EthManager(erc20Json, process.env.ETH_BUSD_CONTRACT);
 
-export const ethMethods = new EthMethods({
+const ethManagerLINK = new EthManager(ethManagerJson, process.env.ETH_LINK_MANAGER_CONTRACT);
+const ethTokenLINK = new EthManager(erc20Json, process.env.ETH_LINK_CONTRACT);
+
+export const ethMethodsBUSD = new EthMethods({
   web3,
-  ethManager,
+  ethManager: ethManagerBUSD,
+  ethToken: ethTokenBUSD,
+});
+
+export const ethMethodsLINK = new EthMethods({
+  web3,
+  ethManager: ethManagerLINK,
+  ethToken: ethTokenLINK,
+});
+
+const ethManagerERC20 = new EthManager(ethManagerERC20Json, process.env.ETH_ERC20_MANAGER_CONTRACT);
+
+export const ethMethodsERC20 = new EthMethodsERC20({
+  web3,
+  ethManager: ethManagerERC20,
 });

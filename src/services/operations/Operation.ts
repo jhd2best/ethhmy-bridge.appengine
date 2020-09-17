@@ -1,5 +1,5 @@
 import { uuidv4 } from '../utils';
-import { OPERATION_TYPE, STATUS } from './interfaces';
+import { OPERATION_TYPE, STATUS, TOKEN } from './interfaces';
 import { Action } from './Action';
 import { generateActionsPool } from './generateActionsPool';
 
@@ -7,8 +7,9 @@ export interface IOperationInitParams {
   id?: string;
   status?: STATUS;
   type: OPERATION_TYPE;
-  erc20Address: string;
+  erc20Address?: string;
   hrc20Address?: string;
+  token: TOKEN;
   ethAddress: string;
   oneAddress: string;
   actions?: Array<Action>;
@@ -21,8 +22,9 @@ export type TSyncOperationCallback = (operation: Operation) => Promise<void>;
 export class Operation {
   id: string;
   type: OPERATION_TYPE;
-  erc20Address: string;
-  hrc20Address = '';
+  token: TOKEN;
+  erc20Address?: string;
+  hrc20Address?: string;
   status: STATUS;
   ethAddress: string;
   oneAddress: string;
@@ -38,6 +40,7 @@ export class Operation {
     this.amount = params.amount;
     this.type = params.type;
     this.erc20Address = params.erc20Address;
+    this.token = params.token;
 
     this.timestamp = params.id ? params.timestamp : Math.round(+new Date() / 1000);
 
@@ -106,6 +109,7 @@ export class Operation {
       type: this.type,
       erc20Address: this.erc20Address,
       hrc20Address: this.hrc20Address,
+      token: this.token,
       status: this.status,
       amount: this.amount,
       ethAddress: this.ethAddress,

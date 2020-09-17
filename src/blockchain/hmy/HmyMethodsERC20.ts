@@ -11,7 +11,7 @@ interface IHmyMethodsInitParams {
   options?: { gasPrice: number; gasLimit: number };
 }
 
-export class HmyMethods {
+export class HmyMethodsERC20 {
   hmySdk: Harmony;
   hmyTokenContract: Contract;
   hmyManager: HmyManager;
@@ -27,16 +27,25 @@ export class HmyMethods {
     }
   }
 
-  mintToken = async (userAddr, amount, receiptId) => {
-    const res = await this.hmyManager.contract.methods
-      .mintToken(amount, userAddr, receiptId)
-      .send(this.options);
+  mintToken = async (oneTokenAddr, userAddr, amount, receiptId) => {
+    console.log(oneTokenAddr, userAddr, amount, receiptId);
 
-    return {
-      ...res.transaction,
-      status: res.status === 'called',
-      transactionHash: res.transaction.id,
-    };
+    try {
+      const res = await this.hmyManager.contract.methods
+        .mintToken(oneTokenAddr, amount, userAddr, receiptId)
+        .send(this.options);
+
+      return {
+        ...res.transaction,
+        status: res.status === 'called',
+        transactionHash: res.transaction.id,
+      };
+    } catch (e) {
+      return {
+        error: e.message,
+        status: 'failed',
+      };
+    }
   };
 
   decodeApprovalLog = (receipt: TransactionReceipt) => {
@@ -67,5 +76,19 @@ export class HmyMethods {
     const txInfoRes = await this.hmySdk.blockchain.getTransactionByHash({ txnHash });
 
     return { ...res.result, ...txInfoRes.result, status: res.result.status === '0x1' };
+  };
+
+  getMappingFor = async erc20TokenAddr => {
+    const res = await this.hmyManager.contract.methods.mappings(erc20TokenAddr).call(this.options);
+
+    return res;
+  };
+
+  addToken = async (erc20TokenAddr, name, symbol, decimals) => {
+    const res = await this.hmyManager.contract.methods
+      .addToken(process.env.TOKEN_MANAGER_CONTRACT, erc20TokenAddr, name, symbol, decimals)
+      .send(this.options);
+
+    return res;
   };
 }

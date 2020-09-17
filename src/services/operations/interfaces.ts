@@ -3,6 +3,12 @@ export enum OPERATION_TYPE {
   ONE_ETH = 'one_to_eth',
 }
 
+export enum TOKEN {
+  BUSD = 'busd',
+  LINK = 'link',
+  ERC20 = 'erc20',
+}
+
 export enum ACTION_TYPE {
   // ETH_TO_ONE
   'getHRC20Address' = 'getHRC20Address',

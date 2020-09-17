@@ -50,7 +50,7 @@ export class OperationService {
           normalizeEthKey(op.ethAddress) === normalizeEthKey(params.ethAddress) &&
           normalizeOne(op.oneAddress) === normalizeOne(params.oneAddress) &&
           op.type === params.type &&
-          op.erc20Address === params.erc20Address &&
+          op.token === params.token &&
           op.status === STATUS.IN_PROGRESS &&
           Date.now() - op.timestamp * 1000 < 1000 * 120 // 120 sec
       )
@@ -83,6 +83,7 @@ export class OperationService {
       {
         type: params.type,
         erc20Address: params.erc20Address,
+        token: params.token,
         ethAddress: params.ethAddress,
         oneAddress: params.oneAddress,
         actions: params.actions,

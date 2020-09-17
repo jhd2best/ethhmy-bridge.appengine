@@ -1,5 +1,6 @@
 import { DBService } from '../database';
-import { ethMethods } from '../../blockchain/eth';
+import { TOKEN } from '../operations/interfaces';
+import { ethMethodsBUSD, ethMethodsLINK } from '../../blockchain/eth';
 import { createError } from '../../utils';
 
 export interface IOperationService {
@@ -8,7 +9,7 @@ export interface IOperationService {
 
 interface IMintParams {
   amount: number;
-  erc20Address: string;
+  token: TOKEN;
   address: string;
 }
 
@@ -23,21 +24,32 @@ export class MintTokens {
   }
 
   mint = async (params: IMintParams) => {
-    const limitKey = params.address + params.erc20Address;
+    const limitKey = params.address + params.token;
     const lastMintDiff = Date.now() - this.limits[limitKey];
 
     if (lastMintDiff < 1000 * 60 * 60) {
       throw createError(
         400,
-        `The limit for getting ${params.erc20Address} tokens is exceeded for your address, min's left: ` +
+        `The limit for getting ${params.token} tokens is exceeded for your address, min's left: ` +
           Math.round(60 - lastMintDiff / (1000 * 60))
       );
     }
 
-    const res = { status: false, transactionHash: '' };
+    let res = { status: false, transactionHash: '' };
 
     try {
-      // res = await ethMethods.mintToken(params.address, params.amount);
+      switch (params.token) {
+        case TOKEN.BUSD:
+          res = await ethMethodsBUSD.mintToken(params.address, params.amount);
+          break;
+
+        case TOKEN.LINK:
+          res = await ethMethodsLINK.mintToken(params.address, params.amount);
+          break;
+
+        default:
+          throw createError(400, 'Token not found');
+      }
 
       if (res.status) {
         this.limits[limitKey] = Date.now();
