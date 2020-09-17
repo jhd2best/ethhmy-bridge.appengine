@@ -5,7 +5,7 @@ import { HmyMethods } from './HmyMethods';
 
 import hmyManagerJson = require('../contracts/HmyManager.json');
 import TokenManagerJson = require('../contracts/TokenManager.json');
-import erc20Json = require('../contracts/IERC20.json');
+import erc20Json = require('../contracts/MyERC20.json');
 
 export * from './HmyMethods';
 
@@ -22,8 +22,7 @@ const hmyManager = new HmyManager(hmyManagerJson, process.env.HMY_MANAGER_CONTRA
 const hmyTokenManager = new HmyManager(TokenManagerJson, process.env.TOKEN_MANAGER_CONTRACT);
 
 // fake address - using only for logs decode
-const erc20JS: any = erc20Json;
-const hmyTokenContract = hmy.contracts.createContract(erc20JS.abi, '');
+const hmyTokenContract = hmy.contracts.createContract(erc20Json.abi, '');
 
 export const hmyMethods = new HmyMethods({
   hmySdk: hmy,
