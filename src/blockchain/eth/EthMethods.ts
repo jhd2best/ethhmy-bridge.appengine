@@ -3,22 +3,20 @@ import { AVG_BLOCK_TIME, BLOCK_TO_FINALITY, sleep } from '../utils';
 import { TransactionReceipt } from 'web3-core';
 import { EthManager } from './EthManager';
 import Web3 from 'web3';
+import erc20Json = require('../contracts/MyERC20.json');
 
 export interface IEthMethodsInitParams {
   web3: Web3;
   ethManager: EthManager;
-  ethToken: EthManager;
 }
 
 export class EthMethods {
   web3: Web3;
   ethManager: EthManager;
-  ethToken: EthManager;
 
   constructor(params: IEthMethodsInitParams) {
     this.web3 = params.web3;
     this.ethManager = params.ethManager;
-    this.ethToken = params.ethToken;
   }
 
   // getTransactionByHash = async (transactionHash: string) => {
@@ -102,9 +100,11 @@ export class EthMethods {
     }
   };
 
-  unlockToken = async (userAddr, amount, receiptId) => {
+  unlockToken = async (ethToken, userAddr, amount, receiptId) => {
+    console.log(3, ethToken, userAddr, amount, receiptId);
+
     const res = await this.ethManager.contract.methods
-      .unlockToken(amount, userAddr, receiptId)
+      .unlockToken(ethToken, amount, userAddr, receiptId)
       .send({
         from: this.ethManager.account.address,
         gas: process.env.ETH_GAS_LIMIT,
@@ -120,27 +120,24 @@ export class EthMethods {
     return { ...res, ...txInfoRes };
   };
 
-  mintToken = async (accountAddr: string, amount: number) => {
-    if (!this.web3.utils.isAddress(accountAddr)) {
-      throw new Error('Invalid account address');
-    }
+  tokenDetails = async contract => {
+    const erc20Contract = new this.web3.eth.Contract(erc20Json.abi as any, contract);
+    return [
+      await erc20Contract.methods.name().call(),
+      await erc20Contract.methods.symbol().call(),
+      await erc20Contract.methods.decimals().call(),
+    ];
+  };
 
-    // let res = await this.ethToken.contract.methods.increaseSupply(amount).send({
-    //   from: this.ethToken.account.address,
-    //   gas: process.env.ETH_GAS_LIMIT,
-    //   gasPrice: new BN(await this.web3.eth.getGasPrice()).mul(new BN(1)),
-    // });
-    //
-    // if (res.status !== true) {
-    //   return res;
-    // }
+  lockTokenFor = async (erc20Address, ethAddress, amount, oneAddress) => {
+    const transaction = await this.ethManager.contract.methods
+      .lockTokenFor(erc20Address, ethAddress, amount, oneAddress)
+      .send({
+        from: this.ethManager.account.address,
+        gas: process.env.ETH_GAS_LIMIT,
+        gasPrice: new BN(await this.web3.eth.getGasPrice()).mul(new BN(1)),
+      });
 
-    const res = await this.ethToken.contract.methods.transfer(accountAddr, amount).send({
-      from: this.ethToken.account.address,
-      gas: process.env.ETH_GAS_LIMIT,
-      gasPrice: new BN(await this.web3.eth.getGasPrice()).mul(new BN(1)),
-    });
-
-    return res;
+    return { ...transaction.events.Locked, status: transaction.status };
   };
 }

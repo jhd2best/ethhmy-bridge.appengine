@@ -1,10 +1,27 @@
 import { Action } from './Action';
-import { ACTION_TYPE, OPERATION_TYPE, TOKEN } from './interfaces';
-import { HmyMethods, hmyMethodsBUSD, hmyMethodsLINK } from '../../blockchain/hmy';
-import { ethMethodsBUSD, ethMethodsLINK, EthMethods } from '../../blockchain/eth';
+import { ACTION_TYPE, OPERATION_TYPE } from './interfaces';
+import { HmyMethods, hmyMethods } from '../../blockchain/hmy';
+import { ethMethods, EthMethods } from '../../blockchain/eth';
 import { createError } from '../../routes/helpers';
+import { IOperationInitParams } from './Operation';
 
-const ethToOne = (hmyMethods: HmyMethods, ethMethods: EthMethods) => {
+const ethToOne = (hmyMethods: HmyMethods, ethMethods: EthMethods, params: IOperationInitParams) => {
+  const getHRC20AddressAction = new Action({
+    type: ACTION_TYPE.getHRC20Address,
+    callFunction: async () => {
+      let transaction = {};
+      let hrc20Address = await hmyMethods.getMappingFor(params.erc20Address);
+
+      if (!Number(hrc20Address)) {
+        const [name, symbol, decimals] = await ethMethods.tokenDetails(params.erc20Address);
+        transaction = await hmyMethods.addToken(params.erc20Address, name, symbol, decimals);
+        hrc20Address = await hmyMethods.getMappingFor(params.erc20Address);
+      }
+
+      return { ...transaction, status: true, hrc20Address };
+    },
+  });
+
   const approveEthMangerAction = new Action({
     type: ACTION_TYPE.approveEthManger,
     awaitConfirmation: true,
@@ -13,8 +30,21 @@ const ethToOne = (hmyMethods: HmyMethods, ethMethods: EthMethods) => {
 
   const lockTokenAction = new Action({
     type: ACTION_TYPE.lockToken,
-    awaitConfirmation: true,
-    callFunction: hash => ethMethods.getTransactionReceipt(hash),
+    callFunction: () => {
+      const approvalLog = ethMethods.decodeApprovalLog(approveEthMangerAction.payload);
+      if (approvalLog.spender != ethMethods.ethManager.address) {
+        throw new Error('approvalLog.spender != process.env.ETH_MANAGER_CONTRACT');
+      }
+
+      const hmyAddrHex = hmyMethods.hmySdk.crypto.getAddress(params.oneAddress).checksum;
+
+      return ethMethods.lockTokenFor(
+        params.erc20Address,
+        params.ethAddress,
+        params.amount,
+        hmyAddrHex
+      );
+    },
   });
 
   const waitingBlockNumberAction = new Action({
@@ -29,26 +59,41 @@ const ethToOne = (hmyMethods: HmyMethods, ethMethods: EthMethods) => {
   const mintTokenAction = new Action({
     type: ACTION_TYPE.mintToken,
     callFunction: () => {
-      const approvalLog = ethMethods.decodeApprovalLog(approveEthMangerAction.payload);
-      if (approvalLog.spender != ethMethods.ethManager.address) {
-        throw new Error('approvalLog.spender != process.env.ETH_MANAGER_CONTRACT');
-      }
-      const lockTokenLog = ethMethods.decodeLockTokenLog(lockTokenAction.payload);
-      if (lockTokenLog.amount != approvalLog.value) {
-        throw new Error('lockTokenLog.amount != approvalLog.value');
-      }
+      const { amount, recipient } = lockTokenAction.payload.returnValues;
+
       return hmyMethods.mintToken(
-        lockTokenLog.recipient,
-        lockTokenLog.amount,
+        getHRC20AddressAction.payload.hrc20Address,
+        recipient,
+        amount,
         lockTokenAction.transactionHash
       );
     },
   });
 
-  return [approveEthMangerAction, lockTokenAction, waitingBlockNumberAction, mintTokenAction];
+  return [
+    getHRC20AddressAction,
+    approveEthMangerAction,
+    lockTokenAction,
+    waitingBlockNumberAction,
+    mintTokenAction,
+  ];
 };
 
-const hmyToEth = (hmyMethods: HmyMethods, ethMethods: EthMethods) => {
+const hmyToEth = (hmyMethods: HmyMethods, ethMethods: EthMethods, params: IOperationInitParams) => {
+  const getHRC20AddressAction = new Action({
+    type: ACTION_TYPE.getHRC20Address,
+    callFunction: async () => {
+      let hrc20Address = await hmyMethods.getMappingFor(params.erc20Address);
+
+      if (!hrc20Address) {
+        const [name, symbol, decimals] = await ethMethods.tokenDetails(params.erc20Address);
+        hrc20Address = await hmyMethods.addToken(params.erc20Address, name, symbol, decimals);
+      }
+
+      return { status: true, hrc20Address };
+    },
+  });
+
   const approveHmyMangerAction = new Action({
     type: ACTION_TYPE.approveHmyManger,
     awaitConfirmation: true,
@@ -70,13 +115,17 @@ const hmyToEth = (hmyMethods: HmyMethods, ethMethods: EthMethods) => {
         throw new Error('approvalLog.spender != hmyManager.address');
       }
 
+      console.log(1);
       const burnTokenLog = hmyMethods.decodeBurnTokenLog(burnTokenAction.payload);
 
       if (burnTokenLog.amount != approvalLog.value) {
         throw new Error('burnTokenLog.amount != approvalLog.value');
       }
 
+      console.log(2);
+
       return ethMethods.unlockToken(
+        params.erc20Address,
         burnTokenLog.recipient,
         burnTokenLog.amount,
         burnTokenAction.transactionHash
@@ -87,27 +136,13 @@ const hmyToEth = (hmyMethods: HmyMethods, ethMethods: EthMethods) => {
   return [approveHmyMangerAction, burnTokenAction, unlockTokenAction];
 };
 
-export const generateActionsPool = (type: OPERATION_TYPE, token: TOKEN): Array<Action> => {
-  let hmyMethods, ethMethods;
-
-  switch (token) {
-    case TOKEN.BUSD:
-      hmyMethods = hmyMethodsBUSD;
-      ethMethods = ethMethodsBUSD;
-      break;
-
-    case TOKEN.LINK:
-      hmyMethods = hmyMethodsLINK;
-      ethMethods = ethMethodsLINK;
-      break;
-  }
-
-  switch (type) {
+export const generateActionsPool = (params: IOperationInitParams): Array<Action> => {
+  switch (params.type) {
     case OPERATION_TYPE.ETH_ONE:
-      return ethToOne(hmyMethods, ethMethods);
+      return ethToOne(hmyMethods, ethMethods, params);
 
     case OPERATION_TYPE.ONE_ETH:
-      return hmyToEth(hmyMethods, ethMethods);
+      return hmyToEth(hmyMethods, ethMethods, params);
 
     default:
       throw createError(500, 'Operation type not found');

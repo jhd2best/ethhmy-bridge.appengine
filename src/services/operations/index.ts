@@ -50,7 +50,7 @@ export class OperationService {
           normalizeEthKey(op.ethAddress) === normalizeEthKey(params.ethAddress) &&
           normalizeOne(op.oneAddress) === normalizeOne(params.oneAddress) &&
           op.type === params.type &&
-          op.token === params.token &&
+          op.erc20Address === params.erc20Address &&
           op.status === STATUS.IN_PROGRESS &&
           Date.now() - op.timestamp * 1000 < 1000 * 120 // 120 sec
       )
@@ -58,15 +58,19 @@ export class OperationService {
       throw createError(500, 'This operation already in progress');
     }
 
-    switch (params.type) {
-      case OPERATION_TYPE.ONE_ETH:
-        await validateOneBalanceNonZero(params.oneAddress);
-        break;
-      case OPERATION_TYPE.ETH_ONE:
-        await validateEthBalanceNonZero(params.ethAddress);
-        break;
-      default:
-        throw createError(400, 'Invalid operation type');
+    try {
+      switch (params.type) {
+        case OPERATION_TYPE.ONE_ETH:
+          await validateOneBalanceNonZero(params.oneAddress);
+          break;
+        case OPERATION_TYPE.ETH_ONE:
+          await validateEthBalanceNonZero(params.ethAddress);
+          break;
+        default:
+          throw createError(400, 'Invalid operation type');
+      }
+    } catch (e) {
+      throw createError(500, 'User eth balance is to low');
     }
 
     return true;
@@ -78,12 +82,11 @@ export class OperationService {
     const operation = new Operation(
       {
         type: params.type,
-        token: params.token,
+        erc20Address: params.erc20Address,
         ethAddress: params.ethAddress,
         oneAddress: params.oneAddress,
         actions: params.actions,
         amount: params.amount,
-        fee: params.fee,
       },
       this.saveOperationToDB
     );

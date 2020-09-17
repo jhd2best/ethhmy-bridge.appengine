@@ -25,7 +25,6 @@ export class Action {
   error: string;
   message: string;
   timestamp: number;
-  fee: string;
   payload: TransactionReceipt | any;
   awaitConfirmation: boolean;
 

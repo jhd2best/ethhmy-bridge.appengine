@@ -61,7 +61,7 @@ export const routes = (app, services: IServices) => {
       const data = await services.mintTokens.mint({
         amount: 100,
         address: req.body.address,
-        token: req.body.token,
+        erc20Address: req.body.erc20Address,
       });
 
       return res.json(data);

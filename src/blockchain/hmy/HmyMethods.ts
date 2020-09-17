@@ -7,6 +7,7 @@ import { HmyManager } from './HmyManager';
 interface IHmyMethodsInitParams {
   hmySdk: Harmony;
   hmyTokenContract: Contract;
+  hmyTokenManager: HmyManager;
   hmyManager: HmyManager;
   options?: { gasPrice: number; gasLimit: number };
 }
@@ -14,11 +15,19 @@ interface IHmyMethodsInitParams {
 export class HmyMethods {
   hmySdk: Harmony;
   hmyTokenContract: Contract;
+  hmyTokenManager: HmyManager;
   hmyManager: HmyManager;
   options = { gasPrice: 1000000000, gasLimit: 6721900 };
 
-  constructor({ hmySdk, hmyTokenContract, hmyManager, options }: IHmyMethodsInitParams) {
+  constructor({
+    hmySdk,
+    hmyTokenManager,
+    hmyTokenContract,
+    hmyManager,
+    options,
+  }: IHmyMethodsInitParams) {
     this.hmySdk = hmySdk;
+    this.hmyTokenManager = hmyTokenManager;
     this.hmyTokenContract = hmyTokenContract;
     this.hmyManager = hmyManager;
 
@@ -27,9 +36,11 @@ export class HmyMethods {
     }
   }
 
-  mintToken = async (userAddr, amount, receiptId) => {
+  mintToken = async (oneTokenAddr, userAddr, amount, receiptId) => {
+    console.log(3, oneTokenAddr, userAddr, amount, receiptId);
+
     const res = await this.hmyManager.contract.methods
-      .mintToken(amount, userAddr, receiptId)
+      .mintToken(oneTokenAddr, amount, userAddr, receiptId)
       .send(this.options);
 
     return {
@@ -67,5 +78,19 @@ export class HmyMethods {
     const txInfoRes = await this.hmySdk.blockchain.getTransactionByHash({ txnHash });
 
     return { ...res.result, ...txInfoRes.result, status: res.result.status === '0x1' };
+  };
+
+  getMappingFor = async erc20TokenAddr => {
+    const res = await this.hmyManager.contract.methods.mappings(erc20TokenAddr).call(this.options);
+
+    return res;
+  };
+
+  addToken = async (erc20TokenAddr, name, symbol, decimals) => {
+    const res = await this.hmyManager.contract.methods
+      .addToken(process.env.TOKEN_MANAGER_CONTRACT, erc20TokenAddr, name, symbol, decimals)
+      .send(this.options);
+
+    return res;
   };
 }

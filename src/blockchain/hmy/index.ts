@@ -3,10 +3,9 @@ import { ChainID, ChainType } from '@harmony-js/utils';
 import { HmyManager } from './HmyManager';
 import { HmyMethods } from './HmyMethods';
 
-import hmyBUSDManagerJson = require('../contracts/BUSDHmyManager.json');
-import hmyLINKManagerJson = require('../contracts/LINKHmyManager.json');
-import hmyBUSDTokenJson = require('../contracts/BUSDImplementation.json');
-import hmyLINKTokenJson = require('../contracts/LinkToken.json');
+import hmyManagerJson = require('../contracts/HmyManager.json');
+import TokenManagerJson = require('../contracts/TokenManager.json');
+import erc20Json = require('../contracts/IERC20.json');
 
 export * from './HmyMethods';
 
@@ -19,27 +18,15 @@ export const hmy = new Harmony(
   }
 );
 
-const busdContract = hmy.contracts.createContract(
-  hmyBUSDTokenJson.abi,
-  process.env.HMY_BUSD_CONTRACT
-);
+const hmyManager = new HmyManager(hmyManagerJson, process.env.HMY_MANAGER_CONTRACT);
+const hmyTokenManager = new HmyManager(TokenManagerJson, process.env.TOKEN_MANAGER_CONTRACT);
 
-const linkContract = hmy.contracts.createContract(
-  hmyLINKTokenJson.abi,
-  process.env.HMY_BUSD_CONTRACT
-);
+// fake address - using only for logs decode
+const hmyTokenContract = hmy.contracts.createContract(erc20Json.abi, '');
 
-const hmyBUSDManager = new HmyManager(hmyBUSDManagerJson, process.env.HMY_MANAGER_CONTRACT);
-const hmyLINKManager = new HmyManager(hmyLINKManagerJson, process.env.HMY_LINK_MANAGER_CONTRACT);
-
-export const hmyMethodsBUSD = new HmyMethods({
+export const hmyMethods = new HmyMethods({
   hmySdk: hmy,
-  hmyTokenContract: busdContract,
-  hmyManager: hmyBUSDManager,
-});
-
-export const hmyMethodsLINK = new HmyMethods({
-  hmySdk: hmy,
-  hmyTokenContract: linkContract,
-  hmyManager: hmyLINKManager,
+  hmyTokenContract: hmyTokenContract,
+  hmyTokenManager: hmyTokenManager,
+  hmyManager: hmyManager,
 });

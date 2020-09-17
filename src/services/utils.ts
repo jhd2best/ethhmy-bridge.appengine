@@ -14,6 +14,7 @@ const payloadKeys = [
   'blockHash',
   'blockNumber',
   'transactionHash',
+  'hrc20Address',
 ];
 
 export function clearPayload(obj: any) {
