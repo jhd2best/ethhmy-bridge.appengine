@@ -29,8 +29,6 @@ export class HmyManager {
   }
 
   call = (secret: string) => {
-    console.log('secret: ', secret);
-
     this.contract.wallet.addByPrivateKey(secret);
   };
 }
