@@ -36,7 +36,7 @@ export class EventsConstructor {
     Object.keys(this.subscribers).forEach(id => {
       const sub = this.subscribers[id];
 
-      console.log(event);
+      // console.log(event);
 
       if (sub.event === event.event && sub.condition(event)) {
         sub.success({ ...event, status: true });

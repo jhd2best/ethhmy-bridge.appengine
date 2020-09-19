@@ -4,19 +4,32 @@ import { TransactionReceipt } from 'web3-core';
 import { EthManager } from './EthManager';
 import Web3 from 'web3';
 import erc20Json = require('../contracts/MyERC20.json');
+import { EventsConstructor } from '../helpers/EventsConstructor';
 
 export interface IEthMethodsERC20InitParams {
   web3: Web3;
   ethManager: EthManager;
 }
 
-export class EthMethodsERC20 {
+export class EthMethodsERC20 extends EventsConstructor {
   web3: Web3;
   ethManager: EthManager;
 
   constructor(params: IEthMethodsERC20InitParams) {
+    super();
+
     this.web3 = params.web3;
     this.ethManager = params.ethManager;
+
+    this.ethManager.wsContract.events
+      .Locked()
+      .on('data', this.eventHandler)
+      .on('error', this.eventErrorHandler);
+
+    this.ethManager.wsContract.events
+      .Unlocked()
+      .on('data', this.eventHandler)
+      .on('error', this.eventErrorHandler);
   }
 
   // getTransactionByHash = async (transactionHash: string) => {
