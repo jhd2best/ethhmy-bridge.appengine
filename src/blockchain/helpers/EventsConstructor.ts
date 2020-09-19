@@ -46,12 +46,11 @@ export class EventsConstructor {
   };
 
   eventErrorHandler = (e: any) => {
-    console.log('eventErrorHandler', e);
-
-    Object.keys(this.subscribers).forEach(id => {
-      this.subscribers[id].failed({ error: e.message, status: false });
-      this.unsubscribe(id);
-    });
+    // console.log('eventErrorHandler', e);
+    // Object.keys(this.subscribers).forEach(id => {
+    //   this.subscribers[id].failed({ error: e.message, status: false });
+    //   this.unsubscribe(id);
+    // });
   };
 
   public subscribe = (params: {
