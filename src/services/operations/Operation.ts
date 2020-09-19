@@ -4,16 +4,17 @@ import { Action } from './Action';
 import { generateActionsPool } from './generateActionsPool';
 
 export interface IOperationInitParams {
-  id?: string;
+  id: string;
   status?: STATUS;
   type: OPERATION_TYPE;
+  erc20Address?: string;
+  hrc20Address?: string;
   token: TOKEN;
   ethAddress: string;
   oneAddress: string;
   actions?: Array<Action>;
   timestamp?: number;
   amount: string;
-  fee: string;
 }
 
 export type TSyncOperationCallback = (operation: Operation) => Promise<void>;
@@ -22,35 +23,36 @@ export class Operation {
   id: string;
   type: OPERATION_TYPE;
   token: TOKEN;
+  erc20Address?: string;
+  hrc20Address?: string;
   status: STATUS;
   ethAddress: string;
   oneAddress: string;
   amount: string;
-  fee: string;
   timestamp: number;
   actions: Action[];
 
   syncOperationCallback: TSyncOperationCallback;
 
   constructor(params: IOperationInitParams, callback: TSyncOperationCallback) {
+    this.id = params.id;
     this.oneAddress = params.oneAddress;
     this.ethAddress = params.ethAddress;
     this.amount = params.amount;
-    this.fee = params.fee;
     this.type = params.type;
+    this.erc20Address = params.erc20Address;
     this.token = params.token;
 
     this.timestamp = params.id ? params.timestamp : Math.round(+new Date() / 1000);
 
     this.syncOperationCallback = callback;
 
-    this.actions = generateActionsPool(params.type, params.token);
+    this.actions = generateActionsPool(params);
 
-    if (params.id) {
+    this.status = params.status;
+
+    if (!!this.status) {
       // init from DB
-      this.id = params.id;
-      this.status = params.status;
-
       this.actions.forEach(action => {
         const actionFromDB = params.actions.find(a => a.type === action.type);
 
@@ -59,7 +61,6 @@ export class Operation {
         }
       });
     } else {
-      this.id = uuidv4();
       this.status = STATUS.WAITING;
     }
 
@@ -105,10 +106,11 @@ export class Operation {
     return {
       id: this.id,
       type: this.type,
+      erc20Address: this.erc20Address,
+      hrc20Address: this.hrc20Address,
       token: this.token,
       status: this.status,
       amount: this.amount,
-      fee: this.fee,
       ethAddress: this.ethAddress,
       oneAddress: this.oneAddress,
       timestamp: this.timestamp || this.actions[0].timestamp,

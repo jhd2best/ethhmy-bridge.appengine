@@ -12,7 +12,7 @@ interface IHmyMethodsInitParams {
   options?: { gasPrice: number; gasLimit: number };
 }
 
-export class HmyMethods extends EventsConstructor {
+export class HmyMethodsERC20 extends EventsConstructor {
   hmySdk: Harmony;
   hmyTokenContract: Contract;
   hmyManager: HmyManager;
@@ -40,21 +40,25 @@ export class HmyMethods extends EventsConstructor {
       .on('error', this.eventErrorHandler);
   }
 
-  mintToken = async (userAddr, amount, receiptId) => {
-    console.log('Before Mint Token', amount, userAddr, receiptId);
+  mintToken = async (oneTokenAddr, userAddr, amount, receiptId) => {
+    console.log(oneTokenAddr, userAddr, amount, receiptId);
 
-    const res = await this.hmyManager.contract.methods
-      .mintToken(amount, userAddr, receiptId)
-      .send(this.options)
-      .on('transactionHash', hash => console.log('hash: ', hash));
+    try {
+      const res = await this.hmyManager.contract.methods
+        .mintToken(oneTokenAddr, amount, userAddr, receiptId)
+        .send(this.options);
 
-    console.log(111, res.status);
-
-    return {
-      ...res.transaction,
-      status: res.status === 'called',
-      transactionHash: res.transaction.id,
-    };
+      return {
+        ...res.transaction,
+        status: res.status === 'called',
+        transactionHash: res.transaction.id,
+      };
+    } catch (e) {
+      return {
+        error: e.message,
+        status: 'failed',
+      };
+    }
   };
 
   decodeApprovalLog = (receipt: TransactionReceipt) => {
@@ -85,5 +89,19 @@ export class HmyMethods extends EventsConstructor {
     const txInfoRes = await this.hmySdk.blockchain.getTransactionByHash({ txnHash });
 
     return { ...res.result, ...txInfoRes.result, status: res.result.status === '0x1' };
+  };
+
+  getMappingFor = async erc20TokenAddr => {
+    const res = await this.hmyManager.contract.methods.mappings(erc20TokenAddr).call(this.options);
+
+    return res;
+  };
+
+  addToken = async (erc20TokenAddr, name, symbol, decimals) => {
+    const res = await this.hmyManager.contract.methods
+      .addToken(process.env.TOKEN_MANAGER_CONTRACT, erc20TokenAddr, name, symbol, decimals)
+      .send(this.options);
+
+    return res;
   };
 }

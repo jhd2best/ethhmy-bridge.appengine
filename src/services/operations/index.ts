@@ -1,7 +1,7 @@
 import { DBService } from '../database';
 import { IOperationInitParams, Operation } from './Operation';
 import { createError } from '../../routes/helpers';
-import { STATUS, OPERATION_TYPE } from './interfaces';
+import { STATUS, OPERATION_TYPE, ACTION_TYPE } from './interfaces';
 import { hmy } from '../../blockchain/hmy';
 import { normalizeEthKey } from '../../blockchain/utils';
 import { validateEthBalanceNonZero, validateOneBalanceNonZero } from './validations';
@@ -58,15 +58,19 @@ export class OperationService {
       throw createError(500, 'This operation already in progress');
     }
 
-    switch (params.type) {
-      case OPERATION_TYPE.ONE_ETH:
-        await validateOneBalanceNonZero(params.oneAddress);
-        break;
-      case OPERATION_TYPE.ETH_ONE:
-        await validateEthBalanceNonZero(params.ethAddress);
-        break;
-      default:
-        throw createError(400, 'Invalid operation type');
+    try {
+      switch (params.type) {
+        case OPERATION_TYPE.ONE_ETH:
+          await validateOneBalanceNonZero(params.oneAddress);
+          break;
+        case OPERATION_TYPE.ETH_ONE:
+          await validateEthBalanceNonZero(params.ethAddress);
+          break;
+        default:
+          throw createError(400, 'Invalid operation type');
+      }
+    } catch (e) {
+      throw createError(500, 'User eth balance is to low');
     }
 
     return true;
@@ -77,13 +81,13 @@ export class OperationService {
 
     const operation = new Operation(
       {
+        id: params.id,
         type: params.type,
+        erc20Address: params.erc20Address,
         token: params.token,
         ethAddress: params.ethAddress,
         oneAddress: params.oneAddress,
-        actions: params.actions,
         amount: params.amount,
-        fee: params.fee,
       },
       this.saveOperationToDB
     );
@@ -105,14 +109,18 @@ export class OperationService {
     return null;
   };
 
-  setActionHash = (params: { operationId: string; actionId: string; transactionHash: string }) => {
+  setActionHash = (params: {
+    operationId: string;
+    actionType: ACTION_TYPE;
+    transactionHash: string;
+  }) => {
     const operation = this.operations.find(o => o.id === params.operationId);
 
     if (!operation) {
       throw createError(400, 'Operation not found');
     }
 
-    const action = operation.actions.find(a => a.id === params.actionId);
+    const action = operation.actions.find(a => a.type === params.actionType);
 
     if (!action) {
       throw createError(400, 'Action not found');

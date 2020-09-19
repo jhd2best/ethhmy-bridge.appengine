@@ -16,6 +16,7 @@ export class DBService {
       });
 
       this.db = admin.firestore();
+      this.db.settings({ ignoreUndefinedProperties: true });
     } catch (e) {
       console.error(e);
     }
