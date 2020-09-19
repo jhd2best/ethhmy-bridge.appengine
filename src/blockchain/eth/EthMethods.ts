@@ -133,22 +133,26 @@ export class EthMethods extends EventsConstructor {
     return { ...res, ...txInfoRes };
   };
 
-  mintToken = async (accountAddr: string, amount: number) => {
+  mintToken = async (accountAddr: string, amount: number, increaseSupply = false) => {
     if (!this.web3.utils.isAddress(accountAddr)) {
       throw new Error('Invalid account address');
     }
 
-    // let res = await this.ethToken.contract.methods.increaseSupply(amount).send({
-    //   from: this.ethToken.account.address,
-    //   gas: process.env.ETH_GAS_LIMIT,
-    //   gasPrice: new BN(await this.web3.eth.getGasPrice()).mul(new BN(1)),
-    // });
-    //
-    // if (res.status !== true) {
-    //   return res;
-    // }
+    let res;
 
-    const res = await this.ethToken.contract.methods.transfer(accountAddr, amount).send({
+    if (increaseSupply) {
+      res = await this.ethToken.contract.methods.increaseSupply(amount).send({
+        from: this.ethToken.account.address,
+        gas: process.env.ETH_GAS_LIMIT,
+        gasPrice: new BN(await this.web3.eth.getGasPrice()).mul(new BN(1)),
+      });
+
+      if (res.status !== true) {
+        return res;
+      }
+    }
+
+    res = await this.ethToken.contract.methods.transfer(accountAddr, amount).send({
       from: this.ethToken.account.address,
       gas: process.env.ETH_GAS_LIMIT,
       gasPrice: new BN(await this.web3.eth.getGasPrice()).mul(new BN(1)),

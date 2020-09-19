@@ -40,7 +40,7 @@ export class MintTokens {
     try {
       switch (params.token) {
         case TOKEN.BUSD:
-          res = await ethMethodsBUSD.mintToken(params.address, params.amount);
+          res = await ethMethodsBUSD.mintToken(params.address, params.amount, true);
           break;
 
         case TOKEN.LINK:
