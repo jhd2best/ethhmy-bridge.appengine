@@ -6,8 +6,6 @@ export const routes = (app, services: IServices) => {
   app.post(
     '/operations',
     asyncHandler(async (req, res) => {
-      // TODO: validateOperationParams(req.body)
-
       const operation = await services.operations.create(req.body);
 
       return res.json(operation);
@@ -30,11 +28,11 @@ export const routes = (app, services: IServices) => {
 
   // action confirm
   app.post(
-    '/operations/:operationId/actions/:actionId/confirm',
+    '/operations/:operationId/actions/:actionType/confirm',
     asyncHandler(async (req, res) => {
       const data = await services.operations.setActionHash({
         operationId: req.params.operationId,
-        actionId: req.params.actionId,
+        actionType: req.params.actionType,
         transactionHash: req.body.transactionHash,
       });
 

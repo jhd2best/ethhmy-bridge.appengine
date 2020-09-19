@@ -3,6 +3,7 @@ import { AVG_BLOCK_TIME, BLOCK_TO_FINALITY, sleep } from '../utils';
 import { TransactionReceipt } from 'web3-core';
 import { EthManager } from './EthManager';
 import Web3 from 'web3';
+import { EventsConstructor } from '../helpers/EventsConstructor';
 
 export interface IEthMethodsInitParams {
   web3: Web3;
@@ -10,15 +11,27 @@ export interface IEthMethodsInitParams {
   ethToken: EthManager;
 }
 
-export class EthMethods {
+export class EthMethods extends EventsConstructor {
   web3: Web3;
   ethManager: EthManager;
   ethToken: EthManager;
 
   constructor(params: IEthMethodsInitParams) {
+    super();
+
     this.web3 = params.web3;
     this.ethManager = params.ethManager;
     this.ethToken = params.ethToken;
+
+    this.ethManager.wsContract.events
+      .Locked()
+      .on('data', this.eventHandler)
+      .on('error', this.eventErrorHandler);
+
+    this.ethManager.wsContract.events
+      .Unlocked()
+      .on('data', this.eventHandler)
+      .on('error', this.eventErrorHandler);
   }
 
   // getTransactionByHash = async (transactionHash: string) => {

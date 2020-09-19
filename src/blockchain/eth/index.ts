@@ -11,7 +11,10 @@ export * from './EthMethods';
 export * from './EthMethodsERC20';
 
 export const web3URL = process.env.ETH_NODE_URL;
+export const web3URLWS = process.env.ETH_NODE_URL_WS;
+
 export const web3 = new Web3(web3URL);
+export const web3WS = new Web3(new Web3.providers.WebsocketProvider(web3URLWS));
 
 const ethManagerBUSD = new EthManager(ethManagerJson, process.env.ETH_BUSD_MANAGER_CONTRACT);
 const ethTokenBUSD = new EthManager(erc20Json, process.env.ETH_BUSD_CONTRACT);

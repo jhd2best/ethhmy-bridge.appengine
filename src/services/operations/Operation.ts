@@ -4,7 +4,7 @@ import { Action } from './Action';
 import { generateActionsPool } from './generateActionsPool';
 
 export interface IOperationInitParams {
-  id?: string;
+  id: string;
   status?: STATUS;
   type: OPERATION_TYPE;
   erc20Address?: string;
@@ -35,6 +35,7 @@ export class Operation {
   syncOperationCallback: TSyncOperationCallback;
 
   constructor(params: IOperationInitParams, callback: TSyncOperationCallback) {
+    this.id = params.id;
     this.oneAddress = params.oneAddress;
     this.ethAddress = params.ethAddress;
     this.amount = params.amount;
@@ -48,11 +49,10 @@ export class Operation {
 
     this.actions = generateActionsPool(params);
 
-    if (params.id) {
-      // init from DB
-      this.id = params.id;
-      this.status = params.status;
+    this.status = params.status;
 
+    if (!!this.status) {
+      // init from DB
       this.actions.forEach(action => {
         const actionFromDB = params.actions.find(a => a.type === action.type);
 
@@ -61,7 +61,6 @@ export class Operation {
         }
       });
     } else {
-      this.id = uuidv4();
       this.status = STATUS.WAITING;
     }
 

@@ -1,7 +1,7 @@
 import { DBService } from '../database';
 import { IOperationInitParams, Operation } from './Operation';
 import { createError } from '../../routes/helpers';
-import { STATUS, OPERATION_TYPE } from './interfaces';
+import { STATUS, OPERATION_TYPE, ACTION_TYPE } from './interfaces';
 import { hmy } from '../../blockchain/hmy';
 import { normalizeEthKey } from '../../blockchain/utils';
 import { validateEthBalanceNonZero, validateOneBalanceNonZero } from './validations';
@@ -81,12 +81,12 @@ export class OperationService {
 
     const operation = new Operation(
       {
+        id: params.id,
         type: params.type,
         erc20Address: params.erc20Address,
         token: params.token,
         ethAddress: params.ethAddress,
         oneAddress: params.oneAddress,
-        actions: params.actions,
         amount: params.amount,
       },
       this.saveOperationToDB
@@ -109,14 +109,18 @@ export class OperationService {
     return null;
   };
 
-  setActionHash = (params: { operationId: string; actionId: string; transactionHash: string }) => {
+  setActionHash = (params: {
+    operationId: string;
+    actionType: ACTION_TYPE;
+    transactionHash: string;
+  }) => {
     const operation = this.operations.find(o => o.id === params.operationId);
 
     if (!operation) {
       throw createError(400, 'Operation not found');
     }
 
-    const action = operation.actions.find(a => a.id === params.actionId);
+    const action = operation.actions.find(a => a.type === params.actionType);
 
     if (!action) {
       throw createError(400, 'Action not found');

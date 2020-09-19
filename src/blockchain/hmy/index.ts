@@ -20,8 +20,12 @@ export const hmy = new Harmony(
   }
 );
 
-const busdContract = hmy.contracts.createContract(erc20Json.abi, process.env.HMY_BUSD_CONTRACT);
+export const hmyWS = new Harmony('wss://ws.s0.b.hmny.io', {
+  chainType: ChainType.Harmony,
+  chainId: ChainID.HmyTestnet,
+});
 
+const busdContract = hmy.contracts.createContract(erc20Json.abi, process.env.HMY_BUSD_CONTRACT);
 const linkContract = hmy.contracts.createContract(erc20Json.abi, process.env.HMY_LINK_CONTRACT);
 
 const hmyBUSDManager = new HmyManager(hmyManagerJson, process.env.HMY_BUSD_MANAGER_CONTRACT);
