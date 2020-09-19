@@ -3,6 +3,9 @@ import { readFileSync } from 'fs';
 import { awsKMS } from '../utils';
 import { Account } from 'web3-core';
 import { Contract } from 'web3-eth-contract';
+import readlineSync from 'readline-sync';
+
+const encryptedDir = './encrypted/' + readlineSync.question('Encrypted sub-dir (1-3): ');
 
 export class EthManager {
   contract: Contract;
@@ -16,7 +19,7 @@ export class EthManager {
 
     awsKMS.decrypt(
       {
-        CiphertextBlob: readFileSync('./encrypted/eth-secret'),
+        CiphertextBlob: readFileSync(`${encryptedDir}/eth-secret`),
       },
       (err, data) => {
         if (!err) {
