@@ -1,5 +1,7 @@
 import { Harmony } from '@harmony-js/core';
 import { ChainID, ChainType } from '@harmony-js/utils';
+import { WSProvider } from '@harmony-js/network';
+
 import { HmyManager } from './HmyManager';
 import { HmyMethods } from './HmyMethods';
 
@@ -7,6 +9,7 @@ import hmyManagerJson = require('../contracts/LINKHmyManager.json');
 import hmyManagerERC20Json = require('../contracts/HmyManagerERC20.json');
 import erc20Json = require('../contracts/MyERC20.json');
 import { HmyMethodsERC20 } from './HmyMethodsERC20';
+import { sleep } from '../utils';
 
 export * from './HmyMethods';
 export * from './HmyMethodsERC20';
@@ -20,10 +23,28 @@ export const hmy = new Harmony(
   }
 );
 
+const wsProvider = new WSProvider('wss://ws.s0.b.hmny.io', {
+  chainType: ChainType.Harmony,
+  chainId: ChainID.HmyTestnet,
+});
+
 export const hmyWS = new Harmony('wss://ws.s0.b.hmny.io', {
   chainType: ChainType.Harmony,
   chainId: ChainID.HmyTestnet,
 });
+
+hmyWS.setProvider(wsProvider);
+
+const ping = async () => {
+  while (true) {
+    if (!wsProvider.connected) {
+      console.log('hmy_WS Connected: ', wsProvider.connected);
+    }
+    await sleep(3000);
+  }
+};
+
+ping();
 
 const busdContract = hmy.contracts.createContract(erc20Json.abi, process.env.HMY_BUSD_CONTRACT);
 const linkContract = hmy.contracts.createContract(erc20Json.abi, process.env.HMY_LINK_CONTRACT);

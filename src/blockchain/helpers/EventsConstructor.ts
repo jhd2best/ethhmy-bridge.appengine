@@ -36,9 +36,10 @@ export class EventsConstructor {
     Object.keys(this.subscribers).forEach(id => {
       const sub = this.subscribers[id];
 
-      console.log(event);
+      console.log('New event: ', event.event, event.returnValues.receiptId);
 
       if (sub.event === event.event && sub.condition(event)) {
+        console.log('Success subscribe called: ', event.event);
         sub.success({ ...event, status: true });
         this.unsubscribe(id);
       }
@@ -46,7 +47,7 @@ export class EventsConstructor {
   };
 
   eventErrorHandler = (e: any) => {
-    // console.log('eventErrorHandler', e);
+    console.log('-- eventErrorHandler --');
     // Object.keys(this.subscribers).forEach(id => {
     //   this.subscribers[id].failed({ error: e.message, status: false });
     //   this.unsubscribe(id);

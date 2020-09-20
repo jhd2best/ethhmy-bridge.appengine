@@ -41,14 +41,13 @@ export class HmyMethods extends EventsConstructor {
   }
 
   mintToken = async (userAddr, amount, receiptId) => {
-    console.log('Before Mint Token', amount, userAddr, receiptId);
+    console.log('before mintToken: ', receiptId);
 
     const res = await this.hmyManager.contract.methods
       .mintToken(amount, userAddr, receiptId)
-      .send(this.options)
-      .on('transactionHash', hash => console.log('hash: ', hash));
+      .send(this.options);
 
-    console.log(111, res.status);
+    console.log('mintToken status: ', res.status);
 
     return {
       ...res.transaction,

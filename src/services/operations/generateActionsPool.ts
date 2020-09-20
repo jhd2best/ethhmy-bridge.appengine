@@ -253,6 +253,7 @@ const hmyToEth = (hmyMethods: hmyContract.HmyMethods, ethMethods: ethContract.Et
             burnTokenAction.transactionHash
           );
         } catch (e) {
+          console.log('Unlocked error: ');
           reject(e.message);
         }
       });
