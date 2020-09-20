@@ -15,6 +15,7 @@ export interface IActionInitParams {
   type: ACTION_TYPE;
   callFunction: TActionCallFunction;
   awaitConfirmation?: boolean;
+  startRollbackOnFail?: boolean;
 }
 
 export class Action {
@@ -27,6 +28,7 @@ export class Action {
   timestamp: number;
   payload: TransactionReceipt | any;
   awaitConfirmation: boolean;
+  startRollbackOnFail: boolean;
 
   callFunction: TActionCallFunction;
 
@@ -36,6 +38,7 @@ export class Action {
     this.type = params.type;
     this.callFunction = params.callFunction;
     this.awaitConfirmation = !!params.awaitConfirmation;
+    this.startRollbackOnFail = !!params.startRollbackOnFail;
   }
 
   public setParams = (action: Action) => {

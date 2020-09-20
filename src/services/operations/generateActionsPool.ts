@@ -51,6 +51,7 @@ const ethToOneERC20 = (
 
   const mintTokenAction = new Action({
     type: ACTION_TYPE.mintToken,
+    startRollbackOnFail: true,
     callFunction: () => {
       return eventWrapper(hmyMethods, 'Minted', lockTokenAction.transactionHash, async () => {
         const approvalLog = ethMethods.decodeApprovalLog(approveEthMangerAction.payload);
@@ -75,13 +76,16 @@ const ethToOneERC20 = (
     },
   });
 
-  return [
-    getHRC20AddressAction,
-    approveEthMangerAction,
-    lockTokenAction,
-    waitingBlockNumberAction,
-    mintTokenAction,
-  ];
+  return {
+    actions: [
+      getHRC20AddressAction,
+      approveEthMangerAction,
+      lockTokenAction,
+      waitingBlockNumberAction,
+      mintTokenAction,
+    ],
+    rollbackActions: [],
+  };
 };
 
 const hmyToEthERC20 = (
@@ -103,6 +107,7 @@ const hmyToEthERC20 = (
 
   const unlockTokenAction = new Action({
     type: ACTION_TYPE.unlockToken,
+    startRollbackOnFail: true,
     callFunction: () => {
       return eventWrapper(ethMethods, 'Unlocked', burnTokenAction.transactionHash, async () => {
         const approvalLog = hmyMethods.decodeApprovalLog(approveHmyMangerAction.payload);
@@ -127,7 +132,10 @@ const hmyToEthERC20 = (
     },
   });
 
-  return [approveHmyMangerAction, burnTokenAction, unlockTokenAction];
+  return {
+    actions: [approveHmyMangerAction, burnTokenAction, unlockTokenAction],
+    rollbackActions: [],
+  };
 };
 
 const ethToOne = (hmyMethods: hmyContract.HmyMethods, ethMethods: ethContract.EthMethods) => {
@@ -154,6 +162,7 @@ const ethToOne = (hmyMethods: hmyContract.HmyMethods, ethMethods: ethContract.Et
 
   const mintTokenAction = new Action({
     type: ACTION_TYPE.mintToken,
+    startRollbackOnFail: true,
     callFunction: () => {
       return eventWrapper(hmyMethods, 'Minted', lockTokenAction.transactionHash, async () => {
         const approvalLog = ethMethods.decodeApprovalLog(approveEthMangerAction.payload);
@@ -175,7 +184,33 @@ const ethToOne = (hmyMethods: hmyContract.HmyMethods, ethMethods: ethContract.Et
     },
   });
 
-  return [approveEthMangerAction, lockTokenAction, waitingBlockNumberAction, mintTokenAction];
+  const unlockTokenRollbackAction = new Action({
+    type: ACTION_TYPE.unlockTokenRollback,
+    callFunction: async () => {
+      return eventWrapper(ethMethods, 'Unlocked', lockTokenAction.transactionHash, async () => {
+        const approvalLog = ethMethods.decodeApprovalLog(approveEthMangerAction.payload);
+        if (approvalLog.spender != ethMethods.ethManager.address) {
+          throw new Error('approvalLog.spender != process.env.ETH_MANAGER_CONTRACT');
+        }
+
+        const lockTokenLog = ethMethods.decodeLockTokenLog(lockTokenAction.payload);
+        if (lockTokenLog.amount != approvalLog.value) {
+          throw new Error('lockTokenLog.amount != approvalLog.value');
+        }
+
+        return await ethMethods.unlockToken(
+          lockTokenLog.sender,
+          lockTokenLog.amount,
+          lockTokenAction.transactionHash
+        );
+      });
+    },
+  });
+
+  return {
+    actions: [approveEthMangerAction, lockTokenAction, waitingBlockNumberAction, mintTokenAction],
+    rollbackActions: [unlockTokenRollbackAction],
+  };
 };
 
 const hmyToEth = (hmyMethods: hmyContract.HmyMethods, ethMethods: ethContract.EthMethods) => {
@@ -193,6 +228,7 @@ const hmyToEth = (hmyMethods: hmyContract.HmyMethods, ethMethods: ethContract.Et
 
   const unlockTokenAction = new Action({
     type: ACTION_TYPE.unlockToken,
+    startRollbackOnFail: true,
     callFunction: async () => {
       return eventWrapper(ethMethods, 'Unlocked', burnTokenAction.transactionHash, async () => {
         const approvalLog = hmyMethods.decodeApprovalLog(approveHmyMangerAction.payload);
@@ -216,10 +252,40 @@ const hmyToEth = (hmyMethods: hmyContract.HmyMethods, ethMethods: ethContract.Et
     },
   });
 
-  return [approveHmyMangerAction, burnTokenAction, unlockTokenAction];
+  const mintTokenRollbackAction = new Action({
+    type: ACTION_TYPE.mintTokenRollback,
+    callFunction: () => {
+      return eventWrapper(hmyMethods, 'Minted', burnTokenAction.transactionHash, async () => {
+        const approvalLog = hmyMethods.decodeApprovalLog(approveHmyMangerAction.payload);
+
+        if (approvalLog.spender.toUpperCase() != hmyMethods.hmyManager.address.toUpperCase()) {
+          throw new Error('approvalLog.spender != hmyManager.address');
+        }
+
+        const burnTokenLog = hmyMethods.decodeBurnTokenLog(burnTokenAction.payload);
+
+        if (burnTokenLog.amount != approvalLog.value) {
+          throw new Error('burnTokenLog.amount != approvalLog.value');
+        }
+
+        return await hmyMethods.mintToken(
+          burnTokenLog.sender,
+          burnTokenLog.amount,
+          burnTokenAction.transactionHash
+        );
+      });
+    },
+  });
+
+  return {
+    actions: [approveHmyMangerAction, burnTokenAction, unlockTokenAction],
+    rollbackActions: [mintTokenRollbackAction],
+  };
 };
 
-export const generateActionsPool = (params: IOperationInitParams): Array<Action> => {
+export const generateActionsPool = (
+  params: IOperationInitParams
+): { actions: Array<Action>; rollbackActions: Array<Action> } => {
   if (params.type === OPERATION_TYPE.ONE_ETH) {
     switch (params.token) {
       case TOKEN.BUSD:
