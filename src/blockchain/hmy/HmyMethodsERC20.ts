@@ -46,7 +46,7 @@ export class HmyMethodsERC20 extends EventsConstructor {
   };
 
   mintToken = async (oneTokenAddr, userAddr, amount, receiptId) => {
-    console.log(oneTokenAddr, userAddr, amount, receiptId);
+    // console.log(oneTokenAddr, userAddr, amount, receiptId);
 
     try {
       const res = await this.hmyManager.contract.methods

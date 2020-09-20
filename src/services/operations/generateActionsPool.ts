@@ -66,9 +66,37 @@ const ethToOneERC20 = (
           throw new Error('lockTokenLog.amount != approvalLog.value');
         }
 
+        const erc20Address = await hmyMethods.getMappingFor(lockTokenLog.token);
+
         return await hmyMethods.mintToken(
-          getHRC20AddressAction.payload.hrc20Address,
+          erc20Address,
           lockTokenLog.recipient,
+          lockTokenLog.amount,
+          lockTokenAction.transactionHash
+        );
+      });
+    },
+  });
+
+  const unlockTokenRollbackAction = new Action({
+    type: ACTION_TYPE.unlockToken,
+    callFunction: () => {
+      return eventWrapper(ethMethods, 'Unlocked', lockTokenAction.transactionHash, async () => {
+        const approvalLog = ethMethods.decodeApprovalLog(approveEthMangerAction.payload);
+
+        if (approvalLog.spender != ethMethods.ethManager.address) {
+          throw new Error('approvalLog.spender != process.env.ETH_MANAGER_CONTRACT');
+        }
+
+        const lockTokenLog = ethMethods.decodeLockTokenLog(lockTokenAction.payload);
+
+        if (lockTokenLog.amount != approvalLog.value) {
+          throw new Error('lockTokenLog.amount != approvalLog.value');
+        }
+
+        return await ethMethods.unlockToken(
+          lockTokenLog.token,
+          lockTokenLog.sender,
           lockTokenLog.amount,
           lockTokenAction.transactionHash
         );
@@ -84,7 +112,7 @@ const ethToOneERC20 = (
       waitingBlockNumberAction,
       mintTokenAction,
     ],
-    rollbackActions: [],
+    rollbackActions: [unlockTokenRollbackAction],
   };
 };
 
@@ -122,6 +150,14 @@ const hmyToEthERC20 = (
           throw new Error('burnTokenLog.amount != approvalLog.value');
         }
 
+        console.log(
+          'before unlockToken',
+          params.erc20Address,
+          burnTokenLog.recipient,
+          burnTokenLog.amount,
+          burnTokenAction.transactionHash
+        );
+
         return await ethMethods.unlockToken(
           params.erc20Address,
           burnTokenLog.recipient,
@@ -132,9 +168,35 @@ const hmyToEthERC20 = (
     },
   });
 
+  const mintTokenRollbackAction = new Action({
+    type: ACTION_TYPE.mintTokenRollback,
+    callFunction: () => {
+      return eventWrapper(hmyMethods, 'Minted', burnTokenAction.transactionHash, async () => {
+        const approvalLog = hmyMethods.decodeApprovalLog(approveHmyMangerAction.payload);
+
+        if (approvalLog.spender.toUpperCase() != hmyMethods.hmyManager.address.toUpperCase()) {
+          throw new Error('approvalLog.spender != hmyManager.address');
+        }
+
+        const burnTokenLog = hmyMethods.decodeBurnTokenLog(burnTokenAction.payload);
+
+        if (burnTokenLog.amount != approvalLog.value) {
+          throw new Error('burnTokenLog.amount != approvalLog.value');
+        }
+
+        return await hmyMethods.mintToken(
+          burnTokenLog.token,
+          burnTokenLog.sender,
+          burnTokenLog.amount,
+          burnTokenAction.transactionHash
+        );
+      });
+    },
+  });
+
   return {
     actions: [approveHmyMangerAction, burnTokenAction, unlockTokenAction],
-    rollbackActions: [],
+    rollbackActions: [mintTokenRollbackAction],
   };
 };
 
