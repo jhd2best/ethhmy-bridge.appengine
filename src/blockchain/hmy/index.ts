@@ -23,7 +23,7 @@ export const hmy = new Harmony(
   }
 );
 
-const wsProvider = new WSProvider('wss://ws.s0.b.hmny.io', {
+export const hmyWSProvider = new WSProvider('wss://ws.s0.b.hmny.io', {
   chainType: ChainType.Harmony,
   chainId: ChainID.HmyTestnet,
 });
@@ -33,18 +33,18 @@ export const hmyWS = new Harmony('wss://ws.s0.b.hmny.io', {
   chainId: ChainID.HmyTestnet,
 });
 
-hmyWS.setProvider(wsProvider);
+hmyWS.setProvider(hmyWSProvider);
 
-const ping = async () => {
-  while (true) {
-    if (!wsProvider.connected) {
-      console.log('hmy_WS Connected: ', wsProvider.connected);
-    }
-    await sleep(3000);
-  }
-};
-
-ping();
+// const ping = async () => {
+//   while (true) {
+//     if (!hmyWSProvider.connected) {
+//       console.log('hmy_WS Connected: ', hmyWSProvider.connected);
+//     }
+//     await sleep(3000);
+//   }
+// };
+//
+// ping();
 
 const busdContract = hmy.contracts.createContract(erc20Json.abi, process.env.HMY_BUSD_CONTRACT);
 const linkContract = hmy.contracts.createContract(erc20Json.abi, process.env.HMY_LINK_CONTRACT);

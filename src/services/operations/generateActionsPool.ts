@@ -5,6 +5,7 @@ import { IOperationInitParams } from './Operation';
 
 import * as hmyContract from '../../blockchain/hmy';
 import * as ethContract from '../../blockchain/eth';
+import { eventWrapper } from './eventWrapper';
 
 const ethToOneERC20 = (
   hmyMethods: hmyContract.HmyMethodsERC20,
@@ -51,36 +52,25 @@ const ethToOneERC20 = (
   const mintTokenAction = new Action({
     type: ACTION_TYPE.mintToken,
     callFunction: () => {
-      return new Promise((resolve, reject) => {
-        try {
-          const approvalLog = ethMethods.decodeApprovalLog(approveEthMangerAction.payload);
+      return eventWrapper(hmyMethods, 'Minted', lockTokenAction.transactionHash, async () => {
+        const approvalLog = ethMethods.decodeApprovalLog(approveEthMangerAction.payload);
 
-          if (approvalLog.spender != ethMethods.ethManager.address) {
-            throw new Error('approvalLog.spender != process.env.ETH_MANAGER_CONTRACT');
-          }
-
-          const lockTokenLog = ethMethods.decodeLockTokenLog(lockTokenAction.payload);
-
-          if (lockTokenLog.amount != approvalLog.value) {
-            throw new Error('lockTokenLog.amount != approvalLog.value');
-          }
-
-          hmyMethods.subscribe({
-            event: 'Minted',
-            success: event => resolve(event),
-            failed: err => reject(err.error),
-            condition: event => event.returnValues.receiptId === lockTokenAction.transactionHash,
-          });
-
-          hmyMethods.mintToken(
-            getHRC20AddressAction.payload.hrc20Address,
-            lockTokenLog.recipient,
-            lockTokenLog.amount,
-            lockTokenAction.transactionHash
-          );
-        } catch (e) {
-          reject(e.message);
+        if (approvalLog.spender != ethMethods.ethManager.address) {
+          throw new Error('approvalLog.spender != process.env.ETH_MANAGER_CONTRACT');
         }
+
+        const lockTokenLog = ethMethods.decodeLockTokenLog(lockTokenAction.payload);
+
+        if (lockTokenLog.amount != approvalLog.value) {
+          throw new Error('lockTokenLog.amount != approvalLog.value');
+        }
+
+        return await hmyMethods.mintToken(
+          getHRC20AddressAction.payload.hrc20Address,
+          lockTokenLog.recipient,
+          lockTokenLog.amount,
+          lockTokenAction.transactionHash
+        );
       });
     },
   });
@@ -114,36 +104,25 @@ const hmyToEthERC20 = (
   const unlockTokenAction = new Action({
     type: ACTION_TYPE.unlockToken,
     callFunction: () => {
-      return new Promise((resolve, reject) => {
-        try {
-          const approvalLog = hmyMethods.decodeApprovalLog(approveHmyMangerAction.payload);
+      return eventWrapper(ethMethods, 'Unlocked', burnTokenAction.transactionHash, async () => {
+        const approvalLog = hmyMethods.decodeApprovalLog(approveHmyMangerAction.payload);
 
-          if (approvalLog.spender.toUpperCase() != hmyMethods.hmyManager.address.toUpperCase()) {
-            throw new Error('approvalLog.spender != hmyManager.address');
-          }
-
-          const burnTokenLog = hmyMethods.decodeBurnTokenLog(burnTokenAction.payload);
-
-          if (burnTokenLog.amount != approvalLog.value) {
-            throw new Error('burnTokenLog.amount != approvalLog.value');
-          }
-
-          ethMethods.subscribe({
-            event: 'Unlocked',
-            success: event => resolve(event),
-            failed: err => reject(err.error),
-            condition: event => event.returnValues.receiptId === burnTokenAction.transactionHash,
-          });
-
-          ethMethods.unlockToken(
-            params.erc20Address,
-            burnTokenLog.recipient,
-            burnTokenLog.amount,
-            burnTokenAction.transactionHash
-          );
-        } catch (e) {
-          reject(e.message);
+        if (approvalLog.spender.toUpperCase() != hmyMethods.hmyManager.address.toUpperCase()) {
+          throw new Error('approvalLog.spender != hmyManager.address');
         }
+
+        const burnTokenLog = hmyMethods.decodeBurnTokenLog(burnTokenAction.payload);
+
+        if (burnTokenLog.amount != approvalLog.value) {
+          throw new Error('burnTokenLog.amount != approvalLog.value');
+        }
+
+        return await ethMethods.unlockToken(
+          params.erc20Address,
+          burnTokenLog.recipient,
+          burnTokenLog.amount,
+          burnTokenAction.transactionHash
+        );
       });
     },
   });
@@ -176,33 +155,22 @@ const ethToOne = (hmyMethods: hmyContract.HmyMethods, ethMethods: ethContract.Et
   const mintTokenAction = new Action({
     type: ACTION_TYPE.mintToken,
     callFunction: () => {
-      return new Promise((resolve, reject) => {
-        try {
-          const approvalLog = ethMethods.decodeApprovalLog(approveEthMangerAction.payload);
-          if (approvalLog.spender != ethMethods.ethManager.address) {
-            throw new Error('approvalLog.spender != process.env.ETH_MANAGER_CONTRACT');
-          }
-
-          const lockTokenLog = ethMethods.decodeLockTokenLog(lockTokenAction.payload);
-          if (lockTokenLog.amount != approvalLog.value) {
-            throw new Error('lockTokenLog.amount != approvalLog.value');
-          }
-
-          hmyMethods.subscribe({
-            event: 'Minted',
-            success: event => resolve(event),
-            failed: err => reject(err.error),
-            condition: event => event.returnValues.receiptId === lockTokenAction.transactionHash,
-          });
-
-          hmyMethods.mintToken(
-            lockTokenLog.recipient,
-            lockTokenLog.amount,
-            lockTokenAction.transactionHash
-          );
-        } catch (e) {
-          reject(e.message);
+      return eventWrapper(hmyMethods, 'Minted', lockTokenAction.transactionHash, async () => {
+        const approvalLog = ethMethods.decodeApprovalLog(approveEthMangerAction.payload);
+        if (approvalLog.spender != ethMethods.ethManager.address) {
+          throw new Error('approvalLog.spender != process.env.ETH_MANAGER_CONTRACT');
         }
+
+        const lockTokenLog = ethMethods.decodeLockTokenLog(lockTokenAction.payload);
+        if (lockTokenLog.amount != approvalLog.value) {
+          throw new Error('lockTokenLog.amount != approvalLog.value');
+        }
+
+        return await hmyMethods.mintToken(
+          lockTokenLog.recipient,
+          lockTokenLog.amount,
+          lockTokenAction.transactionHash
+        );
       });
     },
   });
@@ -226,36 +194,24 @@ const hmyToEth = (hmyMethods: hmyContract.HmyMethods, ethMethods: ethContract.Et
   const unlockTokenAction = new Action({
     type: ACTION_TYPE.unlockToken,
     callFunction: async () => {
-      return new Promise((resolve, reject) => {
-        try {
-          const approvalLog = hmyMethods.decodeApprovalLog(approveHmyMangerAction.payload);
+      return eventWrapper(ethMethods, 'Unlocked', burnTokenAction.transactionHash, async () => {
+        const approvalLog = hmyMethods.decodeApprovalLog(approveHmyMangerAction.payload);
 
-          if (approvalLog.spender.toUpperCase() != hmyMethods.hmyManager.address.toUpperCase()) {
-            throw new Error('approvalLog.spender != hmyManager.address');
-          }
-
-          const burnTokenLog = hmyMethods.decodeBurnTokenLog(burnTokenAction.payload);
-
-          if (burnTokenLog.amount != approvalLog.value) {
-            throw new Error('burnTokenLog.amount != approvalLog.value');
-          }
-
-          ethMethods.subscribe({
-            event: 'Unlocked',
-            success: event => resolve(event),
-            failed: err => reject(err.error),
-            condition: event => event.returnValues.receiptId === burnTokenAction.transactionHash,
-          });
-
-          return ethMethods.unlockToken(
-            burnTokenLog.recipient,
-            burnTokenLog.amount,
-            burnTokenAction.transactionHash
-          );
-        } catch (e) {
-          console.log('Unlocked error: ');
-          reject(e.message);
+        if (approvalLog.spender.toUpperCase() != hmyMethods.hmyManager.address.toUpperCase()) {
+          throw new Error('approvalLog.spender != hmyManager.address');
         }
+
+        const burnTokenLog = hmyMethods.decodeBurnTokenLog(burnTokenAction.payload);
+
+        if (burnTokenLog.amount != approvalLog.value) {
+          throw new Error('burnTokenLog.amount != approvalLog.value');
+        }
+
+        return await ethMethods.unlockToken(
+          burnTokenLog.recipient,
+          burnTokenLog.amount,
+          burnTokenAction.transactionHash
+        );
       });
     },
   });

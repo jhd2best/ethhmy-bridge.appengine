@@ -1,4 +1,5 @@
 import { uuidv4 } from '../../services/utils';
+import { hmyWSProvider } from '../hmy';
 
 interface IError {
   error: string;
@@ -36,10 +37,9 @@ export class EventsConstructor {
     Object.keys(this.subscribers).forEach(id => {
       const sub = this.subscribers[id];
 
-      console.log('New event: ', event.event, event.returnValues.receiptId);
+      console.log('New Event: ', event.event, event.returnValues.receiptId);
 
       if (sub.event === event.event && sub.condition(event)) {
-        console.log('Success subscribe called: ', event.event);
         sub.success({ ...event, status: true });
         this.unsubscribe(id);
       }
@@ -69,5 +69,9 @@ export class EventsConstructor {
 
   public unsubscribe = (id: string) => {
     delete this.subscribers[id];
+  };
+
+  isWSConnected = () => {
+    return false;
   };
 }

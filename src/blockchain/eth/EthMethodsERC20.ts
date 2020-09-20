@@ -5,6 +5,7 @@ import { EthManager } from './EthManager';
 import Web3 from 'web3';
 import erc20Json = require('../contracts/MyERC20.json');
 import { EventsConstructor } from '../helpers/EventsConstructor';
+import { ethWSProvider } from './index';
 
 export interface IEthMethodsERC20InitParams {
   web3: Web3;
@@ -31,6 +32,10 @@ export class EthMethodsERC20 extends EventsConstructor {
       .on('data', this.eventHandler)
       .on('error', this.eventErrorHandler);
   }
+
+  isWSConnected = () => {
+    return ethWSProvider.connected;
+  };
 
   // getTransactionByHash = async (transactionHash: string) => {
   //   return await web3.eth.getTransaction(transactionHash);

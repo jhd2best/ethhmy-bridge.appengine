@@ -15,21 +15,21 @@ export * from './EthMethodsERC20';
 export const web3URL = process.env.ETH_NODE_URL;
 export const web3URLWS = process.env.ETH_NODE_URL_WS;
 
-const ethWSProvider = new Web3.providers.WebsocketProvider(web3URLWS)
+export const ethWSProvider = new Web3.providers.WebsocketProvider(web3URLWS)
 
 export const web3 = new Web3(web3URL);
 export const web3WS = new Web3(ethWSProvider);
 
-const ping = async () => {
-  while (true) {
-    if (!ethWSProvider.connected) {
-      console.log('-ETH_WS Connected: ', ethWSProvider.connected);
-    }
-    await sleep(3000);
-  }
-};
-
-ping();
+// const ping = async () => {
+//   while (true) {
+//     if (!ethWSProvider.connected) {
+//       console.log('-ETH_WS Connected: ', ethWSProvider.connected);
+//     }
+//     await sleep(3000);
+//   }
+// };
+//
+// ping();
 
 const ethManagerBUSD = new EthManager(ethManagerJson, process.env.ETH_BUSD_MANAGER_CONTRACT);
 const ethTokenBUSD = new EthManager(busdJson, process.env.ETH_BUSD_CONTRACT);
