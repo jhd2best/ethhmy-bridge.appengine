@@ -5,6 +5,7 @@ import { EthManager } from './EthManager';
 import Web3 from 'web3';
 import erc20Json = require('../contracts/MyERC20.json');
 import { EventsConstructor } from '../helpers/EventsConstructor';
+import { ethWSProvider } from './index';
 
 export interface IEthMethodsERC20InitParams {
   web3: Web3;
@@ -31,6 +32,10 @@ export class EthMethodsERC20 extends EventsConstructor {
       .on('data', this.eventHandler)
       .on('error', this.eventErrorHandler);
   }
+
+  isWSConnected = () => {
+    return ethWSProvider.connected;
+  };
 
   // getTransactionByHash = async (transactionHash: string) => {
   //   return await web3.eth.getTransaction(transactionHash);
@@ -114,13 +119,22 @@ export class EthMethodsERC20 extends EventsConstructor {
   };
 
   unlockToken = async (erc20Address, userAddr, amount, receiptId) => {
-    const res = await this.ethManager.contract.methods
-      .unlockToken(erc20Address, amount, userAddr, receiptId)
-      .send({
-        from: this.ethManager.account.address,
-        gas: process.env.ETH_GAS_LIMIT,
-        gasPrice: new BN(await this.web3.eth.getGasPrice()).mul(new BN(1)), //new BN(process.env.ETH_GAS_PRICE)
-      });
+    let res = { status: false, transactionHash: '', error: '' };
+
+    try {
+      res = await this.ethManager.contract.methods
+        .unlockToken(erc20Address, amount, userAddr, receiptId)
+        .send({
+          from: this.ethManager.account.address,
+          gas: process.env.ETH_GAS_LIMIT,
+          gasPrice: new BN(await this.web3.eth.getGasPrice()).mul(new BN(1)), //new BN(process.env.ETH_GAS_PRICE)
+        })
+        .on('hash', hash => (res.transactionHash = hash));
+    } catch (e) {
+      console.log('unlockToken error: ', e.message.slice(0, 100) + '...', res.transactionHash);
+
+      res.error = e.message;
+    }
 
     if (!res.transactionHash) {
       return res;

@@ -4,6 +4,7 @@ import { Harmony } from '@harmony-js/core';
 import { Contract } from '@harmony-js/contract';
 import { HmyManager } from './HmyManager';
 import { EventsConstructor } from '../helpers/EventsConstructor';
+import { hmyWSProvider } from './index';
 
 interface IHmyMethodsInitParams {
   hmySdk: Harmony;
@@ -40,15 +41,18 @@ export class HmyMethods extends EventsConstructor {
       .on('error', this.eventErrorHandler);
   }
 
+  isWSConnected = () => {
+    return hmyWSProvider.connected;
+  };
+
   mintToken = async (userAddr, amount, receiptId) => {
-    console.log('Before Mint Token', amount, userAddr, receiptId);
+    console.log('before mintToken: ', receiptId);
 
     const res = await this.hmyManager.contract.methods
       .mintToken(amount, userAddr, receiptId)
-      .send(this.options)
-      .on('transactionHash', hash => console.log('hash: ', hash));
+      .send(this.options);
 
-    console.log(111, res.status);
+    console.log('mintToken status: ', res.status);
 
     return {
       ...res.transaction,

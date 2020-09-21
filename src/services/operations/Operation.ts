@@ -1,4 +1,3 @@
-import { uuidv4 } from '../utils';
 import { OPERATION_TYPE, STATUS, TOKEN } from './interfaces';
 import { Action } from './Action';
 import { generateActionsPool } from './generateActionsPool';
@@ -31,6 +30,7 @@ export class Operation {
   amount: string;
   timestamp: number;
   actions: Action[];
+  rollbackActions: Action[];
 
   syncOperationCallback: TSyncOperationCallback;
 
@@ -47,7 +47,10 @@ export class Operation {
 
     this.syncOperationCallback = callback;
 
-    this.actions = generateActionsPool(params);
+    const { actions, rollbackActions } = generateActionsPool(params);
+
+    this.actions = actions;
+    this.rollbackActions = rollbackActions;
 
     this.status = params.status;
 
@@ -88,7 +91,12 @@ export class Operation {
         if (!res) {
           this.status = STATUS.ERROR;
           await this.syncOperationCallback(this);
-          return;
+
+          if (action.startRollbackOnFail) {
+            this.actions = this.actions.concat(this.rollbackActions);
+          } else {
+            return;
+          }
         }
 
         await this.syncOperationCallback(this);
@@ -97,7 +105,9 @@ export class Operation {
       actionIndex++;
     }
 
-    this.status = STATUS.SUCCESS;
+    if (this.status === STATUS.IN_PROGRESS) {
+      this.status = STATUS.SUCCESS;
+    }
 
     await this.syncOperationCallback(this);
   };
