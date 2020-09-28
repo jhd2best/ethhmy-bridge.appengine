@@ -5,9 +5,11 @@ import { EthManager } from './EthManager';
 
 import ethManagerJson = require('../contracts/LINKEthManager.json');
 import erc20Json = require('../contracts/MyERC20.json');
+import multiSigWalletJson = require('../contracts/MultiSigWallet.json');
 import busdJson = require('../contracts/IBUSD.json');
 import ethManagerERC20Json = require('../contracts/EthManagerERC20.json');
 import { sleep } from '../utils';
+import { EthMultiSigWalletMethods } from './EthMultiSigWalletMethods';
 
 export * from './EthMethods';
 export * from './EthMethodsERC20';
@@ -37,6 +39,8 @@ const ethTokenBUSD = new EthManager(busdJson, process.env.ETH_BUSD_CONTRACT);
 const ethManagerLINK = new EthManager(ethManagerJson, process.env.ETH_LINK_MANAGER_CONTRACT);
 const ethTokenLINK = new EthManager(erc20Json, process.env.ETH_LINK_CONTRACT);
 
+const ethMultiSigWallet = new EthManager(multiSigWalletJson, process.env.ETH_MULTISIG_WALLET);
+
 export const ethMethodsBUSD = new EthMethods({
   web3,
   ethManager: ethManagerBUSD,
@@ -54,4 +58,9 @@ const ethManagerERC20 = new EthManager(ethManagerERC20Json, process.env.ETH_ERC2
 export const ethMethodsERC20 = new EthMethodsERC20({
   web3,
   ethManager: ethManagerERC20,
+});
+
+export const ethMultiSigWalletMethods = new EthMultiSigWalletMethods({
+  web3,
+  ethManager: ethMultiSigWallet,
 });
