@@ -8,8 +8,7 @@ import erc20Json = require('../contracts/MyERC20.json');
 import multiSigWalletJson = require('../contracts/MultiSigWallet.json');
 import busdJson = require('../contracts/IBUSD.json');
 import ethManagerERC20Json = require('../contracts/EthManagerERC20.json');
-import { sleep } from '../utils';
-import { EthMultiSigWalletMethods } from './EthMultiSigWalletMethods';
+// import { sleep } from '../utils';
 
 export * from './EthMethods';
 export * from './EthMethodsERC20';
@@ -17,7 +16,7 @@ export * from './EthMethodsERC20';
 export const web3URL = process.env.ETH_NODE_URL;
 export const web3URLWS = process.env.ETH_NODE_URL_WS;
 
-export const ethWSProvider = new Web3.providers.WebsocketProvider(web3URLWS)
+export const ethWSProvider = new Web3.providers.WebsocketProvider(web3URLWS);
 
 export const web3 = new Web3(web3URL);
 export const web3WS = new Web3(ethWSProvider);
@@ -44,12 +43,14 @@ const ethMultiSigWallet = new EthManager(multiSigWalletJson, process.env.ETH_MUL
 export const ethMethodsBUSD = new EthMethods({
   web3,
   ethManager: ethManagerBUSD,
+  ethMultiSigManager: ethMultiSigWallet,
   ethToken: ethTokenBUSD,
 });
 
 export const ethMethodsLINK = new EthMethods({
   web3,
   ethManager: ethManagerLINK,
+  ethMultiSigManager: ethMultiSigWallet,
   ethToken: ethTokenLINK,
 });
 
@@ -58,9 +59,6 @@ const ethManagerERC20 = new EthManager(ethManagerERC20Json, process.env.ETH_ERC2
 export const ethMethodsERC20 = new EthMethodsERC20({
   web3,
   ethManager: ethManagerERC20,
-});
-
-export const ethMultiSigWalletMethods = new EthMultiSigWalletMethods({
-  web3,
-  ethManager: ethMultiSigWallet,
+  ethMultiSigManager: ethMultiSigWallet,
+  ethToken: ethTokenBUSD,
 });
