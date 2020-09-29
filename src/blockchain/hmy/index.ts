@@ -6,10 +6,11 @@ import { HmyManager } from './HmyManager';
 import { HmyMethods } from './HmyMethods';
 
 import hmyManagerJson = require('../contracts/LINKHmyManager.json');
+import hmyMultiSigWalletJson = require('../contracts/MultiSigWallet.json');
 import hmyManagerERC20Json = require('../contracts/HmyManagerERC20.json');
 import erc20Json = require('../contracts/MyERC20.json');
 import { HmyMethodsERC20 } from './HmyMethodsERC20';
-import { sleep } from '../utils';
+// import { sleep } from '../utils';
 
 export * from './HmyMethods';
 export * from './HmyMethodsERC20';
@@ -46,6 +47,8 @@ hmyWS.setProvider(hmyWSProvider);
 //
 // ping();
 
+const hmyManagerMultiSig = new HmyManager(hmyMultiSigWalletJson, process.env.HMY_MULTISIG_WALLET);
+
 const busdContract = hmy.contracts.createContract(erc20Json.abi, process.env.HMY_BUSD_CONTRACT);
 const linkContract = hmy.contracts.createContract(erc20Json.abi, process.env.HMY_LINK_CONTRACT);
 
@@ -56,12 +59,14 @@ export const hmyMethodsBUSD = new HmyMethods({
   hmySdk: hmy,
   hmyTokenContract: busdContract,
   hmyManager: hmyBUSDManager,
+  hmyManagerMultiSig: hmyManagerMultiSig,
 });
 
 export const hmyMethodsLINK = new HmyMethods({
   hmySdk: hmy,
   hmyTokenContract: linkContract,
   hmyManager: hmyLINKManager,
+  hmyManagerMultiSig: hmyManagerMultiSig,
 });
 
 // ERC20
@@ -73,4 +78,5 @@ export const hmyMethodsERC20 = new HmyMethodsERC20({
   hmySdk: hmy,
   hmyTokenContract: hmyTokenContract,
   hmyManager: hmyManagerERC20,
+  hmyManagerMultiSig: hmyManagerMultiSig,
 });
