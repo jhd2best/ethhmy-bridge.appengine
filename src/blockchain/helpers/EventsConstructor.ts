@@ -20,6 +20,7 @@ interface IMintEvent {
   event: string;
   error?: string;
   status: boolean;
+  transaction?: any;
 }
 
 export class EventsConstructor {

@@ -51,7 +51,13 @@ export class HmyMethodsBase extends EventsConstructor {
 
     this.hmyManagerMultiSig.wsContract.events
       .Submission()
-      .on('data', this.eventHandler)
+      .on('data', async event => {
+        const transaction = await this.hmyManagerMultiSig.contract.methods
+          .transactions(event.returnValues.transactionId)
+          .call();
+
+        this.eventHandler({ ...event, transaction });
+      })
       .on('error', this.eventErrorHandler);
 
     this.hmyManagerMultiSig.wsContract.events
@@ -94,7 +100,7 @@ export class HmyMethodsBase extends EventsConstructor {
     return { ...res.result, ...txInfoRes.result, status: res.result.status === '0x1' };
   };
 
-  private submitTx = async data => {
+  submitTx = async data => {
     let res = { status: 'rejected', transactionHash: '', error: '', transaction: null };
     try {
       res = await this.hmyManagerMultiSig.contract.methods
@@ -118,7 +124,7 @@ export class HmyMethodsBase extends EventsConstructor {
     };
   };
 
-  private confirmTx = async transactionId => {
+  confirmTx = async transactionId => {
     let res = { status: 'rejected', transactionHash: '', error: '', transaction: null };
 
     try {
@@ -165,16 +171,7 @@ export class HmyMethodsBase extends EventsConstructor {
             resolve(res);
           },
           failed: err => reject(err.error),
-          condition: () => true,
-          // condition: event => {
-          //   this.ethManager.contract.methods
-          //     .transactions(event.returnValues.transactionId)
-          //     .call()
-          //     .then(tx => {
-          //       return tx.data === data;
-          //     });
-          //   return false; // TODO async this.
-          // },
+          condition: event => event.transaction.data === data,
         });
       });
     }
