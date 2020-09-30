@@ -8,7 +8,7 @@ import erc20Json = require('../contracts/MyERC20.json');
 import multiSigWalletJson = require('../contracts/MultiSigWallet.json');
 import busdJson = require('../contracts/IBUSD.json');
 import ethManagerERC20Json = require('../contracts/EthManagerERC20.json');
-// import { sleep } from '../utils';
+import { sleep } from '../utils';
 
 export * from './EthMethods';
 export * from './EthMethodsERC20';
@@ -19,6 +19,9 @@ export const web3URLWS = process.env.ETH_NODE_URL_WS;
 /**
  * Refreshes provider instance and attaches even handlers to it
  */
+
+let provider = new Web3.providers.WebsocketProvider(web3URLWS);
+
 function refreshProvider(web3Obj, providerUrl) {
   let retries = 0;
 
@@ -39,7 +42,7 @@ function refreshProvider(web3Obj, providerUrl) {
     return null;
   }
 
-  const provider = new Web3.providers.WebsocketProvider(providerUrl);
+  provider = new Web3.providers.WebsocketProvider(providerUrl);
 
   provider.on('end', () => retry());
   provider.on('error', () => retry());
@@ -56,16 +59,18 @@ export const web3WS = new Web3();
 
 refreshProvider(web3WS, web3URLWS);
 
-// const ping = async () => {
-//   while (true) {
-//     if (!ethWSProvider.connected) {
-//       console.log('-ETH_WS Connected: ', ethWSProvider.connected);
-//     }
-//     await sleep(3000);
-//   }
-// };
-//
-// ping();
+const ping = async () => {
+  while (true) {
+    if (provider) {
+      web3WS.eth.net.isListening().catch(() => {
+        refreshProvider(web3WS, web3URLWS);
+      });
+    }
+    await sleep(3000);
+  }
+};
+
+ping();
 
 const ethManagerBUSD = new EthManager(ethManagerJson, process.env.ETH_BUSD_MANAGER_CONTRACT);
 const ethTokenBUSD = new EthManager(busdJson, process.env.ETH_BUSD_CONTRACT);

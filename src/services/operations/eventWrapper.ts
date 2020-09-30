@@ -26,9 +26,9 @@ export const eventWrapper = (
         // const isWsConnected = events.isWSConnected();
         // console.log('isWsConnected: ', isWsConnected);
         // const hasEvent = !isWsConnected || resEvent;
-        const hasEvent = true;
+        // const hasEvent = true;
 
-        if (res && res.status === true && hasEvent) {
+        if (res && res.status === true && !!resEvent) {
           console.log('Action success: ', eventName, transactionHash);
           resolve(resEvent || res);
         }
