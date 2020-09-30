@@ -16,10 +16,45 @@ export * from './EthMethodsERC20';
 export const web3URL = process.env.ETH_NODE_URL;
 export const web3URLWS = process.env.ETH_NODE_URL_WS;
 
-export const ethWSProvider = new Web3.providers.WebsocketProvider(web3URLWS);
+/**
+ * Refreshes provider instance and attaches even handlers to it
+ */
+function refreshProvider(web3Obj, providerUrl) {
+  let retries = 0;
+
+  function retry(event = null) {
+    if (event) {
+      console.log('Web3 provider disconnected or errored.');
+      retries += 1;
+
+      if (retries > 5) {
+        console.log(`Max retries of 5 exceeding: ${retries} times tried`);
+        return setTimeout(() => refreshProvider(web3Obj, providerUrl), 5000);
+      }
+    } else {
+      console.log(`Reconnecting web3 provider ${providerUrl}`);
+      refreshProvider(web3Obj, providerUrl);
+    }
+
+    return null;
+  }
+
+  const provider = new Web3.providers.WebsocketProvider(providerUrl);
+
+  provider.on('end', () => retry());
+  provider.on('error', () => retry());
+
+  web3Obj.setProvider(provider);
+
+  console.log('New Web3 provider initiated');
+
+  return provider;
+}
 
 export const web3 = new Web3(web3URL);
-export const web3WS = new Web3(ethWSProvider);
+export const web3WS = new Web3();
+
+refreshProvider(web3WS, web3URLWS);
 
 // const ping = async () => {
 //   while (true) {
