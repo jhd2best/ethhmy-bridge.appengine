@@ -39,7 +39,13 @@ export class EthMethodsBase extends EventsConstructor {
 
     this.ethMultiSigManager.wsContract.events
       .Submission()
-      .on('data', this.eventHandler)
+      .on('data', async event => {
+        const transaction = await this.ethMultiSigManager.contract.methods
+          .transactions(event.returnValues.transactionId)
+          .call();
+
+        this.eventHandler({ ...event, transaction });
+      })
       .on('error', this.eventErrorHandler);
 
     this.ethMultiSigManager.wsContract.events
@@ -113,12 +119,21 @@ export class EthMethodsBase extends EventsConstructor {
     );
   };
 
-  waitingBlockNumber = async (blockNumber, callbackMessage) => {
+  waitingBlockNumber = async (blockNumber, txHash, callbackMessage) => {
     {
+      const tx = await this.web3.eth.getTransaction(txHash);
+      if (!tx.blockNumber) {
+        return {
+          status: true,
+          error: 'txHash no longer exists in the longest chain, possibly forked',
+        };
+      }
+
       const expectedBlockNumber = blockNumber + BLOCK_TO_FINALITY;
 
       while (true) {
         const blockNumber = await this.web3.eth.getBlockNumber();
+
         if (blockNumber <= expectedBlockNumber) {
           callbackMessage(
             `Currently at block ${blockNumber}, waiting for block ${expectedBlockNumber} to be confirmed`
@@ -181,16 +196,7 @@ export class EthMethodsBase extends EventsConstructor {
             resolve(res);
           },
           failed: err => reject(err.error),
-          condition: () => true,
-          // condition: event => {
-          //   this.ethManager.contract.methods
-          //     .transactions(event.returnValues.transactionId)
-          //     .call()
-          //     .then(tx => {
-          //       return tx.data === data;
-          //     });
-          //   return false; // TODO async this.
-          // },
+          condition: event => event.transaction.data === data,
         });
       });
     }

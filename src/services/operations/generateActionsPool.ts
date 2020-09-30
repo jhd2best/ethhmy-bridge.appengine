@@ -45,6 +45,7 @@ const ethToOneERC20 = (
     callFunction: () =>
       ethMethods.waitingBlockNumber(
         lockTokenAction.payload.blockNumber,
+        lockTokenAction.payload.transactionHash,
         msg => (waitingBlockNumberAction.message = msg)
       ),
   });
@@ -218,6 +219,7 @@ const ethToOne = (hmyMethods: hmyContract.HmyMethods, ethMethods: ethContract.Et
     callFunction: () =>
       ethMethods.waitingBlockNumber(
         lockTokenAction.payload.blockNumber,
+        lockTokenAction.payload.transactionHash,
         msg => (waitingBlockNumberAction.message = msg)
       ),
   });
