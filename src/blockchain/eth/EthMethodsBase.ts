@@ -4,7 +4,6 @@ import { TransactionReceipt } from 'web3-core';
 import { EthManager } from './EthManager';
 import Web3 from 'web3';
 import { EventsConstructor } from '../helpers/EventsConstructor';
-import { ethWSProvider } from './index';
 
 export interface IEthMethodsInitParams {
   web3: Web3;
@@ -55,7 +54,7 @@ export class EthMethodsBase extends EventsConstructor {
   }
 
   isWSConnected = () => {
-    return ethWSProvider.connected;
+    return true;
   };
 
   // getTransactionByHash = async (transactionHash: string) => {
