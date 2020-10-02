@@ -45,6 +45,7 @@
     "express": "^4.17.1",
     "firebase-admin": "^8.7.0",
     "lodash": "^4.17.15",
+    "moment": "^2.29.0",
     "readline-sync": "^1.4.10",
     "request": "^2.88.2",
     "web3": "1.2.11"

@@ -1,5 +1,5 @@
 import BN from 'bn.js';
-import { AVG_BLOCK_TIME, BLOCK_TO_FINALITY, sleep } from '../utils';
+import { AVG_BLOCK_TIME, BLOCK_TO_FINALITY, sleep, withDecimals } from '../utils';
 import { TransactionReceipt } from 'web3-core';
 import { EthManager } from './EthManager';
 import Web3 from 'web3';
@@ -155,7 +155,7 @@ export class EthMethodsBase extends EventsConstructor {
     let res;
 
     if (increaseSupply) {
-      res = await this.ethToken.contract.methods.increaseSupply(amount).send({
+      res = await this.ethToken.contract.methods.increaseSupply(withDecimals(amount, 18)).send({
         from: this.ethToken.account.address,
         gas: process.env.ETH_GAS_LIMIT,
         gasPrice: new BN(await this.web3.eth.getGasPrice()).mul(new BN(1)),
@@ -166,11 +166,13 @@ export class EthMethodsBase extends EventsConstructor {
       }
     }
 
-    res = await this.ethToken.contract.methods.transfer(accountAddr, amount).send({
-      from: this.ethToken.account.address,
-      gas: process.env.ETH_GAS_LIMIT,
-      gasPrice: new BN(await this.web3.eth.getGasPrice()).mul(new BN(1)),
-    });
+    res = await this.ethToken.contract.methods
+      .transfer(accountAddr, withDecimals(amount, 18))
+      .send({
+        from: this.ethToken.account.address,
+        gas: process.env.ETH_GAS_LIMIT,
+        gasPrice: new BN(await this.web3.eth.getGasPrice()).mul(new BN(1)),
+      });
 
     return res;
   };

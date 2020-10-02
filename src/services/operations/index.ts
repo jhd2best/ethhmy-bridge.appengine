@@ -5,6 +5,7 @@ import { STATUS, OPERATION_TYPE, ACTION_TYPE } from './interfaces';
 import { hmy } from '../../blockchain/hmy';
 import { normalizeEthKey } from '../../blockchain/utils';
 import { validateEthBalanceNonZero, validateOneBalanceNonZero } from './validations';
+import moment from 'moment';
 
 export interface IOperationService {
   database: DBService;
@@ -140,6 +141,6 @@ export class OperationService {
         return hasEthAddress && hasOneAddress;
       })
       .map(operation => operation.toObject({ payload: true }))
-      .sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1));
+      .sort((a, b) => (moment(a.timestamp).isBefore(b.timestamp) ? 1 : -1));
   };
 }

@@ -1,5 +1,6 @@
 import { KMS } from 'aws-sdk';
 const readlineSync = require('readline-sync');
+const BN = require('bn.js');
 
 export const BLOCK_TO_FINALITY = 13;
 export const AVG_BLOCK_TIME = 20 * 1000;
@@ -28,3 +29,9 @@ const getAwsConfig = () => {
 };
 
 export const awsKMS = getAwsConfig();
+
+export const withDecimals = (amount: string | number, decimals: string | number) => {
+  const decimalsMul = `10${new Array(Number(decimals)).join('0')}`;
+
+  return new BN(amount).mul(new BN(decimalsMul));
+};
