@@ -5,6 +5,7 @@ import { Contract } from '@harmony-js/contract';
 import { HmyManager } from './HmyManager';
 import { EventsConstructor } from '../helpers/EventsConstructor';
 import { hmyWSProvider } from './index';
+import { HmyEventsTracker } from './HmyEventsTracker';
 
 interface IHmyMethodsInitParams {
   hmySdk: Harmony;
@@ -12,6 +13,7 @@ interface IHmyMethodsInitParams {
   hmyManager: HmyManager;
   hmyManagerMultiSig: HmyManager;
   options?: { gasPrice: number; gasLimit: number };
+  hmyEventsTracker: HmyEventsTracker;
 }
 
 export class HmyMethodsBase extends EventsConstructor {
@@ -19,6 +21,7 @@ export class HmyMethodsBase extends EventsConstructor {
   hmyTokenContract: Contract;
   hmyManager: HmyManager;
   hmyManagerMultiSig: HmyManager;
+  hmyEventsTracker: HmyEventsTracker;
   options = { gasPrice: 1000000000, gasLimit: 6721900 };
 
   constructor({
@@ -27,6 +30,7 @@ export class HmyMethodsBase extends EventsConstructor {
     hmyManager,
     options,
     hmyManagerMultiSig,
+    hmyEventsTracker,
   }: IHmyMethodsInitParams) {
     super();
 
@@ -39,31 +43,11 @@ export class HmyMethodsBase extends EventsConstructor {
       this.options = options;
     }
 
-    this.hmyManager.wsContract.events
-      .Minted()
-      .on('data', this.eventHandler)
-      .on('error', this.eventErrorHandler);
+    this.hmyEventsTracker = hmyEventsTracker;
 
-    this.hmyManager.wsContract.events
-      .Burned()
-      .on('data', this.eventHandler)
-      .on('error', this.eventErrorHandler);
-
-    this.hmyManagerMultiSig.wsContract.events
-      .Submission()
-      .on('data', async event => {
-        const transaction = await this.hmyManagerMultiSig.contract.methods
-          .transactions(event.returnValues.transactionId)
-          .call();
-
-        this.eventHandler({ ...event, transaction });
-      })
-      .on('error', this.eventErrorHandler);
-
-    this.hmyManagerMultiSig.wsContract.events
-      .Execution()
-      .on('data', this.eventHandler)
-      .on('error', this.eventErrorHandler);
+    // subscribe current manager to Submission events
+    this.hmyEventsTracker.addTrack('Minted', this.hmyManager, this.eventHandler);
+    this.hmyEventsTracker.onEventHandler(this.eventHandler);
   }
 
   isWSConnected = () => {
@@ -101,7 +85,7 @@ export class HmyMethodsBase extends EventsConstructor {
   };
 
   submitTx = async data => {
-    let res = { status: 'rejected', transactionHash: '', error: '', transaction: null };
+    let res = { status: 'rejected', transactionHash: '', error: '', transaction: null, events: {} };
     try {
       res = await this.hmyManagerMultiSig.contract.methods
         .submitTransaction(this.hmyManager.address, 0, data)
@@ -140,7 +124,7 @@ export class HmyMethodsBase extends EventsConstructor {
       res.error = e.message;
     }
 
-    console.log('confirmTx status: ', res.status);
+    // console.log('confirmTx status: ', res.status);
 
     return {
       ...res.transaction,
@@ -164,7 +148,7 @@ export class HmyMethodsBase extends EventsConstructor {
         this.subscribe({
           event: 'Submission',
           success: async event => {
-            console.log('Submission', event);
+            console.log('Submission', event.returnValues.transactionId);
 
             const res = await this.confirmTx(event.returnValues.transactionId);
 

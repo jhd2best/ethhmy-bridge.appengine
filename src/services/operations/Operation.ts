@@ -82,6 +82,8 @@ export class Operation {
 
     this.status = STATUS.IN_PROGRESS;
 
+    console.log('----- Operation -------', this.type, this.token);
+
     while (this.actions[actionIndex]) {
       const action = this.actions[actionIndex];
 
@@ -108,6 +110,8 @@ export class Operation {
     if (this.status === STATUS.IN_PROGRESS) {
       this.status = STATUS.SUCCESS;
     }
+
+    console.log('----- END -------', this.type, this.token);
 
     await this.syncOperationCallback(this);
   };

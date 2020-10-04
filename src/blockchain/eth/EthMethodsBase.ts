@@ -4,12 +4,14 @@ import { TransactionReceipt } from 'web3-core';
 import { EthManager } from './EthManager';
 import Web3 from 'web3';
 import { EventsConstructor } from '../helpers/EventsConstructor';
+import { EthEventsTracker } from './EthEventsTracker';
 
 export interface IEthMethodsInitParams {
   web3: Web3;
   ethManager: EthManager;
   ethToken: EthManager;
   ethMultiSigManager: EthManager;
+  ethEventsTracker: EthEventsTracker;
 }
 
 export class EthMethodsBase extends EventsConstructor {
@@ -17,6 +19,7 @@ export class EthMethodsBase extends EventsConstructor {
   ethManager: EthManager;
   ethMultiSigManager: EthManager;
   ethToken: EthManager;
+  ethEventsTracker: EthEventsTracker;
 
   constructor(params: IEthMethodsInitParams) {
     super();
@@ -25,32 +28,11 @@ export class EthMethodsBase extends EventsConstructor {
     this.ethManager = params.ethManager;
     this.ethMultiSigManager = params.ethMultiSigManager;
     this.ethToken = params.ethToken;
+    this.ethEventsTracker = params.ethEventsTracker;
 
-    this.ethManager.wsContract.events
-      .Locked()
-      .on('data', this.eventHandler)
-      .on('error', this.eventErrorHandler);
-
-    this.ethManager.wsContract.events
-      .Unlocked()
-      .on('data', this.eventHandler)
-      .on('error', this.eventErrorHandler);
-
-    this.ethMultiSigManager.wsContract.events
-      .Submission()
-      .on('data', async event => {
-        const transaction = await this.ethMultiSigManager.contract.methods
-          .transactions(event.returnValues.transactionId)
-          .call();
-
-        this.eventHandler({ ...event, transaction });
-      })
-      .on('error', this.eventErrorHandler);
-
-    this.ethMultiSigManager.wsContract.events
-      .Execution()
-      .on('data', this.eventHandler)
-      .on('error', this.eventErrorHandler);
+    // subscribe current manager to Submission events
+    this.ethEventsTracker.addTrack('Unlocked', this.ethManager.contract, this.eventHandler);
+    this.ethEventsTracker.onEventHandler(this.eventHandler);
   }
 
   isWSConnected = () => {
@@ -190,7 +172,7 @@ export class EthMethodsBase extends EventsConstructor {
         this.subscribe({
           event: 'Submission',
           success: async event => {
-            console.log('Submission', event);
+            console.log('Submission', event.returnValues.transactionId);
 
             const res = await this.confirmTx(event.returnValues.transactionId);
 
@@ -204,7 +186,7 @@ export class EthMethodsBase extends EventsConstructor {
   };
 
   private submitTx = async data => {
-    let res = { status: false, transactionHash: '', error: '' };
+    let res = { status: false, transactionHash: '', error: '', events: {} };
 
     try {
       res = await this.ethMultiSigManager.contract.methods

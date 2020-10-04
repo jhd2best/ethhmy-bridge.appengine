@@ -11,15 +11,23 @@ interface IError {
 // recipient: string;
 // receiptId: string;
 
-interface IMintEvent {
-  address: string;
-  blockNumber: number;
+export interface IEventData {
+  returnValues: {
+    [key: string]: any;
+  };
+  raw: {
+    data: string;
+    topics: string[];
+  };
+  event: string;
+  signature: string;
+  logIndex: number;
+  transactionIndex: number;
   transactionHash: string;
   blockHash: string;
-  returnValues: any;
-  event: string;
-  error?: string;
-  status: boolean;
+  blockNumber: number;
+  address: string;
+  status?: boolean;
   transaction?: any;
 }
 
@@ -28,17 +36,17 @@ export class EventsConstructor {
     string,
     {
       event: string;
-      success: (event: IMintEvent) => void;
+      success: (event: IEventData) => void;
       failed: (event: IError) => void;
-      condition: (event: IMintEvent) => boolean;
+      condition: (event: IEventData) => boolean;
     }
   > = {};
 
-  eventHandler = (event: IMintEvent) => {
+  eventHandler = (event: IEventData) => {
     Object.keys(this.subscribers).forEach(id => {
       const sub = this.subscribers[id];
 
-      console.log('New Event: ', event.event, event.returnValues);
+      console.log('New Event: ', event.event);
 
       if (sub.event === event.event && sub.condition(event)) {
         sub.success({ ...event, status: true });
@@ -47,7 +55,7 @@ export class EventsConstructor {
     });
   };
 
-  eventErrorHandler = (e: any) => {
+  eventErrorHandler = (e: IEventData) => {
     console.log('-- eventErrorHandler --');
     // Object.keys(this.subscribers).forEach(id => {
     //   this.subscribers[id].failed({ error: e.message, status: false });
@@ -57,9 +65,9 @@ export class EventsConstructor {
 
   public subscribe = (params: {
     event: string;
-    success: (event: IMintEvent) => void;
+    success: (event: IEventData) => void;
     failed: (event: IError) => void;
-    condition: (event: IMintEvent) => boolean;
+    condition: (event: IEventData) => boolean;
   }) => {
     const id = uuidv4();
 

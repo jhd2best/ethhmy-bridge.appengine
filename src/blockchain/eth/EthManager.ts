@@ -1,4 +1,4 @@
-import { web3, web3WS } from './index';
+import { web3 } from './index';
 import { readFileSync } from 'fs';
 import { awsKMS } from '../utils';
 import { Account } from 'web3-core';
@@ -14,7 +14,6 @@ export class EthManager {
   address: string;
   constructor(contractJson, contractAddr) {
     this.contract = new web3.eth.Contract(contractJson.abi, contractAddr);
-    this.wsContract = new web3WS.eth.Contract(contractJson.abi, contractAddr);
     this.address = contractAddr;
 
     awsKMS.decrypt(

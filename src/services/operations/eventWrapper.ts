@@ -23,12 +23,12 @@ export const eventWrapper = (
           reject(res);
         }
 
-        // const isWsConnected = events.isWSConnected();
+        const isWsConnected = events.isWSConnected();
+        const hasEvent = !isWsConnected || !!resEvent;
         // console.log('isWsConnected: ', isWsConnected);
-        // const hasEvent = !isWsConnected || resEvent;
         // const hasEvent = true;
 
-        if (res && res.status === true && !!resEvent) {
+        if (res && res.status === true && hasEvent) {
           console.log('Action success: ', eventName, transactionHash);
           resolve(resEvent || res);
         }
