@@ -4,6 +4,7 @@ import { Harmony } from '@harmony-js/core';
 import { Messenger, HttpProvider } from '@harmony-js/network';
 import Web3 from 'web3';
 import { HmyManager } from './HmyManager';
+import { sleep } from '../utils';
 
 const CHECK_EVENTS_INTERVAL = 10000;
 
@@ -57,24 +58,33 @@ export class HmyEventsTracker {
 
   getEvents = async (params: IGetEventsParams) => {
     const topicAddress = params.manager.contract.abiModel.getEvent(params.event).signature;
+    let res = { result: [] };
 
-    // console.log(
-    //   'getEvents',
-    //   params.manager.address,
-    //   topicAddress,
-    //   params.event,
-    //   params.fromBlock,
-    //   params.toBlock
-    // );
+    try {
+      res = await this.logsMessenger.send('hmy_getLogs', [
+        {
+          fromBlock: '0x' + params.fromBlock.toString(16),
+          toBlock: '0x' + params.toBlock.toString(16),
+          address: params.manager.address,
+          topics: [topicAddress],
+        },
+      ]);
+    } catch (e) {
+      console.log('Error get HMY logs: ', e && e.message);
 
-    const res = await this.logsMessenger.send('hmy_getLogs', [
-      {
-        fromBlock: '0x' + params.fromBlock.toString(16),
-        toBlock: '0x' + params.toBlock.toString(16),
-        address: params.manager.address,
-        topics: [topicAddress],
-      },
-    ]);
+      await sleep(5000);
+
+      this.logsMessenger = new Messenger(new HttpProvider(process.env.HMY_NODE_URL));
+
+      res = await this.logsMessenger.send('hmy_getLogs', [
+        {
+          fromBlock: '0x' + params.fromBlock.toString(16),
+          toBlock: '0x' + params.toBlock.toString(16),
+          address: params.manager.address,
+          topics: [topicAddress],
+        },
+      ]);
+    }
 
     const logs = res.result;
 
