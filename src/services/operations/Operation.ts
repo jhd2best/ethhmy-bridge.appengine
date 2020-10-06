@@ -43,7 +43,7 @@ export class Operation {
     this.erc20Address = params.erc20Address;
     this.token = params.token;
 
-    this.timestamp = params.id ? params.timestamp : Math.round(+new Date() / 1000);
+    this.timestamp = !!params.status ? params.timestamp : Math.round(+new Date() / 1000);
 
     this.syncOperationCallback = callback;
 
