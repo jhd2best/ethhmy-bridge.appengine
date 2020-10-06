@@ -31,4 +31,11 @@ export class HmyMethodsERC20 extends HmyMethodsBase {
     const data = encodeMintTokenErc20(oneTokenAddr, amount, userAddr, receiptId);
     return await this.submitTxHmy(data);
   };
+
+  totalSupply = async hrc20Address => {
+    const tokenJson = require('../contracts/MyERC20.json');
+    const hmyTokenContract = this.hmySdk.contracts.createContract(tokenJson.abi, hrc20Address);
+
+    return await hmyTokenContract.methods.totalSupply().call(this.options);
+  };
 }

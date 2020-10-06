@@ -11,6 +11,7 @@ import hmyManagerERC20Json = require('../contracts/HmyManagerERC20.json');
 import erc20Json = require('../contracts/MyERC20.json');
 import { HmyMethodsERC20 } from './HmyMethodsERC20';
 import { HmyEventsTracker } from './HmyEventsTracker';
+import { HmyTokensTracker } from './HmyTokensTracker';
 // import { sleep } from '../utils';
 
 export * from './HmyMethods';
@@ -86,3 +87,5 @@ export const hmyMethodsERC20 = new HmyMethodsERC20({
   hmyManagerMultiSig,
   hmyEventsTracker,
 });
+
+export const hmyTokensTracker = new HmyTokensTracker({ hmySdk: hmy });
