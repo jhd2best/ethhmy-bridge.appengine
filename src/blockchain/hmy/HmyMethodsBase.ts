@@ -1,10 +1,8 @@
-// import { hmy } from '../hmySdk';
 import { TransactionReceipt } from 'web3-core';
 import { Harmony } from '@harmony-js/core';
 import { Contract } from '@harmony-js/contract';
 import { HmyManager } from './HmyManager';
 import { EventsConstructor } from '../helpers/EventsConstructor';
-import { hmyWSProvider } from './index';
 import { HmyEventsTracker } from './HmyEventsTracker';
 
 interface IHmyMethodsInitParams {
@@ -51,7 +49,7 @@ export class HmyMethodsBase extends EventsConstructor {
   }
 
   isWSConnected = () => {
-    return hmyWSProvider.connected;
+    return true;
   };
 
   decodeApprovalLog = (receipt: TransactionReceipt) => {

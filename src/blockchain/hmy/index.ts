@@ -1,6 +1,5 @@
 import { Harmony } from '@harmony-js/core';
 import { ChainID, ChainType } from '@harmony-js/utils';
-import { WSProvider } from '@harmony-js/network';
 
 import { HmyManager } from './HmyManager';
 import { HmyMethods } from './HmyMethods';
@@ -18,35 +17,12 @@ export * from './HmyMethodsERC20';
 
 export const hmy = new Harmony(
   // let's assume we deploy smart contract to this end-point URL
-  'https://api.s0.b.hmny.io',
+  process.env.HMY_NODE_URL,
   {
     chainType: ChainType.Harmony,
-    chainId: ChainID.HmyTestnet,
+    chainId: Number(process.env.HMY_CHAIN_ID),
   }
 );
-
-export const hmyWSProvider = new WSProvider('wss://ws.s0.b.hmny.io', {
-  chainType: ChainType.Harmony,
-  chainId: ChainID.HmyTestnet,
-});
-
-export const hmyWS = new Harmony('wss://ws.s0.b.hmny.io', {
-  chainType: ChainType.Harmony,
-  chainId: ChainID.HmyTestnet,
-});
-
-hmyWS.setProvider(hmyWSProvider);
-
-// const ping = async () => {
-//   while (true) {
-//     if (!hmyWSProvider.connected) {
-//       console.log('hmy_WS Connected: ', hmyWSProvider.connected);
-//     }
-//     await sleep(3000);
-//   }
-// };
-//
-// ping();
 
 const hmyManagerMultiSig = new HmyManager(hmyMultiSigWalletJson, process.env.HMY_MULTISIG_WALLET);
 

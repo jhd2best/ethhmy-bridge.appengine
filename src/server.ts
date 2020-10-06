@@ -1,7 +1,6 @@
 'use strict';
 require('../env');
 
-import readlineSync from 'readline-sync';
 import express from 'express';
 import cors from 'cors';
 import { routes } from './routes';
@@ -34,8 +33,7 @@ const startServer = async () => {
     }
   });
 
-  const port = await readlineSync.question('Server port: ');
-  const PORT = port ? Number(port) : Number(process.env.PORT) | 8080;
+  const PORT = process.env.PORT || 8080;
 
   // Listen to the App Engine-specified port, or 8080 otherwise
   app.listen(PORT, () => {

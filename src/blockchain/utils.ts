@@ -1,5 +1,4 @@
 import { KMS } from 'aws-sdk';
-const readlineSync = require('readline-sync');
 const BN = require('bn.js');
 
 export const BLOCK_TO_FINALITY = 13;
@@ -21,11 +20,8 @@ export interface AwsConfig {
 }
 
 const getAwsConfig = () => {
-  return new KMS({
-    accessKeyId: readlineSync.question('accessKeyId: ', { hideEchoBack: true }),
-    secretAccessKey: readlineSync.question('secretAccessKey: ', { hideEchoBack: true }),
-    region: readlineSync.question('region: ', { hideEchoBack: true }),
-  });
+  // [known issue] nodejs sdk won't read the region from the credentials, hence hard coding
+  return new KMS({ region: 'us-west-1' });
 };
 
 export const awsKMS = getAwsConfig();
