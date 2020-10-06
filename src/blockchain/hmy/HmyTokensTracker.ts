@@ -37,14 +37,14 @@ export class HmyTokensTracker {
 
   tokens: ITokenInfo[] = [
     {
-      name: 'BUSD',
+      name: 'Binance USD',
       symbol: 'BUSD',
       decimals: '18',
       erc20Address: process.env.ETH_BUSD_CONTRACT,
       hrc20Address: process.env.HMY_BUSD_CONTRACT,
     },
     {
-      name: 'LINK',
+      name: 'ChainLink Token',
       symbol: 'LINK',
       decimals: '18',
       erc20Address: process.env.ETH_LINK_CONTRACT,
