@@ -35,7 +35,7 @@
     "@harmony-js/core": "^0.1.55",
     "@openzeppelin/contracts": "^3.2.0",
     "autobind-decorator": "^2.4.0",
-    "aws-sdk": "^2.766.0",
+    "aws-sdk": "^2.767.0",
     "axios": "^0.20.0",
     "bignumber.js": "^9.0.1",
     "body-parser": "^1.19.0",

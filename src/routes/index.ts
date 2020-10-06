@@ -46,7 +46,15 @@ export const routes = (app, services: IServices) => {
     asyncHandler(async (req, res) => {
       const { ethAddress, oneAddress } = req.query;
 
-      const data = await services.operations.getAllOperations({ ethAddress, oneAddress });
+      const page = parseInt(req.query.page, 10) || 0;
+      const size = parseInt(req.query.size, 10) || 50;
+
+      const data = await services.operations.getAllOperations({
+        ethAddress,
+        oneAddress,
+        page,
+        size,
+      });
 
       return res.json(data);
     })

@@ -132,15 +132,37 @@ export class OperationService {
     return operation.toObject();
   };
 
-  getAllOperations = (params: { ethAddress?: string; oneAddress?: string }) => {
-    return this.operations
+  getAllOperations = (params: {
+    ethAddress?: string;
+    oneAddress?: string;
+    size: number;
+    page: number;
+  }) => {
+    const filteredData = this.operations
+      .filter(o => !!o.timestamp)
       .filter(operation => {
         const hasEthAddress = params.ethAddress ? params.ethAddress === operation.ethAddress : true;
         const hasOneAddress = params.oneAddress ? params.oneAddress === operation.oneAddress : true;
 
         return hasEthAddress && hasOneAddress;
-      })
-      .map(operation => operation.toObject({ payload: true }))
-      .sort((a, b) => (moment(a.timestamp).isBefore(b.timestamp) ? 1 : -1));
+      });
+
+    const sortedData = filteredData.sort((a, b) =>
+      moment(a.timestamp).isBefore(b.timestamp) ? 1 : -1
+    );
+
+    const from = params.page * params.size;
+    const to = (params.page + 1) * params.size;
+    const paginationData = sortedData.slice(from, Math.min(to, filteredData.length));
+
+    const content = paginationData.map(operation => operation.toObject({ payload: true }));
+
+    return {
+      content,
+      totalElements: filteredData.length,
+      totalPages: Math.ceil(filteredData.length / params.size),
+      size: params.size,
+      page: params.page,
+    };
   };
 }
