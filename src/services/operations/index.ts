@@ -147,7 +147,7 @@ export class OperationService {
 
     const sortedData = filteredData.sort((a, b) => {
       if (!a.timestamp) {
-        return -1;
+        return 1;
       }
       return moment(a.timestamp).isBefore(b.timestamp) ? 1 : -1;
     });
