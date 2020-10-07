@@ -12,4 +12,4 @@ pushd artifacts
 tar xfz ethhmy-bridge-be.tgz
 popd
 
-sudo docker build -f Dockerfile.be -t ethhmy-bridge.be .
+sudo docker build -f Dockerfile.be -t ethhmy-be .
