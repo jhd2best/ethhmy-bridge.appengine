@@ -37,22 +37,7 @@ export class HmyTokensTracker {
   web3: Web3;
   logsMessenger: Messenger;
 
-  tokens: ITokenInfo[] = [
-    {
-      name: 'Binance USD',
-      symbol: 'BUSD',
-      decimals: '18',
-      erc20Address: process.env.ETH_BUSD_CONTRACT,
-      hrc20Address: process.env.HMY_BUSD_CONTRACT,
-    },
-    {
-      name: 'ChainLink Token',
-      symbol: 'LINK',
-      decimals: '18',
-      erc20Address: process.env.ETH_LINK_CONTRACT,
-      hrc20Address: process.env.HMY_LINK_CONTRACT,
-    },
-  ];
+  tokens: ITokenInfo[] = [];
 
   constructor(params: IEthEventTrackerParams) {
     this.hmySdk = params.hmySdk;
@@ -64,7 +49,26 @@ export class HmyTokensTracker {
       process.env.TOKEN_MANAGER_CONTRACT
     );
 
-    this.init();
+    if (process.env.HMY_TOKENS_TRACKER_ENABLE === 'true') {
+      this.tokens = [
+        {
+          name: 'Binance USD',
+          symbol: 'BUSD',
+          decimals: '18',
+          erc20Address: process.env.ETH_BUSD_CONTRACT,
+          hrc20Address: process.env.HMY_BUSD_CONTRACT,
+        },
+        {
+          name: 'ChainLink Token',
+          symbol: 'LINK',
+          decimals: '18',
+          erc20Address: process.env.ETH_LINK_CONTRACT,
+          hrc20Address: process.env.HMY_LINK_CONTRACT,
+        },
+      ];
+
+      this.init();
+    }
   }
 
   getTokens = () => {
