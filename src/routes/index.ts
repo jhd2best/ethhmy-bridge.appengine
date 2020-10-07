@@ -73,4 +73,19 @@ export const routes = (app, services: IServices) => {
       return res.json(data);
     })
   );
+
+  app.get(
+    '/tokens',
+    asyncHandler(async (req, res) => {
+      const page = parseInt(req.query.page, 10) || 0;
+      const size = parseInt(req.query.size, 10) || 50;
+
+      const data = await services.tokens.getAllTokens({
+        page,
+        size,
+      });
+
+      return res.json(data);
+    })
+  );
 };
