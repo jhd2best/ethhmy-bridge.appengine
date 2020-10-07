@@ -138,12 +138,14 @@ export class OperationService {
     size: number;
     page: number;
   }) => {
-    const filteredData = this.operations.filter(operation => {
-      const hasEthAddress = params.ethAddress ? params.ethAddress === operation.ethAddress : true;
-      const hasOneAddress = params.oneAddress ? params.oneAddress === operation.oneAddress : true;
+    const filteredData = this.operations
+      .filter(o => !!o.timestamp)
+      .filter(operation => {
+        const hasEthAddress = params.ethAddress ? params.ethAddress === operation.ethAddress : true;
+        const hasOneAddress = params.oneAddress ? params.oneAddress === operation.oneAddress : true;
 
-      return hasEthAddress && hasOneAddress;
-    });
+        return hasEthAddress && hasOneAddress;
+      });
 
     const sortedData = filteredData.sort((a, b) => {
       return moment(a.timestamp).isBefore(b.timestamp) ? 1 : -1;

@@ -5,6 +5,8 @@ import Web3 from 'web3';
 import { sleep } from '../utils';
 import tokenManagerJson = require('../contracts/TokenManager.json');
 import { ethMethodsERC20 } from '../eth';
+import logger from '../../logger';
+const log = logger.module('validator:tokensTracker');
 
 const CHECK_EVENTS_INTERVAL = 30000;
 
@@ -70,60 +72,64 @@ export class HmyTokensTracker {
   };
 
   getEvents = async (params: IGetEventsParams) => {
-    const topicAddress = params.contract.abiModel.getEvent(params.event).signature;
     let res = { result: [] };
-
-    try {
-      res = await this.logsMessenger.send('hmy_getLogs', [
-        {
-          fromBlock: '0x' + params.fromBlock.toString(16),
-          toBlock: '0x' + params.toBlock.toString(16),
-          address: params.address,
-          topics: [topicAddress],
-        },
-      ]);
-    } catch (e) {
-      console.log('Error get HMY logs: ', e && e.message);
-
-      await sleep(5000);
-
-      this.logsMessenger = new Messenger(new HttpProvider(process.env.HMY_NODE_URL));
-
-      res = await this.logsMessenger.send('hmy_getLogs', [
-        {
-          fromBlock: '0x' + params.fromBlock.toString(16),
-          toBlock: '0x' + params.toBlock.toString(16),
-          address: params.address,
-          topics: [topicAddress],
-        },
-      ]);
-    }
-
-    const logs: any[] = res.result.map(log =>
-      this.web3.eth.abi.decodeLog(
-        params.contract.abiModel.getEvent(params.event).inputs,
-        log.data,
-        log.topics.slice(1)
-      )
-    );
-
     const result = [];
 
     try {
-      for (let j = 0; j < logs.length; j++) {
-        const token = logs[j];
-        const [name, symbol, decimals] = await ethMethodsERC20.tokenDetails(token.tokenReq);
+      const topicAddress = params.contract.abiModel.getEvent(params.event).signature;
 
-        result.push({
-          erc20Address: token.tokenReq,
-          hrc20Address: token.tokenAck,
-          name,
-          symbol,
-          decimals,
-        });
+      try {
+        res = await this.logsMessenger.send('hmy_getLogs', [
+          {
+            fromBlock: '0x' + params.fromBlock.toString(16),
+            toBlock: '0x' + params.toBlock.toString(16),
+            address: params.address,
+            topics: [topicAddress],
+          },
+        ]);
+      } catch (e) {
+        log.error('Error get HMY logs: ', { error: e && e.message, params });
+
+        await sleep(5000);
+
+        this.logsMessenger = new Messenger(new HttpProvider(process.env.HMY_NODE_URL));
+
+        res = await this.logsMessenger.send('hmy_getLogs', [
+          {
+            fromBlock: '0x' + params.fromBlock.toString(16),
+            toBlock: '0x' + params.toBlock.toString(16),
+            address: params.address,
+            topics: [topicAddress],
+          },
+        ]);
+      }
+
+      const logs: any[] = res.result.map(log =>
+        this.web3.eth.abi.decodeLog(
+          params.contract.abiModel.getEvent(params.event).inputs,
+          log.data,
+          log.topics.slice(1)
+        )
+      );
+
+      try {
+        for (let j = 0; j < logs.length; j++) {
+          const token = logs[j];
+          const [name, symbol, decimals] = await ethMethodsERC20.tokenDetails(token.tokenReq);
+
+          result.push({
+            erc20Address: token.tokenReq,
+            hrc20Address: token.tokenAck,
+            name,
+            symbol,
+            decimals,
+          });
+        }
+      } catch (e) {
+        log.error('Error get token details', { error: e && e.message, params });
       }
     } catch (e) {
-      console.log('Error get token details', e && e.message);
+      log.error('Error getEvents', { error: e && e.message, params });
     }
 
     return result;
