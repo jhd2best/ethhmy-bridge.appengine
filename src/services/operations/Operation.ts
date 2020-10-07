@@ -1,6 +1,8 @@
 import { OPERATION_TYPE, STATUS, TOKEN } from './interfaces';
 import { Action } from './Action';
 import { generateActionsPool } from './generateActionsPool';
+import logger from '../../logger';
+const log = logger.module('validator:operation');
 
 export interface IOperationInitParams {
   id: string;
@@ -82,7 +84,7 @@ export class Operation {
 
     this.status = STATUS.IN_PROGRESS;
 
-    console.log('----- Operation -------', this.type, this.token);
+    // log.info('Operation start', { type: this.type.toString(), token: this.token });
 
     while (this.actions[actionIndex]) {
       const action = this.actions[actionIndex];
@@ -111,7 +113,7 @@ export class Operation {
       this.status = STATUS.SUCCESS;
     }
 
-    console.log('----- END -------', this.type, this.token);
+    // log.info('Operation end', { type: this.type.toString(), token: this.token });
 
     await this.syncOperationCallback(this);
   };
