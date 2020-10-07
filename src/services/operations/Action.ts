@@ -3,6 +3,8 @@ import { ACTION_TYPE, STATUS } from './interfaces';
 import { createError } from '../../routes/helpers';
 import { sleep } from '../../blockchain/utils';
 import { TransactionReceipt } from 'web3-core';
+import logger from '../../logger';
+const log = logger.module('validator:action');
 
 export type TActionCallFunction = (
   props?: any
@@ -83,8 +85,18 @@ export class Action {
         return true;
       } else {
         this.error = 'Tx status not success';
+
+        log.error(`${this.type.toString()}: tx status not success`, {
+          error: '',
+          action: this.toObject({ payload: true }),
+        });
       }
     } catch (e) {
+      log.error(`${this.type.toString()}: action exception error`, {
+        error: e,
+        action: this.toObject({ payload: true }),
+      });
+
       this.error = e.message;
     }
 
