@@ -1,4 +1,6 @@
 import { EventsConstructor } from '../../blockchain/helpers/EventsConstructor';
+import logger from '../../logger';
+const log = logger.module('validator:eventWrapper');
 
 export const eventWrapper = (
   events: EventsConstructor,
@@ -19,7 +21,7 @@ export const eventWrapper = (
 
       const returnResult = () => {
         if (res && res.status !== true) {
-          console.log('Action rejected: ', eventName, transactionHash);
+          log.warn(`${eventName}: action rejected`, { eventName, transactionHash });
           reject(res);
         }
 
@@ -29,7 +31,7 @@ export const eventWrapper = (
         // const hasEvent = true;
 
         if (res && res.status === true && hasEvent) {
-          console.log('Action success: ', eventName, transactionHash);
+          // log.info('Action success', { eventName, transactionHash });
           resolve(resEvent || res);
         }
       };
@@ -46,10 +48,11 @@ export const eventWrapper = (
 
       res = await func();
 
-      console.log('Res status: ', eventName, res.status);
+      // log.info('Action res status', { eventName, status: res.status });
 
       returnResult();
     } catch (e) {
+      log.error(`${eventName}: exception error`, { eventName, error: e, transactionHash });
       reject({ status: false, error: e.message });
     }
   });
