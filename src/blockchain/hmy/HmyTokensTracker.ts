@@ -7,7 +7,6 @@ import tokenManagerJson = require('../contracts/TokenManager.json');
 import { ethMethodsERC20 } from '../eth';
 import logger from '../../logger';
 const log = logger.module('validator:tokensTracker');
-import readlineSync from 'readline-sync';
 
 const CHECK_EVENTS_INTERVAL = 30000;
 
@@ -50,9 +49,7 @@ export class HmyTokensTracker {
       process.env.TOKEN_MANAGER_CONTRACT
     );
 
-    const enable = readlineSync.question('HMY_TOKENS_TRACKER_ENABLE: true/false: ');
-
-    if (enable === 'true' || process.env.HMY_TOKENS_TRACKER_ENABLE === 'true') {
+    if (process.env.HMY_TOKENS_TRACKER_ENABLE === 'true') {
       this.tokens = [
         {
           name: 'Binance USD',
