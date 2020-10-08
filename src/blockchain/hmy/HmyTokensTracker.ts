@@ -50,30 +50,30 @@ export class HmyTokensTracker {
       process.env.TOKEN_MANAGER_CONTRACT
     );
 
-    readlineSync.question('HMY_TOKENS_TRACKER_ENABLE: true/false').then(enable => {
-      if (enable === true || process.env.HMY_TOKENS_TRACKER_ENABLE === 'true') {
-        this.tokens = [
-          {
-            name: 'Binance USD',
-            symbol: 'BUSD',
-            decimals: '18',
-            erc20Address: process.env.ETH_BUSD_CONTRACT,
-            hrc20Address: process.env.HMY_BUSD_CONTRACT,
-          },
-          {
-            name: 'ChainLink Token',
-            symbol: 'LINK',
-            decimals: '18',
-            erc20Address: process.env.ETH_LINK_CONTRACT,
-            hrc20Address: process.env.HMY_LINK_CONTRACT,
-          },
-        ];
+    const enable = readlineSync.question('HMY_TOKENS_TRACKER_ENABLE: true/false: ');
 
-        console.log('HMY_TOKENS_TRACKER_ENABLE: true');
+    if (enable === true || process.env.HMY_TOKENS_TRACKER_ENABLE === 'true') {
+      this.tokens = [
+        {
+          name: 'Binance USD',
+          symbol: 'BUSD',
+          decimals: '18',
+          erc20Address: process.env.ETH_BUSD_CONTRACT,
+          hrc20Address: process.env.HMY_BUSD_CONTRACT,
+        },
+        {
+          name: 'ChainLink Token',
+          symbol: 'LINK',
+          decimals: '18',
+          erc20Address: process.env.ETH_LINK_CONTRACT,
+          hrc20Address: process.env.HMY_LINK_CONTRACT,
+        },
+      ];
 
-        this.init();
-      }
-    });
+      console.log('HMY_TOKENS_TRACKER_ENABLE: true');
+
+      this.init();
+    }
   }
 
   getTokens = () => {
