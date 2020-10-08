@@ -18,6 +18,8 @@ export const eventWrapper = (
     transactionHash?: string;
   }>(async (resolve, reject) => {
     try {
+      let res;
+
       const timerId = setTimeout(() => {
         log.error(`${eventName}: action rejected by timeout`, { eventName, transactionHash, res });
         reject({ status: false, error: 'Rejected by timeout' });
@@ -33,10 +35,10 @@ export const eventWrapper = (
         condition: event => event.returnValues.receiptId === transactionHash,
       });
 
-      const res = await func();
+      res = await func();
 
-      if (!res && res.status !== true) {
-        log.warn(`${eventName}: action rejected`, { eventName, transactionHash });
+      if (!res || res.status !== true) {
+        log.warn(`${eventName}: action rejected`, { eventName, transactionHash, res });
       }
     } catch (e) {
       log.error(`${eventName}: exception error`, { eventName, error: e, transactionHash });
