@@ -3,7 +3,6 @@ import { Harmony } from '@harmony-js/core';
 import { Contract } from '@harmony-js/contract';
 import { HmyManager } from './HmyManager';
 import { EventsConstructor } from '../helpers/EventsConstructor';
-import { hmyWSProvider } from './index';
 import { HmyEventsTracker } from './HmyEventsTracker';
 import logger from '../../logger';
 const log = logger.module('validator:hmyMethodsBase');
@@ -52,7 +51,7 @@ export class HmyMethodsBase extends EventsConstructor {
   }
 
   isWSConnected = () => {
-    return hmyWSProvider.connected;
+    return true;
   };
 
   decodeApprovalLog = (receipt: TransactionReceipt) => {

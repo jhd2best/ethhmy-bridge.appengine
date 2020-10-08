@@ -1,5 +1,4 @@
 import { uuidv4 } from '../../services/utils';
-import { hmyWSProvider } from '../hmy';
 
 interface IError {
   error: string;
