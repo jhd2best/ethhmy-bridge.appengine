@@ -7,6 +7,9 @@ import * as hmyContract from '../../blockchain/hmy';
 import * as ethContract from '../../blockchain/eth';
 import { eventWrapper } from './eventWrapper';
 
+import logger from '../../logger';
+const log = logger.module('validator:generateActionsPool');
+
 const ethToOneERC20 = (
   hmyMethods: hmyContract.HmyMethodsERC20,
   ethMethods: ethContract.EthMethodsERC20,
@@ -94,6 +97,12 @@ const ethToOneERC20 = (
         if (lockTokenLog.amount != approvalLog.value) {
           throw new Error('lockTokenLog.amount != approvalLog.value');
         }
+
+        log.info('unlockTokenRollbackAction', {
+          lockTokenLog,
+          approvalLog,
+          transactionHash: lockTokenAction.transactionHash,
+        });
 
         return await ethMethods.unlockToken(
           lockTokenLog.token,
@@ -185,6 +194,12 @@ const hmyToEthERC20 = (
           throw new Error('burnTokenLog.amount != approvalLog.value');
         }
 
+        log.info('mintTokenRollbackAction', {
+          burnTokenLog,
+          approvalLog,
+          transactionHash: burnTokenAction.transactionHash,
+        });
+
         return await hmyMethods.mintToken(
           burnTokenLog.token,
           burnTokenLog.sender,
@@ -262,6 +277,12 @@ const ethToOne = (hmyMethods: hmyContract.HmyMethods, ethMethods: ethContract.Et
           throw new Error('lockTokenLog.amount != approvalLog.value');
         }
 
+        log.info('unlockTokenRollbackAction', {
+          lockTokenLog,
+          approvalLog,
+          transactionHash: lockTokenAction.transactionHash,
+        });
+
         return await ethMethods.unlockToken(
           lockTokenLog.sender,
           lockTokenLog.amount,
@@ -331,6 +352,12 @@ const hmyToEth = (hmyMethods: hmyContract.HmyMethods, ethMethods: ethContract.Et
         if (burnTokenLog.amount != approvalLog.value) {
           throw new Error('burnTokenLog.amount != approvalLog.value');
         }
+
+        log.info('mintTokenRollbackAction', {
+          burnTokenLog,
+          approvalLog,
+          transactionHash: burnTokenAction.transactionHash,
+        });
 
         return await hmyMethods.mintToken(
           burnTokenLog.sender,

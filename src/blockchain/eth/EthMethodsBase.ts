@@ -200,7 +200,7 @@ export class EthMethodsBase extends EventsConstructor {
         })
         .on('hash', hash => (res.transactionHash = hash));
     } catch (e) {
-      log.error('submitTxEth error: ', { error: e, res });
+      log.error('submitTxEth error: ', { error: e, res, data, address: this.ethManager.address });
 
       res.error = e.message;
     }

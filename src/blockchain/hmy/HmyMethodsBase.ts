@@ -95,7 +95,7 @@ export class HmyMethodsBase extends EventsConstructor {
           res.transactionHash = hash;
         });
     } catch (e) {
-      log.error('submitTxHmy error: ', { error: e, res });
+      log.error('submitTxHmy error: ', { error: e, res, data, address: this.hmyManager.address });
 
       res.error = e.message;
     }
@@ -105,7 +105,7 @@ export class HmyMethodsBase extends EventsConstructor {
     return {
       ...res.transaction,
       status: res.status === 'called',
-      transactionHash: res.transaction.id,
+      transactionHash: res.transaction && res.transaction.id,
     };
   };
 
