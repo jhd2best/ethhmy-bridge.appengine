@@ -45,6 +45,10 @@ export class OperationService {
   validateOperationBeforeCreate = async (params: IOperationInitParams) => {
     const normalizeOne = v => hmy.crypto.getAddress(v).checksum;
 
+    if (this.operations.some(o => o.id === params.id)) {
+      throw createError(500, 'This operation already in progress');
+    }
+
     if (
       this.operations.some(
         op =>
@@ -52,7 +56,7 @@ export class OperationService {
           normalizeOne(op.oneAddress) === normalizeOne(params.oneAddress) &&
           op.type === params.type &&
           op.token === params.token &&
-          op.status === STATUS.IN_PROGRESS &&
+          (op.status === STATUS.IN_PROGRESS || op.status === STATUS.WAITING) &&
           Date.now() - op.timestamp * 1000 < 1000 * 120 // 120 sec
       )
     ) {
