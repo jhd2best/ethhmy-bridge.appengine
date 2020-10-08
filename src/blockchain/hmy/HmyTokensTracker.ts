@@ -7,6 +7,7 @@ import tokenManagerJson = require('../contracts/TokenManager.json');
 import { ethMethodsERC20 } from '../eth';
 import logger from '../../logger';
 const log = logger.module('validator:tokensTracker');
+import readlineSync from 'readline-sync';
 
 const CHECK_EVENTS_INTERVAL = 30000;
 
@@ -49,26 +50,30 @@ export class HmyTokensTracker {
       process.env.TOKEN_MANAGER_CONTRACT
     );
 
-    if (process.env.HMY_TOKENS_TRACKER_ENABLE === 'true') {
-      this.tokens = [
-        {
-          name: 'Binance USD',
-          symbol: 'BUSD',
-          decimals: '18',
-          erc20Address: process.env.ETH_BUSD_CONTRACT,
-          hrc20Address: process.env.HMY_BUSD_CONTRACT,
-        },
-        {
-          name: 'ChainLink Token',
-          symbol: 'LINK',
-          decimals: '18',
-          erc20Address: process.env.ETH_LINK_CONTRACT,
-          hrc20Address: process.env.HMY_LINK_CONTRACT,
-        },
-      ];
+    readlineSync.question('HMY_TOKENS_TRACKER_ENABLE: true/false').then(enable => {
+      if (enable === true || process.env.HMY_TOKENS_TRACKER_ENABLE === 'true') {
+        this.tokens = [
+          {
+            name: 'Binance USD',
+            symbol: 'BUSD',
+            decimals: '18',
+            erc20Address: process.env.ETH_BUSD_CONTRACT,
+            hrc20Address: process.env.HMY_BUSD_CONTRACT,
+          },
+          {
+            name: 'ChainLink Token',
+            symbol: 'LINK',
+            decimals: '18',
+            erc20Address: process.env.ETH_LINK_CONTRACT,
+            hrc20Address: process.env.HMY_LINK_CONTRACT,
+          },
+        ];
 
-      this.init();
-    }
+        console.log('HMY_TOKENS_TRACKER_ENABLE: true');
+
+        this.init();
+      }
+    });
   }
 
   getTokens = () => {
