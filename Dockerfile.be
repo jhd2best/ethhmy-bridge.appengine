@@ -1,10 +1,11 @@
-FROM nginx:latest
+FROM node:12-alpine3.12
 
-RUN mkdir -p /app /root/.aws
+RUN apk add git
 WORKDIR /app
 
-ADD artifacts/dist /app/dist/
-COPY env.js /app
-RUN mkdir -p /app/encrypted/eth-secret /app/encrypted/hmy-secret /app/keys
+RUN mkdir -p /root/.aws /app/keys /app/encrypted
+
+COPY . /app/
+RUN yarn && yarn build
 
 CMD node ./dist/server.js

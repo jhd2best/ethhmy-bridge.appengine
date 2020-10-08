@@ -1,5 +1,9 @@
 #!/bin/bash
 
+sudo docker build -f Dockerfile.be -t ethhmy-be .
+
+exit 0
+
 sudo docker build -f Dockerfile.build -t ethhmy-bridge.be.build .
 rm -rf artifacts
 mkdir artifacts
@@ -12,4 +16,3 @@ pushd artifacts
 tar xfz ethhmy-bridge-be.tgz
 popd
 
-sudo docker build -f Dockerfile.be -t ethhmy-be .
