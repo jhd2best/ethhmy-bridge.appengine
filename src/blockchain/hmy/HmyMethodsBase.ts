@@ -1,4 +1,3 @@
-// import { hmy } from '../hmySdk';
 import { TransactionReceipt } from 'web3-core';
 import { Harmony } from '@harmony-js/core';
 import { Contract } from '@harmony-js/contract';
@@ -6,6 +5,8 @@ import { HmyManager } from './HmyManager';
 import { EventsConstructor } from '../helpers/EventsConstructor';
 import { hmyWSProvider } from './index';
 import { HmyEventsTracker } from './HmyEventsTracker';
+import logger from '../../logger';
+const log = logger.module('validator:hmyMethodsBase');
 
 interface IHmyMethodsInitParams {
   hmySdk: Harmony;
@@ -94,7 +95,7 @@ export class HmyMethodsBase extends EventsConstructor {
           res.transactionHash = hash;
         });
     } catch (e) {
-      console.log('submitTxHmy error: ', e);
+      log.error('submitTxHmy error: ', { error: e, res });
 
       res.error = e.message;
     }

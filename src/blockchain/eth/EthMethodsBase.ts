@@ -5,6 +5,8 @@ import { EthManager } from './EthManager';
 import Web3 from 'web3';
 import { EventsConstructor } from '../helpers/EventsConstructor';
 import { EthEventsTracker } from './EthEventsTracker';
+import logger from '../../logger';
+const log = logger.module('validator:ethMethodsBase');
 
 export interface IEthMethodsInitParams {
   web3: Web3;
@@ -198,7 +200,7 @@ export class EthMethodsBase extends EventsConstructor {
         })
         .on('hash', hash => (res.transactionHash = hash));
     } catch (e) {
-      console.log('submitTxEth error: ', e.message.slice(0, 100) + '...', res.transactionHash);
+      log.error('submitTxEth error: ', { error: e, res });
 
       res.error = e.message;
     }
