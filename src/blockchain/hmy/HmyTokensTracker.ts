@@ -52,7 +52,7 @@ export class HmyTokensTracker {
 
     const enable = readlineSync.question('HMY_TOKENS_TRACKER_ENABLE: true/false: ');
 
-    if (enable === true || process.env.HMY_TOKENS_TRACKER_ENABLE === 'true') {
+    if (enable === 'true' || process.env.HMY_TOKENS_TRACKER_ENABLE === 'true') {
       this.tokens = [
         {
           name: 'Binance USD',
