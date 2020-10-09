@@ -38,7 +38,7 @@ export class HmyEventsTracker {
   constructor(params: IEthEventTrackerParams) {
     this.hmySdk = params.hmySdk;
     this.hmyManagerMultiSig = params.hmyManagerMultiSig;
-    this.web3 = new Web3(`${process.env.ETH_NODE_URL}`);
+    this.web3 = new Web3(`${process.env.ETH_NODE_URL}/${process.env.INFURA_PROJECT_ID}`);
     this.logsMessenger = new Messenger(new HttpProvider(process.env.HMY_NODE_URL));
 
     setInterval(this.checkEvents, CHECK_EVENTS_INTERVAL);

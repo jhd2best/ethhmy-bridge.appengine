@@ -13,7 +13,7 @@ import { EthEventsTracker } from './EthEventsTracker';
 export * from './EthMethods';
 export * from './EthMethodsERC20';
 
-export const web3URL = `${process.env.ETH_NODE_URL}`;
+export const web3URL = `${process.env.ETH_NODE_URL}/${process.env.INFURA_PROJECT_ID}`;
 
 /**
  * Refreshes provider instance and attaches even handlers to it
