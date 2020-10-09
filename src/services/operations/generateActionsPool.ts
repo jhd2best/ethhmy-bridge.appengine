@@ -221,7 +221,7 @@ const hmyToEthERC20 = (
   });
 
   return {
-    actions: [approveHmyMangerAction, burnTokenAction, unlockTokenAction],
+    actions: [approveHmyMangerAction, burnTokenAction, waitingBlockNumberAction, unlockTokenAction],
     rollbackActions: [mintTokenRollbackAction],
   };
 };
@@ -389,7 +389,7 @@ const hmyToEth = (hmyMethods: hmyContract.HmyMethods, ethMethods: ethContract.Et
   });
 
   return {
-    actions: [approveHmyMangerAction, burnTokenAction, unlockTokenAction],
+    actions: [approveHmyMangerAction, burnTokenAction, waitingBlockNumberAction, unlockTokenAction],
     rollbackActions: [mintTokenRollbackAction],
   };
 };
