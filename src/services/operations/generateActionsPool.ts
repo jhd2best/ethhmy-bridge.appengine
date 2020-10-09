@@ -144,7 +144,7 @@ const hmyToEthERC20 = (
   });
 
   const waitingBlockNumberAction = new Action({
-    type: ACTION_TYPE.waitingBlockNumber,
+    type: ACTION_TYPE.waitingBlockNumberHarmony,
     callFunction: () =>
       hmyMethods.waitingBlockNumber(
         Number(burnTokenAction.payload.blockNumber),
@@ -322,7 +322,7 @@ const hmyToEth = (hmyMethods: hmyContract.HmyMethods, ethMethods: ethContract.Et
   });
 
   const waitingBlockNumberAction = new Action({
-    type: ACTION_TYPE.waitingBlockNumber,
+    type: ACTION_TYPE.waitingBlockNumberHarmony,
     callFunction: () =>
       hmyMethods.waitingBlockNumber(
         Number(burnTokenAction.payload.blockNumber),
