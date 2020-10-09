@@ -9,10 +9,12 @@ const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
 const NODE_ENV = process.env.NODE_ENV || 'production';
 
 if (!process.env.NODE_ENV) {
-  console.warn('NODE ENV is not specified. Set to production')
+  console.warn('NODE ENV is not specified. Set to production');
 }
 
-var dotenvFiles = [`${resolveApp('.env')}.${NODE_ENV}`].filter(Boolean);
+var dotenvFiles = [`${resolveApp('.env')}.${NODE_ENV}`, resolveApp('./keys/.env.private')].filter(
+  Boolean
+);
 
 console.log('dotenvFiles', dotenvFiles);
 
