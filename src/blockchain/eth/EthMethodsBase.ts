@@ -107,7 +107,7 @@ export class EthMethodsBase extends EventsConstructor {
       const tx = await this.web3.eth.getTransaction(txHash);
       if (!tx.blockNumber) {
         return {
-          status: true,
+          status: false,
           error: 'txHash no longer exists in the longest chain, possibly forked',
         };
       }

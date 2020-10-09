@@ -143,6 +143,16 @@ const hmyToEthERC20 = (
     callFunction: hash => hmyMethods.getTransactionReceipt(hash),
   });
 
+  const waitingBlockNumberAction = new Action({
+    type: ACTION_TYPE.waitingBlockNumber,
+    callFunction: () =>
+      hmyMethods.waitingBlockNumber(
+        Number(burnTokenAction.payload.blockNumber),
+        burnTokenAction.payload.transactionHash,
+        msg => (waitingBlockNumberAction.message = msg)
+      ),
+  });
+
   const unlockTokenAction = new Action({
     type: ACTION_TYPE.unlockToken,
     startRollbackOnFail: true,
@@ -311,6 +321,16 @@ const hmyToEth = (hmyMethods: hmyContract.HmyMethods, ethMethods: ethContract.Et
     callFunction: hash => hmyMethods.getTransactionReceipt(hash),
   });
 
+  const waitingBlockNumberAction = new Action({
+    type: ACTION_TYPE.waitingBlockNumber,
+    callFunction: () =>
+      hmyMethods.waitingBlockNumber(
+        Number(burnTokenAction.payload.blockNumber),
+        burnTokenAction.payload.transactionHash,
+        msg => (waitingBlockNumberAction.message = msg)
+      ),
+  });
+
   const unlockTokenAction = new Action({
     type: ACTION_TYPE.unlockToken,
     startRollbackOnFail: true,
@@ -401,3 +421,5 @@ export const generateActionsPool = (
 
   throw createError(500, 'Operation or token type not found');
 };
+
+// SENTRY_DSN_TOKEN="https://9bc5fffefdec4686afc7eead809cf944@o457691.ingest.sentry.io/5454064"

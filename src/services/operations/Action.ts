@@ -6,6 +6,8 @@ import { TransactionReceipt } from 'web3-core';
 import logger from '../../logger';
 const log = logger.module('validator:action');
 
+const AWAIT_STEP = 3000;
+
 export type TActionCallFunction = (
   props?: any
 ) => Promise<{
@@ -68,9 +70,12 @@ export class Action {
       let res;
 
       if (this.awaitConfirmation) {
-        while (!res) {
+        let maxAwaitTime = 180 * 1000; // 180sec
+
+        while (!res && maxAwaitTime >= 0) {
           res = await this.callFunction(this.transactionHash);
-          await sleep(1000);
+          await sleep(AWAIT_STEP);
+          maxAwaitTime = maxAwaitTime - AWAIT_STEP;
         }
       } else {
         res = await this.callFunction();

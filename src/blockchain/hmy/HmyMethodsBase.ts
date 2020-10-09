@@ -5,6 +5,7 @@ import { HmyManager } from './HmyManager';
 import { EventsConstructor } from '../helpers/EventsConstructor';
 import { HmyEventsTracker } from './HmyEventsTracker';
 import logger from '../../logger';
+import { AVG_BLOCK_TIME, BLOCK_TO_FINALITY, sleep } from '../utils';
 const log = logger.module('validator:hmyMethodsBase');
 
 interface IHmyMethodsInitParams {
@@ -70,6 +71,37 @@ export class HmyMethodsBase extends EventsConstructor {
       receiptLogs.data,
       receiptLogs.topics.slice(1)
     );
+  };
+
+  waitingBlockNumber = async (blockNumber, txnHash, callbackMessage) => {
+    {
+      const res = await this.hmySdk.blockchain.getTransactionByHash({ txnHash });
+
+      if (!res.result.blockNumber) {
+        return {
+          status: false,
+          error: 'txHash no longer exists in the longest chain, possibly forked',
+        };
+      }
+
+      const expectedBlockNumber = blockNumber + BLOCK_TO_FINALITY;
+
+      while (true) {
+        const res = await this.hmySdk.blockchain.getBlockNumber();
+        const blockNumber = Number(res.result);
+
+        if (blockNumber <= expectedBlockNumber) {
+          callbackMessage(
+            `Currently at block ${blockNumber}, waiting for block ${expectedBlockNumber} to be confirmed`
+          );
+
+          await sleep(AVG_BLOCK_TIME);
+        } else {
+          break;
+        }
+      }
+      return { status: true };
+    }
   };
 
   getTransactionReceipt = async txnHash => {
