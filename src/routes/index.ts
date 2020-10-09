@@ -88,4 +88,11 @@ export const routes = (app, services: IServices) => {
       return res.json(data);
     })
   );
+
+  app.get(
+    '/version',
+    asyncHandler(async (req, res) => {
+      return res.json({ version: '1.0.0' });
+    })
+  );
 };
