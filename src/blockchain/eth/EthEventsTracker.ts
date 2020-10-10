@@ -21,7 +21,12 @@ export class EthEventsTracker {
   subscribers: Record<string, EventHandler> = {};
   tracks: Record<
     string,
-    { eventName: string; contract: Contract; eventHandler: EventHandler }
+    {
+      eventName: string;
+      contract: Contract;
+      eventHandler: EventHandler;
+      hasSubscribers: () => boolean;
+    }
   > = {};
 
   constructor(params: IEthEventTrackerParams) {
@@ -37,10 +42,15 @@ export class EthEventsTracker {
     this.subscribers[id] = callback;
   };
 
-  public addTrack = (eventName: string, contract: Contract, eventHandler: EventHandler) => {
+  public addTrack = (
+    eventName: string,
+    contract: Contract,
+    eventHandler: EventHandler,
+    hasSubscribers: () => boolean
+  ) => {
     const id = uuidv4();
 
-    this.tracks[id] = { contract, eventName, eventHandler };
+    this.tracks[id] = { contract, eventName, eventHandler, hasSubscribers };
   };
 
   private checkEvents = async () => {
@@ -68,17 +78,19 @@ export class EthEventsTracker {
       });
 
       Object.values(this.tracks).map(async track => {
-        const events = await track.contract.getPastEvents(track.eventName, {
-          filter: {},
-          fromBlock: this.lastBlock,
-          toBlock: latest,
-        });
+        if (track.hasSubscribers()) {
+          const events = await track.contract.getPastEvents(track.eventName, {
+            filter: {},
+            fromBlock: this.lastBlock,
+            toBlock: latest,
+          });
 
-        if (events.length) {
-          console.log('New unlocked events: ', events.length);
+          if (events.length) {
+            console.log('New unlocked events: ', events.length);
+          }
+
+          events.forEach(track.eventHandler);
         }
-
-        events.forEach(track.eventHandler);
       });
 
       this.lastBlock = latest;
