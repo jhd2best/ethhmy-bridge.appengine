@@ -161,7 +161,7 @@ export class HmyMethodsBase extends EventsConstructor {
     return {
       ...res.transaction,
       status: res.status === 'called',
-      transactionHash: res.transaction.id,
+      transactionHash: res.transaction && res.transaction.id,
     };
   };
 
