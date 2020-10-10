@@ -6,7 +6,10 @@ import { EventsConstructor } from '../helpers/EventsConstructor';
 import { HmyEventsTracker } from './HmyEventsTracker';
 import logger from '../../logger';
 import { AVG_BLOCK_TIME, BLOCK_TO_FINALITY, sleep } from '../utils';
+import { ActionsQueue } from '../helpers/ActionsQueue';
 const log = logger.module('validator:hmyMethodsBase');
+
+const queue = new ActionsQueue();
 
 interface IHmyMethodsInitParams {
   hmySdk: Harmony;
@@ -173,8 +176,13 @@ export class HmyMethodsBase extends EventsConstructor {
 
     if (firstOwner.toLowerCase() === validatorAddress.toLowerCase()) {
       // i am the first owner
-
-      return await this.submitTx(data);
+      return new Promise((resolve, reject) =>
+        queue.addAction({
+          func: async () => await this.submitTx(data),
+          resolve,
+          reject,
+        })
+      );
     } else {
       return new Promise((resolve, reject) => {
         this.subscribe({

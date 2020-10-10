@@ -6,7 +6,10 @@ import Web3 from 'web3';
 import { EventsConstructor } from '../helpers/EventsConstructor';
 import { EthEventsTracker } from './EthEventsTracker';
 import logger from '../../logger';
+import { ActionsQueue } from '../helpers/ActionsQueue';
 const log = logger.module('validator:ethMethodsBase');
+
+const queue = new ActionsQueue();
 
 export interface IEthMethodsInitParams {
   web3: Web3;
@@ -173,7 +176,13 @@ export class EthMethodsBase extends EventsConstructor {
     if (firstOwner.toLowerCase() === validatorAddress.toLowerCase()) {
       // i am the first owner
 
-      return await this.submitTx(data);
+      return new Promise((resolve, reject) =>
+        queue.addAction({
+          func: async () => await this.submitTx(data),
+          resolve,
+          reject,
+        })
+      );
     } else {
       return new Promise((resolve, reject) => {
         this.subscribe({
