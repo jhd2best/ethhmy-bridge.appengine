@@ -26,6 +26,8 @@ export class ActionsQueue {
         } catch (e) {
           action.reject(e);
         }
+
+        await sleep(5000);
       } else {
         await sleep(1000);
       }
