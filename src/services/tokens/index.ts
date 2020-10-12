@@ -1,5 +1,7 @@
 import { DBService } from '../database';
 import { hmyTokensTracker, hmyMethodsERC20 } from '../../blockchain/hmy';
+import logger from '../../logger';
+const log = logger.module('validator:tokensService');
 
 export interface IOperationService {
   database: DBService;
@@ -35,7 +37,13 @@ export class Tokens {
 
     this.tokens = await Promise.all(
       tokens.map(async token => {
-        const totalSupply = await hmyMethodsERC20.totalSupply(token.hrc20Address);
+        let totalSupply = 0;
+
+        try {
+          totalSupply = await hmyMethodsERC20.totalSupply(token.hrc20Address);
+        } catch (e) {
+          log.error('get totalSupply', { error: e, token });
+        }
 
         return { ...token, totalLocked: String(totalSupply) };
       })
