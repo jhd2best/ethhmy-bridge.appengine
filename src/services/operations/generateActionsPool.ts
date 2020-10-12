@@ -23,7 +23,7 @@ const ethToOneERC20 = (
 
       if (!Number(hrc20Address)) {
         const [name, symbol, decimals] = await ethMethods.tokenDetails(params.erc20Address);
-        transaction = await hmyMethods.addToken(params.erc20Address, name, symbol, decimals);
+        transaction = await hmyMethods.addToken(params.erc20Address, name, '1' + symbol, decimals);
         hrc20Address = await hmyMethods.getMappingFor(params.erc20Address);
       }
 
