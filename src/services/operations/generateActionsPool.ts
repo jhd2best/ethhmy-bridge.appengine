@@ -143,15 +143,15 @@ const hmyToEthERC20 = (
     callFunction: hash => hmyMethods.getTransactionReceipt(hash),
   });
 
-  const waitingBlockNumberAction = new Action({
-    type: ACTION_TYPE.waitingBlockNumberHarmony,
-    callFunction: () =>
-      hmyMethods.waitingBlockNumber(
-        Number(burnTokenAction.payload.blockNumber),
-        burnTokenAction.payload.transactionHash,
-        msg => (waitingBlockNumberAction.message = msg)
-      ),
-  });
+  // const waitingBlockNumberAction = new Action({
+  //   type: ACTION_TYPE.waitingBlockNumberHarmony,
+  //   callFunction: () =>
+  //     hmyMethods.waitingBlockNumber(
+  //       Number(burnTokenAction.payload.blockNumber),
+  //       burnTokenAction.payload.transactionHash,
+  //       msg => (waitingBlockNumberAction.message = msg)
+  //     ),
+  // });
 
   const unlockTokenAction = new Action({
     type: ACTION_TYPE.unlockToken,
@@ -221,7 +221,7 @@ const hmyToEthERC20 = (
   });
 
   return {
-    actions: [approveHmyMangerAction, burnTokenAction, waitingBlockNumberAction, unlockTokenAction],
+    actions: [approveHmyMangerAction, burnTokenAction, unlockTokenAction],
     rollbackActions: [mintTokenRollbackAction],
   };
 };
@@ -321,15 +321,15 @@ const hmyToEth = (hmyMethods: hmyContract.HmyMethods, ethMethods: ethContract.Et
     callFunction: hash => hmyMethods.getTransactionReceipt(hash),
   });
 
-  const waitingBlockNumberAction = new Action({
-    type: ACTION_TYPE.waitingBlockNumberHarmony,
-    callFunction: () =>
-      hmyMethods.waitingBlockNumber(
-        Number(burnTokenAction.payload.blockNumber),
-        burnTokenAction.payload.transactionHash,
-        msg => (waitingBlockNumberAction.message = msg)
-      ),
-  });
+  // const waitingBlockNumberAction = new Action({
+  //   type: ACTION_TYPE.waitingBlockNumberHarmony,
+  //   callFunction: () =>
+  //     hmyMethods.waitingBlockNumber(
+  //       Number(burnTokenAction.payload.blockNumber),
+  //       burnTokenAction.payload.transactionHash,
+  //       msg => (waitingBlockNumberAction.message = msg)
+  //     ),
+  // });
 
   const unlockTokenAction = new Action({
     type: ACTION_TYPE.unlockToken,
@@ -389,7 +389,7 @@ const hmyToEth = (hmyMethods: hmyContract.HmyMethods, ethMethods: ethContract.Et
   });
 
   return {
-    actions: [approveHmyMangerAction, burnTokenAction, waitingBlockNumberAction, unlockTokenAction],
+    actions: [approveHmyMangerAction, burnTokenAction, unlockTokenAction],
     rollbackActions: [mintTokenRollbackAction],
   };
 };
