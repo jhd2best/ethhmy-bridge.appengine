@@ -421,5 +421,3 @@ export const generateActionsPool = (
 
   throw createError(500, 'Operation or token type not found');
 };
-
-// SENTRY_DSN_TOKEN="https://9bc5fffefdec4686afc7eead809cf944@o457691.ingest.sentry.io/5454064"
