@@ -60,19 +60,21 @@ export const routes = (app, services: IServices) => {
     })
   );
 
-  // mint tokens
-  app.post(
-    '/get-token',
-    asyncHandler(async (req, res) => {
-      const data = await services.mintTokens.mint({
-        amount: 100,
-        address: req.body.address,
-        token: req.body.token,
-      });
+  if (process.env.GET_TOKENS_SERVICE === 'true') {
+    // mint tokens
+    app.post(
+      '/get-token',
+      asyncHandler(async (req, res) => {
+        const data = await services.mintTokens.mint({
+          amount: 100,
+          address: req.body.address,
+          token: req.body.token,
+        });
 
-      return res.json(data);
-    })
-  );
+        return res.json(data);
+      })
+    );
+  }
 
   app.get(
     '/tokens',
