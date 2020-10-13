@@ -94,7 +94,7 @@ export const routes = (app, services: IServices) => {
   app.get(
     '/version',
     asyncHandler(async (req, res) => {
-      return res.json({ version: '1.0.0' });
+      return res.json({ version: '9.0.0' });
     })
   );
 };
