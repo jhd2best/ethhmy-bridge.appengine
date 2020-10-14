@@ -1,18 +1,35 @@
 #!/bin/bash
+NETWORK=
 
-sudo docker build -f Dockerfile.be -t ethhmy-be .
+usage() {
+   me=$(basename "$0")
 
-exit 0
+cat <<-EOT
+Usage: this script is used to build docker image for current branch and tag.
 
-sudo docker build -f Dockerfile.build -t ethhmy-bridge.be.build .
-rm -rf artifacts
-mkdir artifacts
-sudo docker run -i --rm -v ${PWD}/artifacts:/mnt/artifacts ethhmy-bridge.be.build /bin/bash << COMMANDS
-cp /app/ethhmy-bridge-be.tgz /mnt/artifacts
-chown -R $(id -u):$(id -g) /mnt/artifacts
-COMMANDS
+$me [options]
 
-pushd artifacts
-tar xfz ethhmy-bridge-be.tgz
-popd
+Options:
+   -h                print this message
+   -n network        network of the docker image (e.g. testnet/mainnet)
 
+EOT
+   exit 0
+}
+
+while getopts ':hn:' opt; do
+   case $opt in
+      n) NETWORK="$OPTARG";;
+      *) usage ;;
+   esac
+done
+
+if [ -z "$NETWORK" ]; then
+   usage
+fi
+
+if [ "$NETWORK" == "mainnet" ]; then
+	sudo docker build -f Dockerfile.be -t ethhmy-be .
+else
+	sudo docker build -f Dockerfile.be."$NETWORK" -t ethhmy-be:"$NETWORK" .
+fi
