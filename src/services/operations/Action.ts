@@ -6,8 +6,19 @@ import { TransactionReceipt } from 'web3-core';
 import logger from '../../logger';
 const log = logger.module('validator:action');
 
-const AWAIT_STEP = 10 * 1000; // 10 sec
-const WAIT_TIMEOUT = 10 * 60 * 1000; // 10 min
+const AWAIT_STEP_LONG = 20 * 1000; // 20 sec
+const AWAIT_STEP_SHORT = 3 * 1000; // 3 sec
+
+const WAIT_TIMEOUT = 20 * 60 * 1000; // 20 min
+
+const isEth = (type: ACTION_TYPE) =>
+  [
+    ACTION_TYPE.approveEthManger,
+    ACTION_TYPE.unlockToken,
+    ACTION_TYPE.lockToken,
+    ACTION_TYPE.waitingBlockNumber,
+    ACTION_TYPE.unlockTokenRollback,
+  ].includes(type);
 
 export type TActionCallFunction = (
   props?: any
@@ -69,6 +80,7 @@ export class Action {
 
     try {
       let res;
+      const AWAIT_STEP = isEth(this.type) ? AWAIT_STEP_LONG : AWAIT_STEP_SHORT;
 
       if (this.awaitConfirmation) {
         let maxAwaitTime = WAIT_TIMEOUT;
