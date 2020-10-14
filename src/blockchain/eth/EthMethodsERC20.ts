@@ -32,8 +32,8 @@ export class EthMethodsERC20 extends EthMethodsBase {
           type: 'address',
         },
       ],
-      receipt.logs[2].data,
-      receipt.logs[2].topics.slice(1)
+      receipt.logs[receipt.logs.length - 1].data,
+      receipt.logs[receipt.logs.length - 1].topics.slice(1)
     );
   };
 
