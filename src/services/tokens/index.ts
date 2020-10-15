@@ -16,7 +16,7 @@ export interface ITokenInfo {
   totalLocked: string;
 }
 
-const GET_TOTAL_LOCKED_INTERVAL = 30000;
+const GET_TOTAL_LOCKED_INTERVAL = 40000;
 
 export class Tokens {
   private database: DBService;
@@ -35,20 +35,23 @@ export class Tokens {
   getTotalLocked = async () => {
     const tokens = hmyTokensTracker.getTokens();
 
-    this.tokens = await Promise.all(
-      tokens.map(async token => {
-        let totalSupply = 0;
+    const newTokens = [];
 
-        try {
-          totalSupply = await hmyMethodsERC20.totalSupply(token.hrc20Address);
-        } catch (e) {
-          log.error('get totalSupply', { error: e, token });
-        }
+    for (let i = 0; i < tokens.length; i++) {
+      const token = tokens[i];
+      let totalSupply = 0;
 
-        return { ...token, totalLocked: String(totalSupply) };
-      })
-    );
+      try {
+        totalSupply = await hmyMethodsERC20.totalSupply(token.hrc20Address);
+      } catch (e) {
+        log.error('get totalSupply', { error: e, token });
+        return;
+      }
 
+      newTokens.push({ ...token, totalLocked: String(totalSupply) });
+    }
+
+    this.tokens = newTokens;
     this.lastUpdateTime = Date.now();
   };
 
