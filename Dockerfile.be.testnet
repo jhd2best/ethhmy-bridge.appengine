@@ -3,7 +3,7 @@ FROM node:12-alpine3.12
 RUN apk add git
 WORKDIR /app
 
-ENV NODE_ENV mainnet
+ENV NODE_ENV testnet
 
 RUN mkdir -p /root/.aws /app/keys /app/encrypted
 
