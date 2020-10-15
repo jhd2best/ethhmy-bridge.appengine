@@ -30,6 +30,8 @@ export class Tokens {
     this.database = params.database;
 
     setInterval(this.getTotalLocked, GET_TOTAL_LOCKED_INTERVAL);
+
+    this.getTotalLocked();
   }
 
   getTotalLocked = async () => {
