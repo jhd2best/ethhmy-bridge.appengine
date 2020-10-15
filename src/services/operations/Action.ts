@@ -91,7 +91,7 @@ export class Action {
           maxAwaitTime = maxAwaitTime - AWAIT_STEP;
         }
       } else {
-        res = await this.callFunction();
+        res = await this.callFunction(this.transactionHash);
       }
 
       this.transactionHash = res.transactionHash;
