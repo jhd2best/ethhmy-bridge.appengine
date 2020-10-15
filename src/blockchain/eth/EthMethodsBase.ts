@@ -11,6 +11,9 @@ const log = logger.module('validator:ethMethodsBase');
 
 const queue = new ActionsQueue();
 
+const WAIT_TIMEOUT = 20 * 60 * 1000;
+const AWAIT_STEP = 5 * 1000;
+
 export interface IEthMethodsInitParams {
   web3: Web3;
   ethManager: EthManager;
@@ -61,6 +64,63 @@ export class EthMethodsBase extends EventsConstructor {
     }
 
     const txInfo = await this.web3.eth.getTransaction(transactionHash);
+
+    return { ...txInfo, ...res };
+  };
+
+  waitTransaction = async (transactionHash: string, callback?) => {
+    let txInfo = await this.web3.eth.getTransaction(transactionHash);
+
+    if (!txInfo) {
+      return { status: false, transactionHash };
+    }
+
+    // console.log(txInfo)
+
+    const { from, nonce, blockNumber } = txInfo;
+
+    let lastBlock = blockNumber;
+
+    if (!lastBlock) {
+      lastBlock = await this.web3.eth.getBlockNumber();
+    }
+
+    let txHash = transactionHash;
+    let maxAwaitTime = WAIT_TIMEOUT;
+    let res;
+
+    while (!res && maxAwaitTime >= 0) {
+      await sleep(AWAIT_STEP);
+      maxAwaitTime = maxAwaitTime - AWAIT_STEP;
+
+      res = await this.web3.eth.getTransactionReceipt(txHash);
+
+      if (!res) {
+        // check to other tx with the same nonce
+        const block = await this.web3.eth.getBlock(lastBlock, true);
+
+        if (!!block) {
+          lastBlock++;
+        }
+
+        if (!!block && !!block.transactions) {
+          block.transactions.forEach(transaction => {
+            if (from === transaction.from && nonce === transaction.nonce) {
+              txHash = transaction.hash;
+              if (callback) {
+                callback(transaction);
+              }
+            }
+          });
+        }
+      }
+    }
+
+    if (!res) {
+      return res;
+    }
+
+    txInfo = await this.web3.eth.getTransaction(transactionHash);
 
     return { ...txInfo, ...res };
   };

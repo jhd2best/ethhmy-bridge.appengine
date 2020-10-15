@@ -82,7 +82,7 @@ export class Action {
       let res;
       const AWAIT_STEP = isEth(this.type) ? AWAIT_STEP_LONG : AWAIT_STEP_SHORT;
 
-      if (this.awaitConfirmation) {
+      if (this.awaitConfirmation && !isEth(this.type)) {
         let maxAwaitTime = WAIT_TIMEOUT;
 
         while (!res && maxAwaitTime >= 0) {

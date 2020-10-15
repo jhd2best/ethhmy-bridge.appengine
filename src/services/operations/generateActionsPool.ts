@@ -34,13 +34,13 @@ const ethToOneERC20 = (
   const approveEthMangerAction = new Action({
     type: ACTION_TYPE.approveEthManger,
     awaitConfirmation: true,
-    callFunction: hash => ethMethods.getTransactionReceipt(hash),
+    callFunction: async hash => await ethMethods.waitTransaction(hash),
   });
 
   const lockTokenAction = new Action({
     type: ACTION_TYPE.lockToken,
     awaitConfirmation: true,
-    callFunction: hash => ethMethods.getTransactionReceipt(hash),
+    callFunction: async hash => await ethMethods.waitTransaction(hash),
   });
 
   const waitingBlockNumberAction = new Action({
@@ -230,13 +230,13 @@ const ethToOne = (hmyMethods: hmyContract.HmyMethods, ethMethods: ethContract.Et
   const approveEthMangerAction = new Action({
     type: ACTION_TYPE.approveEthManger,
     awaitConfirmation: true,
-    callFunction: hash => ethMethods.getTransactionReceipt(hash),
+    callFunction: async hash => await ethMethods.waitTransaction(hash),
   });
 
   const lockTokenAction = new Action({
     type: ACTION_TYPE.lockToken,
     awaitConfirmation: true,
-    callFunction: hash => ethMethods.getTransactionReceipt(hash),
+    callFunction: async hash => await ethMethods.waitTransaction(hash),
   });
 
   const waitingBlockNumberAction = new Action({
