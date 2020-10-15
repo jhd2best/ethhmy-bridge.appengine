@@ -16,7 +16,7 @@ export interface ITokenInfo {
   totalLocked: string;
 }
 
-const GET_TOTAL_LOCKED_INTERVAL = 40000;
+const GET_TOTAL_LOCKED_INTERVAL = 60000;
 
 export class Tokens {
   private database: DBService;
