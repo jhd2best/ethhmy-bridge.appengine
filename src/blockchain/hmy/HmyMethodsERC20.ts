@@ -3,6 +3,11 @@ import { Contract } from '@harmony-js/contract';
 import { HmyManager } from './HmyManager';
 import { HmyMethodsBase } from './HmyMethodsBase';
 import { encodeMintTokenErc20 } from './hmy-encoders';
+import logger from '../../logger';
+const log = logger.module('validator:hmyMethodsERC20');
+import { ChainType } from '@harmony-js/utils';
+
+const tokenJson = require('../contracts/MyERC20.json');
 
 export class HmyMethodsERC20 extends HmyMethodsBase {
   hmySdk: Harmony;
@@ -33,9 +38,32 @@ export class HmyMethodsERC20 extends HmyMethodsBase {
   };
 
   totalSupply = async hrc20Address => {
-    const tokenJson = require('../contracts/MyERC20.json');
-    const hmyTokenContract = this.hmySdk.contracts.createContract(tokenJson.abi, hrc20Address);
+    let hmyTokenContract, res;
 
-    return await hmyTokenContract.methods.totalSupply().call(this.options);
+    try {
+      hmyTokenContract = this.hmySdk.contracts.createContract(tokenJson.abi, hrc20Address);
+    } catch (e) {
+      log.error('this.hmySdk.contracts.createContract', { error: e });
+
+      this.hmySdk = new Harmony(
+        // let's assume we deploy smart contract to this end-point URL
+        process.env.HMY_NODE_URL,
+        {
+          chainType: ChainType.Harmony,
+          chainId: Number(process.env.HMY_CHAIN_ID),
+        }
+      );
+
+      return 0;
+    }
+
+    try {
+      res = await hmyTokenContract.methods.totalSupply().call(this.options);
+    } catch (e) {
+      log.error('hmyTokenContract.methods.totalSupply', { error: e });
+      return 0;
+    }
+
+    return res;
   };
 }
