@@ -6,6 +6,7 @@ import { encodeMintTokenErc20 } from './hmy-encoders';
 import logger from '../../logger';
 const log = logger.module('validator:hmyMethodsERC20');
 import { ChainType } from '@harmony-js/utils';
+import { sleep } from '../utils';
 
 const tokenJson = require('../contracts/MyERC20.json');
 
@@ -45,6 +46,8 @@ export class HmyMethodsERC20 extends HmyMethodsBase {
     } catch (e) {
       log.error('this.hmySdk.contracts.createContract', { error: e });
 
+      await sleep(5000);
+
       this.hmySdk = new Harmony(
         // let's assume we deploy smart contract to this end-point URL
         process.env.HMY_NODE_URL,
@@ -61,6 +64,18 @@ export class HmyMethodsERC20 extends HmyMethodsBase {
       res = await hmyTokenContract.methods.totalSupply().call(this.options);
     } catch (e) {
       log.error('hmyTokenContract.methods.totalSupply', { error: e });
+
+      await sleep(5000);
+
+      this.hmySdk = new Harmony(
+        // let's assume we deploy smart contract to this end-point URL
+        process.env.HMY_NODE_URL,
+        {
+          chainType: ChainType.Harmony,
+          chainId: Number(process.env.HMY_CHAIN_ID),
+        }
+      );
+
       return 0;
     }
 

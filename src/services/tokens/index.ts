@@ -1,5 +1,5 @@
 import { DBService } from '../database';
-import { hmyTokensTracker, hmyMethodsERC20 } from '../../blockchain/hmy';
+import { hmyTokensTracker, hmyMethodsERC20, hmyMethodsLINK } from '../../blockchain/hmy';
 import logger from '../../logger';
 const log = logger.module('validator:tokensService');
 
@@ -44,7 +44,17 @@ export class Tokens {
       let totalSupply = 0;
 
       try {
-        totalSupply = await hmyMethodsERC20.totalSupply(token.hrc20Address);
+        if (token.erc20Address === process.env.ETH_LINK_CONTRACT) {
+          const hmyLINKManagerBalance = await hmyMethodsLINK.getBalance(
+            process.env.HMY_LINK_MANAGER_CONTRACT
+          );
+
+          const initMinted = 100000 * 1e18;
+
+          totalSupply = initMinted - Number(hmyLINKManagerBalance);
+        } else {
+          totalSupply = await hmyMethodsERC20.totalSupply(token.hrc20Address);
+        }
       } catch (e) {
         log.error('get totalSupply', { error: e, token });
         return;

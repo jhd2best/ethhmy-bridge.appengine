@@ -200,4 +200,18 @@ export class HmyMethodsBase extends EventsConstructor {
       });
     }
   };
+
+  getBalance = async (addr: string) => {
+    const addrHex = this.hmySdk.crypto.getAddress(addr).checksum;
+
+    let balance = 0;
+
+    try {
+      balance = await this.hmyTokenContract.methods.balanceOf(addrHex).call(this.options);
+    } catch (e) {
+      log.error('hmyTokenContract.methods.balanceOf', { error: e });
+    }
+
+    return balance;
+  };
 }
