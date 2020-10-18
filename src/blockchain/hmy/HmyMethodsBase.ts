@@ -8,6 +8,7 @@ import logger from '../../logger';
 import { AVG_BLOCK_TIME, BLOCK_TO_FINALITY, sleep } from '../utils';
 import { ActionsQueue } from '../helpers/ActionsQueue';
 const log = logger.module('validator:hmyMethodsBase');
+import { ChainType } from '@harmony-js/utils';
 
 const queue = new ActionsQueue();
 
@@ -210,6 +211,17 @@ export class HmyMethodsBase extends EventsConstructor {
       balance = await this.hmyTokenContract.methods.balanceOf(addrHex).call(this.options);
     } catch (e) {
       log.error('hmyTokenContract.methods.balanceOf', { error: e });
+
+      await sleep(5000);
+
+      this.hmySdk = new Harmony(
+        // let's assume we deploy smart contract to this end-point URL
+        process.env.HMY_NODE_URL,
+        {
+          chainType: ChainType.Harmony,
+          chainId: Number(process.env.HMY_CHAIN_ID),
+        }
+      );
     }
 
     return balance;
