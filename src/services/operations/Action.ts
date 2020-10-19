@@ -70,8 +70,17 @@ export class Action {
 
   public call = async () => {
     if (this.awaitConfirmation) {
-      while (!this.transactionHash) {
+      let maxAwaitTime = WAIT_TIMEOUT;
+
+      while (!this.transactionHash && maxAwaitTime >= 0) {
         await sleep(1000);
+        maxAwaitTime = maxAwaitTime - 1000;
+      }
+
+      if (!this.transactionHash) {
+        this.status = STATUS.ERROR;
+        this.error = 'Rejected by timeout';
+        return false;
       }
     }
 

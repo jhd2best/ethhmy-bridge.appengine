@@ -2,6 +2,7 @@ import { OPERATION_TYPE, STATUS, TOKEN } from './interfaces';
 import { Action } from './Action';
 import { generateActionsPool } from './generateActionsPool';
 import logger from '../../logger';
+
 const log = logger.module('validator:operation');
 
 export interface IOperationInitParams {
@@ -78,9 +79,13 @@ export class Operation {
     let actionIndex = 0;
 
     // TODO: add mode for continue operation loading from DB
-    if (this.actions.some(a => a.status !== STATUS.WAITING)) {
+    if (this.actions.some(a => a.status === STATUS.IN_PROGRESS)) {
       return;
     }
+
+    // if (![STATUS.IN_PROGRESS, STATUS.WAITING].includes(this.status)) {
+    //   return;
+    // }
 
     this.status = STATUS.IN_PROGRESS;
 
