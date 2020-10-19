@@ -11,7 +11,7 @@ const log = logger.module('validator:ethMethodsBase');
 
 const queue = new ActionsQueue();
 
-const WAIT_TIMEOUT = 20 * 60 * 1000;
+const WAIT_TIMEOUT = 30 * 60 * 1000;
 const AWAIT_STEP = 5 * 1000;
 
 export interface IEthMethodsInitParams {
@@ -71,18 +71,20 @@ export class EthMethodsBase extends EventsConstructor {
   waitTransaction = async (transactionHash: string, callback?) => {
     let txInfo = await this.web3.eth.getTransaction(transactionHash);
 
-    if (!txInfo) {
-      log.warn('waitTransaction: Transaction not found', { transactionHash });
+    let maxAwaitTimeoutSmall = 5 * 60 * 1000;
 
+    while (!txInfo && maxAwaitTimeoutSmall >= 0) {
       await sleep(3000);
 
       txInfo = await this.web3.eth.getTransaction(transactionHash);
 
-      if (!txInfo) {
-        log.error('waitTransaction: Transaction not found', { transactionHash });
+      maxAwaitTimeoutSmall = maxAwaitTimeoutSmall - 3000;
+    }
 
-        return { status: false, transactionHash };
-      }
+    if (!txInfo) {
+      log.error('waitTransaction: Transaction not found', { transactionHash });
+
+      return { status: false, transactionHash };
     }
 
     // console.log(txInfo)
@@ -129,7 +131,7 @@ export class EthMethodsBase extends EventsConstructor {
     if (!res) {
       log.error('waitTransaction: Transaction not found 2', { txHash });
 
-      return res;
+      return { status: false, transactionHash, error: 'Transaction not found' };
     }
 
     txInfo = await this.web3.eth.getTransaction(txHash);
