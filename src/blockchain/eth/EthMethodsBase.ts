@@ -72,9 +72,17 @@ export class EthMethodsBase extends EventsConstructor {
     let txInfo = await this.web3.eth.getTransaction(transactionHash);
 
     if (!txInfo) {
-      log.error('waitTransaction: Transaction not found', { transactionHash });
+      log.warn('waitTransaction: Transaction not found', { transactionHash });
 
-      return { status: false, transactionHash };
+      await sleep(3000);
+
+      txInfo = await this.web3.eth.getTransaction(transactionHash);
+
+      if (!txInfo) {
+        log.error('waitTransaction: Transaction not found', { transactionHash });
+
+        return { status: false, transactionHash };
+      }
     }
 
     // console.log(txInfo)
