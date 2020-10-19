@@ -83,9 +83,9 @@ export class Operation {
       return;
     }
 
-    // if (![STATUS.IN_PROGRESS, STATUS.WAITING].includes(this.status)) {
-    //   return;
-    // }
+    if (![STATUS.IN_PROGRESS, STATUS.WAITING].includes(this.status)) {
+      return;
+    }
 
     this.status = STATUS.IN_PROGRESS;
 
@@ -94,7 +94,7 @@ export class Operation {
     while (this.actions[actionIndex]) {
       const action = this.actions[actionIndex];
 
-      if (action.status === STATUS.WAITING) {
+      if (action.awaitConfirmation || action.status === STATUS.WAITING) {
         const res = await action.call();
 
         if (!res) {
