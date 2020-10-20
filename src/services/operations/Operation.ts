@@ -98,7 +98,7 @@ export class Operation {
         const res = await action.call();
 
         if (!res) {
-          this.status = STATUS.ERROR;
+          this.status = action.status === STATUS.CANCELED ? STATUS.CANCELED : STATUS.ERROR;
           await this.syncOperationCallback(this);
 
           if (action.startRollbackOnFail) {

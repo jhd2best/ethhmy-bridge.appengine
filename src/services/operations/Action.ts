@@ -78,8 +78,8 @@ export class Action {
       }
 
       if (!this.transactionHash) {
-        this.status = STATUS.ERROR;
-        this.error = 'Rejected by timeout';
+        this.status = STATUS.CANCELED;
+        this.error = 'Rejected by timeout, while waiting for user to sign';
         return false;
       }
     }

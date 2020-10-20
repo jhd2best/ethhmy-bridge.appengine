@@ -11,7 +11,7 @@ const log = logger.module('validator:ethMethodsBase');
 
 const queue = new ActionsQueue();
 
-const WAIT_TIMEOUT = 30 * 60 * 1000;
+const WAIT_TIMEOUT = 60 * 60 * 1000;
 const AWAIT_STEP = 5 * 1000;
 
 export interface IEthMethodsInitParams {
@@ -84,7 +84,7 @@ export class EthMethodsBase extends EventsConstructor {
     if (!txInfo) {
       log.error('waitTransaction: Transaction not found', { transactionHash });
 
-      return { status: false, transactionHash };
+      return { status: false, transactionHash, error: 'Transaction not found' };
     }
 
     // console.log(txInfo)

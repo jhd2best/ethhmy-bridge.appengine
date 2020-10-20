@@ -31,4 +31,5 @@ export enum STATUS {
   SUCCESS = 'success',
   WAITING = 'waiting',
   IN_PROGRESS = 'in_progress',
+  CANCELED = 'canceled',
 }
