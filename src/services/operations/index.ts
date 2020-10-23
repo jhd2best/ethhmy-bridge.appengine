@@ -1,7 +1,7 @@
 import { DBService } from '../database';
 import { IOperationInitParams, Operation } from './Operation';
 import { createError } from '../../routes/helpers';
-import { STATUS, OPERATION_TYPE, ACTION_TYPE } from './interfaces';
+import { ACTION_TYPE, OPERATION_TYPE, STATUS } from './interfaces';
 import { hmy } from '../../blockchain/hmy';
 import { normalizeEthKey } from '../../blockchain/utils';
 import { validateEthBalanceNonZero, validateOneBalanceNonZero } from './validations';
@@ -144,6 +144,7 @@ export class OperationService {
   }) => {
     const filteredData = this.operations
       .filter(o => !!o.timestamp)
+      .filter(o => o.status !== STATUS.CANCELED)
       .filter(operation => {
         const hasEthAddress = params.ethAddress ? params.ethAddress === operation.ethAddress : true;
         const hasOneAddress = params.oneAddress ? params.oneAddress === operation.oneAddress : true;

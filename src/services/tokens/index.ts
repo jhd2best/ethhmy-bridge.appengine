@@ -1,6 +1,9 @@
+import axios from 'axios';
 import { DBService } from '../database';
 import { hmyTokensTracker, hmyMethodsERC20, hmyMethodsLINK } from '../../blockchain/hmy';
 import logger from '../../logger';
+import { divDecimals } from './helpers';
+
 const log = logger.module('validator:tokensService');
 
 export interface IOperationService {
@@ -14,15 +17,20 @@ export interface ITokenInfo {
   erc20Address: string;
   hrc20Address: string;
   totalLocked: string;
+  usdPrice: number;
 }
 
-const GET_TOTAL_LOCKED_INTERVAL = 60000;
+const GET_TOTAL_LOCKED_INTERVAL = 180000;
 
 export class Tokens {
   private database: DBService;
   private dbCollectionName = 'tokens';
 
   private tokens: ITokenInfo[] = [];
+
+  private priceCache = {};
+
+  private lastPriceUpdate = 0;
 
   private lastUpdateTime = Date.now();
 
@@ -33,6 +41,45 @@ export class Tokens {
 
     this.getTotalLocked();
   }
+
+  getTokenPrice = async (symbol: string) => {
+    let usdPrice = 0;
+
+    if (Date.now() - this.lastPriceUpdate < 1000 * 60 * 60 && this.priceCache[symbol]) {
+      return this.priceCache[symbol];
+    }
+
+    this.lastPriceUpdate = Date.now();
+
+    try {
+      const res = await axios.get<{ lastPrice: number }>(
+        `https://api.binance.com/api/v1/ticker/24hr?symbol=${symbol}USDT`
+      );
+
+      usdPrice = res.data.lastPrice;
+    } catch (e) {
+      // log.error('get usdPrice api binance', { error: e, token });
+    }
+
+    if (!Number(usdPrice)) {
+      try {
+        const res = await axios.get<{ USD: number; USDT: number }>(
+          `https://min-api.cryptocompare.com/data/price?fsym=${symbol}&tsyms=USDT&tsyms=USD`
+        );
+
+        usdPrice = res.data.USD || res.data.USDT;
+      } catch (e) {
+        log.error('get usdPrice cryptocompare', { error: e, symbol });
+      }
+    }
+
+    if (usdPrice) {
+      this.priceCache[symbol] = usdPrice;
+      return usdPrice;
+    }
+
+    return this.priceCache[symbol] | 0;
+  };
 
   getTotalLocked = async () => {
     const tokens = hmyTokensTracker.getTokens();
@@ -60,7 +107,19 @@ export class Tokens {
         return;
       }
 
-      newTokens.push({ ...token, totalLocked: String(totalSupply) });
+      const usdPrice = await this.getTokenPrice(token.symbol);
+
+      const totalLockedNormal = divDecimals(totalSupply, token.decimals);
+
+      const totalLockedUSD = Number(totalLockedNormal) * Number(usdPrice);
+
+      newTokens.push({
+        ...token,
+        totalLocked: String(totalSupply),
+        totalLockedNormal,
+        usdPrice,
+        totalLockedUSD,
+      });
     }
 
     this.tokens = newTokens;
