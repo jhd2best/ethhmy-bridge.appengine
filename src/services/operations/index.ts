@@ -49,6 +49,25 @@ export class OperationService {
       throw createError(500, 'This operation already in progress');
     }
 
+    if (params.type === OPERATION_TYPE.ONE_ETH) {
+      const DAY = 1000 * 60 * 60 * 24;
+
+      const userTxs = this.operations.filter(
+        o =>
+          Date.now() - DAY < o.timestamp &&
+          o.type === OPERATION_TYPE.ONE_ETH &&
+          o.oneAddress === params.oneAddress &&
+          [STATUS.SUCCESS, STATUS.IN_PROGRESS, STATUS.WAITING].includes(o.status)
+      );
+
+      if (userTxs.length >= 5) {
+        throw createError(
+          500,
+          'You have reached the limit of transfers from Harmony to Ethereum (5 transfers within 24 hours)'
+        );
+      }
+    }
+
     if (
       this.operations.some(
         op =>
