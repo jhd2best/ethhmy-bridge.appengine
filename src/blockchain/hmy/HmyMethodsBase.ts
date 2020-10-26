@@ -9,21 +9,23 @@ import { AVG_BLOCK_TIME, BLOCK_TO_FINALITY, sleep } from '../utils';
 import { ActionsQueue } from '../helpers/ActionsQueue';
 const log = logger.module('validator:hmyMethodsBase');
 import { ChainType } from '@harmony-js/utils';
+import erc20Json = require('../contracts/MyERC20.json');
 
 const queue = new ActionsQueue();
 
 interface IHmyMethodsInitParams {
   hmySdk: Harmony;
-  hmyTokenContract: Contract;
   hmyManager: HmyManager;
   hmyManagerMultiSig: HmyManager;
   options?: { gasPrice: number; gasLimit: number };
   hmyEventsTracker: HmyEventsTracker;
+  hmyTokenContractAddress: string;
 }
 
 export class HmyMethodsBase extends EventsConstructor {
   hmySdk: Harmony;
   hmyTokenContract: Contract;
+  hmyTokenContractAddress: string;
   hmyManager: HmyManager;
   hmyManagerMultiSig: HmyManager;
   hmyEventsTracker: HmyEventsTracker;
@@ -31,7 +33,7 @@ export class HmyMethodsBase extends EventsConstructor {
 
   constructor({
     hmySdk,
-    hmyTokenContract,
+    hmyTokenContractAddress,
     hmyManager,
     options,
     hmyManagerMultiSig,
@@ -40,9 +42,14 @@ export class HmyMethodsBase extends EventsConstructor {
     super();
 
     this.hmySdk = hmySdk;
-    this.hmyTokenContract = hmyTokenContract;
     this.hmyManager = hmyManager;
     this.hmyManagerMultiSig = hmyManagerMultiSig;
+    this.hmyTokenContractAddress = hmyTokenContractAddress;
+
+    this.hmyTokenContract = this.hmySdk.contracts.createContract(
+      erc20Json.abi,
+      this.hmyTokenContractAddress
+    );
 
     if (options) {
       this.options = options;
@@ -222,6 +229,17 @@ export class HmyMethodsBase extends EventsConstructor {
           chainId: Number(process.env.HMY_CHAIN_ID),
         }
       );
+
+      this.hmyTokenContract = this.hmySdk.contracts.createContract(
+        erc20Json.abi,
+        this.hmyTokenContractAddress
+      );
+
+      try {
+        balance = await this.hmyTokenContract.methods.balanceOf(addrHex).call(this.options);
+      } catch (e) {
+        log.error('hmyTokenContract.methods.balanceOf 2', { error: e });
+      }
     }
 
     return balance;
