@@ -186,8 +186,18 @@ export class EthMethodsBase extends EventsConstructor {
 
   waitingBlockNumber = async (blockNumber, txHash, callbackMessage) => {
     {
-      const tx = await this.web3.eth.getTransaction(txHash);
-      if (!tx.blockNumber) {
+      let tx = await this.web3.eth.getTransaction(txHash);
+
+      let maxAwaitTimeoutSmall = 2 * 60 * 1000;
+
+      while (!tx || !tx.blockNumber || maxAwaitTimeoutSmall < 0) {
+        await sleep(3000);
+        maxAwaitTimeoutSmall = maxAwaitTimeoutSmall - 3000;
+
+        tx = await this.web3.eth.getTransaction(txHash);
+      }
+
+      if (!tx || !tx.blockNumber) {
         return {
           status: false,
           error: 'txHash no longer exists in the longest chain, possibly forked',
