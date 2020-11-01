@@ -190,7 +190,7 @@ export class EthMethodsBase extends EventsConstructor {
 
       let maxAwaitTimeoutSmall = 2 * 60 * 1000;
 
-      while (!tx || !tx.blockNumber || maxAwaitTimeoutSmall < 0) {
+      while ((!tx || !tx.blockNumber) && maxAwaitTimeoutSmall >= 0) {
         await sleep(3000);
         maxAwaitTimeoutSmall = maxAwaitTimeoutSmall - 3000;
 
