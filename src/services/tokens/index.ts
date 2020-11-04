@@ -34,6 +34,10 @@ export class Tokens {
 
   private lastUpdateTime = Date.now();
 
+  private symbolsMap = {
+    WETH: 'ETH',
+  };
+
   constructor(params: IOperationService) {
     this.database = params.database;
 
@@ -107,7 +111,7 @@ export class Tokens {
         return;
       }
 
-      const usdPrice = await this.getTokenPrice(token.symbol);
+      const usdPrice = await this.getTokenPrice(this.symbolsMap[token.symbol] || token.symbol);
 
       const totalLockedNormal = divDecimals(totalSupply, token.decimals);
 
