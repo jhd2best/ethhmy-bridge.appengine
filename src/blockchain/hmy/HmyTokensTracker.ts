@@ -6,13 +6,10 @@ import { sleep } from '../utils';
 import tokenManagerJson = require('../contracts/TokenManager.json');
 import { ethMethodsERC20 } from '../eth';
 import logger from '../../logger';
+import { createHmySdk } from './index';
 const log = logger.module('validator:tokensTracker');
 
 const CHECK_EVENTS_INTERVAL = 30000;
-
-interface IEthEventTrackerParams {
-  hmySdk: Harmony;
-}
 
 interface ITokenInfo {
   name: string;
@@ -39,8 +36,8 @@ export class HmyTokensTracker {
 
   tokens: ITokenInfo[] = [];
 
-  constructor(params: IEthEventTrackerParams) {
-    this.hmySdk = params.hmySdk;
+  constructor() {
+    this.hmySdk = createHmySdk();
     this.web3 = new Web3(`${process.env.ETH_NODE_URL}/${process.env.INFURA_PROJECT_ID}`);
     this.logsMessenger = new Messenger(new HttpProvider(process.env.HMY_NODE_URL));
 

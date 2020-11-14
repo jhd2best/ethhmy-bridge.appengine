@@ -1,20 +1,17 @@
 import { Harmony } from '@harmony-js/core';
 import { Contract } from '@harmony-js/contract';
-import { HmyManager } from './HmyManager';
 import { HmyMethodsBase } from './HmyMethodsBase';
 import { encodeMintTokenErc20 } from './hmy-encoders';
 import logger from '../../logger';
 const log = logger.module('validator:hmyMethodsERC20');
-import { ChainType } from '@harmony-js/utils';
 import { sleep } from '../utils';
+import { createHmySdk } from './index';
 
 const tokenJson = require('../contracts/MyERC20.json');
 
 export class HmyMethodsERC20 extends HmyMethodsBase {
   hmySdk: Harmony;
   hmyTokenContract: Contract;
-  hmyManager: HmyManager;
-  hmyManagerMultiSig: HmyManager;
   options = { gasPrice: 1000000000, gasLimit: 6721900 };
 
   getMappingFor = async erc20TokenAddr => {
@@ -48,14 +45,7 @@ export class HmyMethodsERC20 extends HmyMethodsBase {
 
       await sleep(5000);
 
-      this.hmySdk = new Harmony(
-        // let's assume we deploy smart contract to this end-point URL
-        process.env.HMY_NODE_URL,
-        {
-          chainType: ChainType.Harmony,
-          chainId: Number(process.env.HMY_CHAIN_ID),
-        }
-      );
+      this.hmySdk = createHmySdk()
 
       return 0;
     }
@@ -67,14 +57,7 @@ export class HmyMethodsERC20 extends HmyMethodsBase {
 
       await sleep(5000);
 
-      this.hmySdk = new Harmony(
-        // let's assume we deploy smart contract to this end-point URL
-        process.env.HMY_NODE_URL,
-        {
-          chainType: ChainType.Harmony,
-          chainId: Number(process.env.HMY_CHAIN_ID),
-        }
-      );
+      this.hmySdk = createHmySdk();
 
       return 0;
     }

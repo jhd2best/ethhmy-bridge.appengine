@@ -1,7 +1,7 @@
-import { hmy } from './index';
 import { Contract } from '@harmony-js/contract';
 import { readFileSync } from 'fs';
 import { awsKMS } from '../utils';
+import { createHmySdk } from './index';
 
 const encryptedDir = './encrypted';
 
@@ -9,6 +9,7 @@ export class HmyManager {
   contract: Contract;
   address: string;
   constructor(contractJson, contractAddr) {
+    const hmy = createHmySdk();
     this.contract = hmy.contracts.createContract(contractJson.abi, contractAddr);
     this.address = contractAddr;
 

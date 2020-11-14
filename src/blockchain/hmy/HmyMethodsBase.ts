@@ -8,15 +8,17 @@ import logger from '../../logger';
 import { AVG_BLOCK_TIME, BLOCK_TO_FINALITY, sleep } from '../utils';
 import { ActionsQueue } from '../helpers/ActionsQueue';
 const log = logger.module('validator:hmyMethodsBase');
-import { ChainType } from '@harmony-js/utils';
+
 import erc20Json = require('../contracts/MyERC20.json');
+import hmyManagerJson = require('../contracts/LINKHmyManager.json');
+import hmyMultiSigWalletJson = require('../contracts/MultiSigWallet.json');
+import { createHmySdk } from './index';
 
 const queue = new ActionsQueue();
 
 interface IHmyMethodsInitParams {
-  hmySdk: Harmony;
-  hmyManager: HmyManager;
-  hmyManagerMultiSig: HmyManager;
+  hmyManagerAddress: string;
+  hmyManagerMultiSigAddress: string;
   options?: { gasPrice: number; gasLimit: number };
   hmyEventsTracker: HmyEventsTracker;
   hmyTokenContractAddress: string;
@@ -26,30 +28,27 @@ export class HmyMethodsBase extends EventsConstructor {
   hmySdk: Harmony;
   hmyTokenContract: Contract;
   hmyTokenContractAddress: string;
+  hmyManagerAddress: string;
+  hmyManagerMultiSigAddress: string;
   hmyManager: HmyManager;
   hmyManagerMultiSig: HmyManager;
   hmyEventsTracker: HmyEventsTracker;
   options = { gasPrice: 1000000000, gasLimit: 6721900 };
 
   constructor({
-    hmySdk,
     hmyTokenContractAddress,
-    hmyManager,
+    hmyManagerAddress,
     options,
-    hmyManagerMultiSig,
+    hmyManagerMultiSigAddress,
     hmyEventsTracker,
   }: IHmyMethodsInitParams) {
     super();
 
-    this.hmySdk = hmySdk;
-    this.hmyManager = hmyManager;
-    this.hmyManagerMultiSig = hmyManagerMultiSig;
     this.hmyTokenContractAddress = hmyTokenContractAddress;
+    this.hmyManagerAddress = hmyManagerAddress;
+    this.hmyManagerMultiSigAddress = hmyManagerMultiSigAddress;
 
-    this.hmyTokenContract = this.hmySdk.contracts.createContract(
-      erc20Json.abi,
-      this.hmyTokenContractAddress
-    );
+    this.init();
 
     if (options) {
       this.options = options;
@@ -60,6 +59,17 @@ export class HmyMethodsBase extends EventsConstructor {
     // subscribe current manager to Submission events
     this.hmyEventsTracker.addTrack('Minted', this.hmyManager, this.eventHandler);
     this.hmyEventsTracker.onEventHandler(this.eventHandler);
+  }
+
+  init() {
+    this.hmySdk = createHmySdk();
+    this.hmyManager = new HmyManager(hmyManagerJson, this.hmyManagerAddress);
+    this.hmyManagerMultiSig = new HmyManager(hmyMultiSigWalletJson, this.hmyManagerMultiSigAddress);
+
+    this.hmyTokenContract = this.hmySdk.contracts.createContract(
+      erc20Json.abi,
+      this.hmyTokenContractAddress
+    );
   }
 
   isWSConnected = () => {
@@ -221,14 +231,7 @@ export class HmyMethodsBase extends EventsConstructor {
 
       await sleep(5000);
 
-      this.hmySdk = new Harmony(
-        // let's assume we deploy smart contract to this end-point URL
-        process.env.HMY_NODE_URL,
-        {
-          chainType: ChainType.Harmony,
-          chainId: Number(process.env.HMY_CHAIN_ID),
-        }
-      );
+      this.hmySdk = createHmySdk()
 
       this.hmyTokenContract = this.hmySdk.contracts.createContract(
         erc20Json.abi,

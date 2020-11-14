@@ -5,12 +5,13 @@ import { Messenger, HttpProvider } from '@harmony-js/network';
 import Web3 from 'web3';
 import { HmyManager } from './HmyManager';
 import { sleep } from '../utils';
+import { createHmySdk } from './index';
+import hmyMultiSigWalletJson = require('../contracts/MultiSigWallet.json');
 
 const CHECK_EVENTS_INTERVAL = 10000;
 
 interface IEthEventTrackerParams {
-  hmyManagerMultiSig: HmyManager;
-  hmySdk: Harmony;
+  hmyManagerMultiSigAddress: string;
 }
 
 interface IGetEventsParams {
@@ -25,6 +26,7 @@ type EventHandler = (event: IEventData) => void;
 export class HmyEventsTracker {
   lastBlock = 0;
   hmyManagerMultiSig: HmyManager;
+  hmyManagerMultiSigAddress: string;
   hmySdk: Harmony;
   web3: Web3;
   logsMessenger: Messenger;
@@ -36,12 +38,17 @@ export class HmyEventsTracker {
   > = {};
 
   constructor(params: IEthEventTrackerParams) {
-    this.hmySdk = params.hmySdk;
-    this.hmyManagerMultiSig = params.hmyManagerMultiSig;
+    this.hmyManagerMultiSigAddress = params.hmyManagerMultiSigAddress;
     this.web3 = new Web3(`${process.env.ETH_NODE_URL}/${process.env.INFURA_PROJECT_ID}`);
     this.logsMessenger = new Messenger(new HttpProvider(process.env.HMY_NODE_URL));
+    this.init();
 
     setInterval(this.checkEvents, CHECK_EVENTS_INTERVAL);
+  }
+
+  init() {
+    this.hmySdk = createHmySdk();
+    this.hmyManagerMultiSig = new HmyManager(hmyMultiSigWalletJson, this.hmyManagerMultiSigAddress);
   }
 
   public onEventHandler = (callback: EventHandler) => {
