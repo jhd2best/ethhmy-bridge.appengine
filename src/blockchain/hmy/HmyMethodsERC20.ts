@@ -6,13 +6,18 @@ import logger from '../../logger';
 const log = logger.module('validator:hmyMethodsERC20');
 import { sleep } from '../utils';
 import { createHmySdk } from './index';
-
+import { HmyManager } from './HmyManager';
 const tokenJson = require('../contracts/MyERC20.json');
+import hmyManagerERC20Json = require('../contracts/HmyManagerERC20.json');
 
 export class HmyMethodsERC20 extends HmyMethodsBase {
   hmySdk: Harmony;
   hmyTokenContract: Contract;
   options = { gasPrice: 1000000000, gasLimit: 6721900 };
+
+  initHmyManager = () => {
+    this.hmyManager = new HmyManager(hmyManagerERC20Json, this.hmyManagerAddress);
+  };
 
   getMappingFor = async erc20TokenAddr => {
     const res = await this.hmyManager.contract.methods.mappings(erc20TokenAddr).call(this.options);
@@ -45,7 +50,7 @@ export class HmyMethodsERC20 extends HmyMethodsBase {
 
       await sleep(5000);
 
-      this.hmySdk = createHmySdk()
+      this.hmySdk = createHmySdk();
 
       return 0;
     }

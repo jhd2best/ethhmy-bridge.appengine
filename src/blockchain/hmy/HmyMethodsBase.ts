@@ -48,7 +48,10 @@ export class HmyMethodsBase extends EventsConstructor {
     this.hmyManagerAddress = hmyManagerAddress;
     this.hmyManagerMultiSigAddress = hmyManagerMultiSigAddress;
 
-    this.init();
+    this.initHmySdk();
+    this.initHmyManager();
+    this.initHmyManagerMultiSig();
+    this.initHmyTokenContract();
 
     if (options) {
       this.options = options;
@@ -61,16 +64,24 @@ export class HmyMethodsBase extends EventsConstructor {
     this.hmyEventsTracker.onEventHandler(this.eventHandler);
   }
 
-  init() {
+  initHmySdk = () => {
     this.hmySdk = createHmySdk();
-    this.hmyManager = new HmyManager(hmyManagerJson, this.hmyManagerAddress);
-    this.hmyManagerMultiSig = new HmyManager(hmyMultiSigWalletJson, this.hmyManagerMultiSigAddress);
+  };
 
+  initHmyManager = () => {
+    this.hmyManager = new HmyManager(hmyManagerJson, this.hmyManagerAddress);
+  };
+
+  initHmyManagerMultiSig = () => {
+    this.hmyManagerMultiSig = new HmyManager(hmyMultiSigWalletJson, this.hmyManagerMultiSigAddress);
+  };
+
+  initHmyTokenContract = () => {
     this.hmyTokenContract = this.hmySdk.contracts.createContract(
       erc20Json.abi,
       this.hmyTokenContractAddress
     );
-  }
+  };
 
   isWSConnected = () => {
     return true;
@@ -231,7 +242,7 @@ export class HmyMethodsBase extends EventsConstructor {
 
       await sleep(5000);
 
-      this.hmySdk = createHmySdk()
+      this.hmySdk = createHmySdk();
 
       this.hmyTokenContract = this.hmySdk.contracts.createContract(
         erc20Json.abi,
