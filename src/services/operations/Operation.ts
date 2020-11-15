@@ -1,4 +1,4 @@
-import { OPERATION_TYPE, STATUS, TOKEN } from './interfaces';
+import { ACTION_TYPE, OPERATION_TYPE, STATUS, TOKEN } from './interfaces';
 import { Action } from './Action';
 import { generateActionsPool } from './generateActionsPool';
 import logger from '../../logger';
@@ -58,6 +58,15 @@ export class Operation {
     this.status = params.status;
 
     if (!!this.status) {
+      // check to rollbackAction
+      const lastAction = params.actions[params.actions.length - 1];
+
+      if (
+        [ACTION_TYPE.mintTokenRollback, ACTION_TYPE.unlockTokenRollback].includes(lastAction.type)
+      ) {
+        this.actions = this.actions.concat(this.rollbackActions);
+      }
+
       // init from DB
       this.actions.forEach(action => {
         const actionFromDB = params.actions.find(a => a.type === action.type);

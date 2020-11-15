@@ -10,7 +10,7 @@ import { ActionsQueue } from '../helpers/ActionsQueue';
 const log = logger.module('validator:hmyMethodsBase');
 
 import erc20Json = require('../contracts/MyERC20.json');
-import hmyManagerJson = require('../contracts/LINKHmyManager.json');
+import hmyManagerJsonLINK = require('../contracts/LINKHmyManager.json');
 import hmyMultiSigWalletJson = require('../contracts/MultiSigWallet.json');
 import { createHmySdk } from './index';
 
@@ -22,6 +22,7 @@ interface IHmyMethodsInitParams {
   options?: { gasPrice: number; gasLimit: number };
   hmyEventsTracker: HmyEventsTracker;
   hmyTokenContractAddress: string;
+  hmyManagerJson?: any;
 }
 
 export class HmyMethodsBase extends EventsConstructor {
@@ -30,6 +31,7 @@ export class HmyMethodsBase extends EventsConstructor {
   hmyTokenContractAddress: string;
   hmyManagerAddress: string;
   hmyManagerMultiSigAddress: string;
+  hmyManagerJson: any;
   hmyManager: HmyManager;
   hmyManagerMultiSig: HmyManager;
   hmyEventsTracker: HmyEventsTracker;
@@ -41,12 +43,14 @@ export class HmyMethodsBase extends EventsConstructor {
     options,
     hmyManagerMultiSigAddress,
     hmyEventsTracker,
+    hmyManagerJson,
   }: IHmyMethodsInitParams) {
     super();
 
     this.hmyTokenContractAddress = hmyTokenContractAddress;
     this.hmyManagerAddress = hmyManagerAddress;
     this.hmyManagerMultiSigAddress = hmyManagerMultiSigAddress;
+    this.hmyManagerJson = hmyManagerJson || hmyManagerJsonLINK;
 
     this.initHmySdk();
     this.initHmyManager();
@@ -69,7 +73,7 @@ export class HmyMethodsBase extends EventsConstructor {
   };
 
   initHmyManager = () => {
-    this.hmyManager = new HmyManager(hmyManagerJson, this.hmyManagerAddress);
+    this.hmyManager = new HmyManager(this.hmyManagerJson, this.hmyManagerAddress);
   };
 
   initHmyManagerMultiSig = () => {

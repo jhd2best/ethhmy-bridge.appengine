@@ -6,7 +6,6 @@ import logger from '../../logger';
 const log = logger.module('validator:hmyMethodsERC20');
 import { sleep } from '../utils';
 import { createHmySdk } from './index';
-import { HmyManager } from './HmyManager';
 const tokenJson = require('../contracts/MyERC20.json');
 import hmyManagerERC20Json = require('../contracts/HmyManagerERC20.json');
 
@@ -15,9 +14,9 @@ export class HmyMethodsERC20 extends HmyMethodsBase {
   hmyTokenContract: Contract;
   options = { gasPrice: 1000000000, gasLimit: 6721900 };
 
-  initHmyManager = () => {
-    this.hmyManager = new HmyManager(hmyManagerERC20Json, this.hmyManagerAddress);
-  };
+  constructor(params) {
+    super({ ...params, hmyManagerJson: hmyManagerERC20Json });
+  }
 
   getMappingFor = async erc20TokenAddr => {
     const res = await this.hmyManager.contract.methods.mappings(erc20TokenAddr).call(this.options);
