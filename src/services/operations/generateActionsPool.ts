@@ -83,7 +83,7 @@ const ethToOneERC20 = (
   });
 
   const unlockTokenRollbackAction = new Action({
-    type: ACTION_TYPE.unlockToken,
+    type: ACTION_TYPE.unlockTokenRollback,
     callFunction: () => {
       return eventWrapper(ethMethods, 'Unlocked', lockTokenAction.transactionHash, async () => {
         const approvalLog = ethMethods.decodeApprovalLog(approveEthMangerAction.payload);
