@@ -394,6 +394,165 @@ const hmyToEth = (hmyMethods: hmyContract.HmyMethods, ethMethods: ethContract.Et
   };
 };
 
+const ethToOneETH = (
+  hmyMethods: hmyContract.HmyMethodsERC20,
+  ethMethods: ethContract.EthMethodsERC20,
+  params: IOperationInitParams
+) => {
+  const lockTokenAction = new Action({
+    type: ACTION_TYPE.lockToken,
+    awaitConfirmation: true,
+    callFunction: async hash => await ethMethods.waitTransaction(hash),
+  });
+
+  const waitingBlockNumberAction = new Action({
+    type: ACTION_TYPE.waitingBlockNumber,
+    callFunction: () =>
+      ethMethods.waitingBlockNumber(
+        lockTokenAction.payload.blockNumber,
+        lockTokenAction.payload.transactionHash,
+        msg => (waitingBlockNumberAction.message = msg)
+      ),
+  });
+
+  const mintTokenAction = new Action({
+    type: ACTION_TYPE.mintToken,
+    startRollbackOnFail: true,
+    callFunction: () => {
+      return eventWrapper(hmyMethods, 'Minted', lockTokenAction.transactionHash, async () => {
+        const lockTokenLog = ethMethods.decodeLockTokenLog(lockTokenAction.payload);
+
+        if (Number(lockTokenLog.amount) != Number(params.amount)) {
+          throw new Error('lockTokenLog.amount != params.amount');
+        }
+
+        const erc20Address = process.env.ETH_HRC20;
+
+        return await hmyMethods.mintToken(
+          erc20Address,
+          lockTokenLog.recipient,
+          lockTokenLog.amount,
+          lockTokenAction.transactionHash
+        );
+      });
+    },
+  });
+
+  const unlockTokenRollbackAction = new Action({
+    type: ACTION_TYPE.unlockTokenRollback,
+    callFunction: () => {
+      return eventWrapper(ethMethods, 'Unlocked', lockTokenAction.transactionHash, async () => {
+        const lockTokenLog = ethMethods.decodeLockTokenLog(lockTokenAction.payload);
+
+        if (lockTokenLog.amount != params.amount) {
+          throw new Error('lockTokenLog.amount != params.amount');
+        }
+
+        return await ethMethods.unlockTokenEth(
+          lockTokenLog.sender,
+          lockTokenLog.amount,
+          lockTokenAction.transactionHash
+        );
+      });
+    },
+  });
+
+  return {
+    actions: [lockTokenAction, waitingBlockNumberAction, mintTokenAction],
+    rollbackActions: [unlockTokenRollbackAction],
+  };
+};
+
+const hmyToEthETH = (
+  hmyMethods: hmyContract.HmyMethodsERC20,
+  ethMethods: ethContract.EthMethodsERC20,
+  params: IOperationInitParams
+) => {
+  const approveHmyMangerAction = new Action({
+    type: ACTION_TYPE.approveHmyManger,
+    awaitConfirmation: true,
+    callFunction: hash => hmyMethods.getTransactionReceipt(hash),
+  });
+
+  const burnTokenAction = new Action({
+    type: ACTION_TYPE.burnToken,
+    awaitConfirmation: true,
+    callFunction: hash => hmyMethods.getTransactionReceipt(hash),
+  });
+
+  const unlockTokenAction = new Action({
+    type: ACTION_TYPE.unlockToken,
+    startRollbackOnFail: true,
+    callFunction: () => {
+      return eventWrapper(ethMethods, 'Unlocked', burnTokenAction.transactionHash, async () => {
+        const approvalLog = hmyMethods.decodeApprovalLog(approveHmyMangerAction.payload);
+
+        if (approvalLog.spender.toUpperCase() != hmyMethods.hmyManager.address.toUpperCase()) {
+          throw new Error('approvalLog.spender != hmyManager.address');
+        }
+
+        const burnTokenLog = hmyMethods.decodeBurnTokenLog(burnTokenAction.payload);
+
+        if (burnTokenLog.amount != approvalLog.value) {
+          throw new Error('burnTokenLog.amount != approvalLog.value');
+        }
+
+        console.log(
+          'before unlockToken',
+          params.erc20Address,
+          burnTokenLog.recipient,
+          burnTokenLog.amount,
+          burnTokenAction.transactionHash
+        );
+
+        return await ethMethods.unlockToken(
+          params.erc20Address,
+          burnTokenLog.recipient,
+          burnTokenLog.amount,
+          burnTokenAction.transactionHash
+        );
+      });
+    },
+  });
+
+  const mintTokenRollbackAction = new Action({
+    type: ACTION_TYPE.mintTokenRollback,
+    callFunction: () => {
+      return eventWrapper(hmyMethods, 'Minted', burnTokenAction.transactionHash, async () => {
+        const approvalLog = hmyMethods.decodeApprovalLog(approveHmyMangerAction.payload);
+
+        if (approvalLog.spender.toUpperCase() != hmyMethods.hmyManager.address.toUpperCase()) {
+          throw new Error('approvalLog.spender != hmyManager.address');
+        }
+
+        const burnTokenLog = hmyMethods.decodeBurnTokenLog(burnTokenAction.payload);
+
+        if (burnTokenLog.amount != approvalLog.value) {
+          throw new Error('burnTokenLog.amount != approvalLog.value');
+        }
+
+        log.info('mintTokenRollbackAction', {
+          burnTokenLog,
+          approvalLog,
+          transactionHash: burnTokenAction.transactionHash,
+        });
+
+        return await hmyMethods.mintToken(
+          burnTokenLog.token,
+          burnTokenLog.sender,
+          burnTokenLog.amount,
+          burnTokenAction.transactionHash
+        );
+      });
+    },
+  });
+
+  return {
+    actions: [approveHmyMangerAction, burnTokenAction, unlockTokenAction],
+    rollbackActions: [mintTokenRollbackAction],
+  };
+};
+
 export const generateActionsPool = (
   params: IOperationInitParams
 ): { actions: Array<Action>; rollbackActions: Array<Action> } => {
@@ -405,6 +564,8 @@ export const generateActionsPool = (
         return hmyToEth(hmyContract.hmyMethodsLINK, ethContract.ethMethodsLINK);
       case TOKEN.ERC20:
         return hmyToEthERC20(hmyContract.hmyMethodsERC20, ethContract.ethMethodsERC20, params);
+      case TOKEN.ETH:
+        return hmyToEthETH(hmyContract.hmyMethodsERC20, ethContract.ethMethodsETH, params);
     }
   }
 
@@ -416,6 +577,8 @@ export const generateActionsPool = (
         return ethToOne(hmyContract.hmyMethodsLINK, ethContract.ethMethodsLINK);
       case TOKEN.ERC20:
         return ethToOneERC20(hmyContract.hmyMethodsERC20, ethContract.ethMethodsERC20, params);
+      case TOKEN.ETH:
+        return ethToOneETH(hmyContract.hmyMethodsERC20, ethContract.ethMethodsETH, params);
     }
   }
 

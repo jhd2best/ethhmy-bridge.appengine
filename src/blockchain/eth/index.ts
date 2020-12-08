@@ -48,10 +48,19 @@ export const ethMethodsLINK = new EthMethods({
 });
 
 const ethManagerERC20 = new EthManager(ethManagerERC20Json, process.env.ETH_ERC20_MANAGER_CONTRACT);
+const ethManagerETH = new EthManager(ethManagerERC20Json, process.env.ETH_MANAGER_CONTRACT);
 
 export const ethMethodsERC20 = new EthMethodsERC20({
   web3,
   ethManager: ethManagerERC20,
+  ethMultiSigManager,
+  ethToken: ethTokenBUSD,
+  ethEventsTracker,
+});
+
+export const ethMethodsETH = new EthMethodsERC20({
+  web3,
+  ethManager: ethManagerETH,
   ethMultiSigManager,
   ethToken: ethTokenBUSD,
   ethEventsTracker,
