@@ -505,8 +505,7 @@ const hmyToEthETH = (
           burnTokenAction.transactionHash
         );
 
-        return await ethMethods.unlockToken(
-          params.erc20Address,
+        return await ethMethods.unlockTokenEth(
           burnTokenLog.recipient,
           burnTokenLog.amount,
           burnTokenAction.transactionHash
