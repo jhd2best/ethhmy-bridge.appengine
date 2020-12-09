@@ -422,14 +422,14 @@ const ethToOneETH = (
       return eventWrapper(hmyMethods, 'Minted', lockTokenAction.transactionHash, async () => {
         const lockTokenLog = ethMethods.decodeLockTokenLog(lockTokenAction.payload);
 
-        if (Number(lockTokenLog.amount) != Number(params.amount)) {
-          throw new Error('lockTokenLog.amount != params.amount');
-        }
+        // if (Number(lockTokenLog.amount) != Number(params.amount)) {
+        //   throw new Error('lockTokenLog.amount != params.amount');
+        // }
 
-        const erc20Address = process.env.ETH_HRC20;
+        const hrc20Address = process.env.ETH_HRC20;
 
         return await hmyMethods.mintToken(
-          erc20Address,
+          hrc20Address,
           lockTokenLog.recipient,
           lockTokenLog.amount,
           lockTokenAction.transactionHash
