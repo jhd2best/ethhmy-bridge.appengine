@@ -66,3 +66,39 @@ export const encodeMintToken = (amount, recipient, receiptId) => {
     [amount, recipient, receiptId]
   );
 };
+
+export const encodeMintTokenErc721 = (hrc20Addr, tokenId, recipient, transactionHash) => {
+  return web3.eth.abi.encodeFunctionCall(
+    {
+      constant: false,
+      inputs: [
+        {
+          internalType: 'address',
+          name: 'oneToken',
+          type: 'address',
+        },
+        {
+          internalType: 'uint256',
+          name: 'tokenId',
+          type: 'uint256',
+        },
+        {
+          internalType: 'address',
+          name: 'recipient',
+          type: 'address',
+        },
+        {
+          internalType: 'bytes32',
+          name: 'receiptId',
+          type: 'bytes32',
+        },
+      ],
+      name: 'mintToken',
+      outputs: [],
+      payable: false,
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    [hrc20Addr, tokenId, recipient, transactionHash]
+  );
+};

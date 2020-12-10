@@ -6,9 +6,11 @@ import { HmyMethods } from './HmyMethods';
 import { HmyMethodsERC20 } from './HmyMethodsERC20';
 import { HmyEventsTracker } from './HmyEventsTracker';
 import { HmyTokensTracker } from './HmyTokensTracker';
+import { HmyMethodsERC721 } from './HmyMethodsERC721';
 
 export * from './HmyMethods';
 export * from './HmyMethodsERC20';
+export * from './HmyMethodsERC721';
 
 export const createHmySdk = () => {
   return new Harmony(
@@ -48,6 +50,13 @@ export const hmyMethodsLINK = new HmyMethods({
 export const hmyMethodsERC20 = new HmyMethodsERC20({
   hmyTokenContractAddress: '',
   hmyManagerAddress: process.env.HMY_ERC20_MANAGER_CONTRACT,
+  hmyManagerMultiSigAddress: process.env.HMY_MULTISIG_WALLET,
+  hmyEventsTracker,
+});
+
+export const hmyMethodsERC721 = new HmyMethodsERC721({
+  hmyTokenContractAddress: '',
+  hmyManagerAddress: process.env.HMY_ERC721_MANAGER_CONTRACT,
   hmyManagerMultiSigAddress: process.env.HMY_MULTISIG_WALLET,
   hmyEventsTracker,
 });
