@@ -24,9 +24,9 @@ export class HmyMethodsERC721 extends HmyMethodsBase {
     return res;
   };
 
-  addToken = async (erc20TokenAddr, name, symbol, decimals) => {
+  addToken = async (erc20TokenAddr, name, symbol) => {
     const res = await this.hmyManager.contract.methods
-      .addToken(process.env.TOKEN_MANAGER_CONTRACT, erc20TokenAddr, name, symbol, decimals)
+      .addToken(process.env.NFT_TOKEN_MANAGER_CONTRACT, erc20TokenAddr, name, symbol)
       .send(this.options);
 
     return res;
