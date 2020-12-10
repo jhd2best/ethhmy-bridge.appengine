@@ -6,8 +6,8 @@ import logger from '../../logger';
 const log = logger.module('validator:hmyMethodsERC721');
 import { sleep } from '../utils';
 import { createHmySdk } from './index';
-const tokenJson = require('../contracts/MyERC721.json');
-import hmyManagerERC20Json = require('../contracts/HmyManagerERC721.json');
+import tokenJson = require('../contracts/MyERC721.json');
+import hmyManagerERC20Json = require('../contracts/ERC721HmyManager.json');
 
 export class HmyMethodsERC721 extends HmyMethodsBase {
   hmySdk: Harmony;
