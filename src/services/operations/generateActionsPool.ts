@@ -600,17 +600,17 @@ const ethToOneERC721 = (
     startRollbackOnFail: true,
     callFunction: () => {
       return eventWrapper(hmyMethods, 'Minted', lockTokenAction.transactionHash, async () => {
-        const approvalLog = ethMethods.decodeApprovalLog(approveEthMangerAction.payload);
+        // const approvalLog = ethMethods.decodeApprovalLog(approveEthMangerAction.payload);
 
-        if (approvalLog.spender != ethMethods.ethManager.address) {
-          throw new Error('approvalLog.spender != process.env.ETH_MANAGER_CONTRACT');
-        }
+        // if (approvalLog.spender != ethMethods.ethManager.address) {
+        //   throw new Error('approvalLog.spender != process.env.ETH_MANAGER_CONTRACT');
+        // }
 
         const lockTokenLog = ethMethods.decodeLockTokenLog(lockTokenAction.payload);
 
-        if (lockTokenLog.amount != approvalLog.value) {
-          throw new Error('lockTokenLog.amount != approvalLog.value');
-        }
+        // if (lockTokenLog.amount != approvalLog.value) {
+        //   throw new Error('lockTokenLog.amount != approvalLog.value');
+        // }
 
         const erc20Address = await hmyMethods.getMappingFor(lockTokenLog.token);
 
@@ -628,23 +628,23 @@ const ethToOneERC721 = (
     type: ACTION_TYPE.unlockTokenRollback,
     callFunction: () => {
       return eventWrapper(ethMethods, 'Unlocked', lockTokenAction.transactionHash, async () => {
-        const approvalLog = ethMethods.decodeApprovalLog(approveEthMangerAction.payload);
-
-        if (approvalLog.spender != ethMethods.ethManager.address) {
-          throw new Error('approvalLog.spender != process.env.ETH_MANAGER_CONTRACT');
-        }
+        // const approvalLog = ethMethods.decodeApprovalLog(approveEthMangerAction.payload);
+        //
+        // if (approvalLog.spender != ethMethods.ethManager.address) {
+        //   throw new Error('approvalLog.spender != process.env.ETH_MANAGER_CONTRACT');
+        // }
 
         const lockTokenLog = ethMethods.decodeLockTokenLog(lockTokenAction.payload);
 
-        if (lockTokenLog.amount != approvalLog.value) {
-          throw new Error('lockTokenLog.amount != approvalLog.value');
-        }
+        // if (lockTokenLog.amount != approvalLog.value) {
+        //   throw new Error('lockTokenLog.amount != approvalLog.value');
+        // }
 
-        log.info('unlockTokenRollbackAction', {
-          lockTokenLog,
-          approvalLog,
-          transactionHash: lockTokenAction.transactionHash,
-        });
+        // log.info('unlockTokenRollbackAction', {
+        //   lockTokenLog,
+        //   approvalLog,
+        //   transactionHash: lockTokenAction.transactionHash,
+        // });
 
         return await ethMethods.unlockToken(
           lockTokenLog.token,
