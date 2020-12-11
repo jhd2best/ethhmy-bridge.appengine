@@ -706,14 +706,14 @@ const hmyToEthERC721 = (
           'before unlockToken',
           params.erc20Address,
           burnTokenLog.recipient,
-          burnTokenLog.amount,
+          burnTokenLog.tokenId,
           burnTokenAction.transactionHash
         );
 
         return await ethMethods.unlockToken(
           params.erc20Address,
           burnTokenLog.recipient,
-          burnTokenLog.amount,
+          burnTokenLog.tokenId,
           burnTokenAction.transactionHash
         );
       });
@@ -745,7 +745,7 @@ const hmyToEthERC721 = (
         return await hmyMethods.mintToken(
           burnTokenLog.token,
           burnTokenLog.sender,
-          burnTokenLog.amount,
+          burnTokenLog.tokenId,
           burnTokenAction.transactionHash
         );
       });

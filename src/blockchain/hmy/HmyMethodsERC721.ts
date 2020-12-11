@@ -7,7 +7,7 @@ const log = logger.module('validator:hmyMethodsERC721');
 import { sleep } from '../utils';
 import { createHmySdk } from './index';
 import tokenJson = require('../contracts/MyERC721.json');
-import hmyManagerERC20Json = require('../contracts/ERC721HmyManager.json');
+import hmyManagerERC721Json = require('../contracts/ERC721HmyManager.json');
 
 export class HmyMethodsERC721 extends HmyMethodsBase {
   hmySdk: Harmony;
@@ -15,7 +15,7 @@ export class HmyMethodsERC721 extends HmyMethodsBase {
   options = { gasPrice: 1000000000, gasLimit: 6721900 };
 
   constructor(params) {
-    super({ ...params, hmyManagerJson: hmyManagerERC20Json });
+    super({ ...params, hmyManagerJson: hmyManagerERC721Json });
   }
 
   getMappingFor = async erc20TokenAddr => {
