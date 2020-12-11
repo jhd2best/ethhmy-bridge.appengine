@@ -690,17 +690,17 @@ const hmyToEthERC721 = (
     startRollbackOnFail: true,
     callFunction: () => {
       return eventWrapper(ethMethods, 'Unlocked', burnTokenAction.transactionHash, async () => {
-        const approvalLog = hmyMethods.decodeApprovalLog(approveHmyMangerAction.payload);
+        // const approvalLog = hmyMethods.decodeApprovalLog(approveHmyMangerAction.payload);
 
-        if (approvalLog.spender.toUpperCase() != hmyMethods.hmyManager.address.toUpperCase()) {
-          throw new Error('approvalLog.spender != hmyManager.address');
-        }
+        // if (approvalLog.spender.toUpperCase() != hmyMethods.hmyManager.address.toUpperCase()) {
+        //   throw new Error('approvalLog.spender != hmyManager.address');
+        // }
 
         const burnTokenLog = hmyMethods.decodeBurnTokenLog(burnTokenAction.payload);
 
-        if (burnTokenLog.amount != approvalLog.value) {
-          throw new Error('burnTokenLog.amount != approvalLog.value');
-        }
+        // if (burnTokenLog.amount != approvalLog.value) {
+        //   throw new Error('burnTokenLog.amount != approvalLog.value');
+        // }
 
         console.log(
           'before unlockToken',
@@ -724,23 +724,23 @@ const hmyToEthERC721 = (
     type: ACTION_TYPE.mintTokenRollback,
     callFunction: () => {
       return eventWrapper(hmyMethods, 'Minted', burnTokenAction.transactionHash, async () => {
-        const approvalLog = hmyMethods.decodeApprovalLog(approveHmyMangerAction.payload);
+        // const approvalLog = hmyMethods.decodeApprovalLog(approveHmyMangerAction.payload);
 
-        if (approvalLog.spender.toUpperCase() != hmyMethods.hmyManager.address.toUpperCase()) {
-          throw new Error('approvalLog.spender != hmyManager.address');
-        }
+        // if (approvalLog.spender.toUpperCase() != hmyMethods.hmyManager.address.toUpperCase()) {
+        //   throw new Error('approvalLog.spender != hmyManager.address');
+        // }
 
         const burnTokenLog = hmyMethods.decodeBurnTokenLog(burnTokenAction.payload);
 
-        if (burnTokenLog.amount != approvalLog.value) {
-          throw new Error('burnTokenLog.amount != approvalLog.value');
-        }
+        // if (burnTokenLog.amount != approvalLog.value) {
+        //   throw new Error('burnTokenLog.amount != approvalLog.value');
+        // }
 
-        log.info('mintTokenRollbackAction', {
-          burnTokenLog,
-          approvalLog,
-          transactionHash: burnTokenAction.transactionHash,
-        });
+        // log.info('mintTokenRollbackAction', {
+        //   burnTokenLog,
+        //   approvalLog,
+        //   transactionHash: burnTokenAction.transactionHash,
+        // });
 
         return await hmyMethods.mintToken(
           burnTokenLog.token,
