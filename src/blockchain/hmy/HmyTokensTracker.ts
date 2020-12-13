@@ -3,10 +3,9 @@ import { Contract } from '@harmony-js/contract';
 import { Messenger, HttpProvider } from '@harmony-js/network';
 import Web3 from 'web3';
 import { sleep } from '../utils';
-import tokenManagerJson = require('../contracts/TokenManager.json');
-import { ethMethodsERC20 } from '../eth';
 import logger from '../../logger';
 import { createHmySdk } from './index';
+import { EthMethodsERC20, EthMethodsERC721 } from '../eth';
 const log = logger.module('validator:tokensTracker');
 
 const CHECK_EVENTS_INTERVAL = 30000;
@@ -27,42 +26,61 @@ interface IGetEventsParams {
   toBlock: number;
 }
 
+interface IHmyTokensTrackerParams {
+  ethMethods: EthMethodsERC20 | EthMethodsERC721;
+  type: 'erc20' | 'erc721';
+  tokenManagerJsonAbi: any;
+  tokenManagerAddress: string;
+}
+
 export class HmyTokensTracker {
   lastBlock = 0;
   tokenManagerContract: Contract;
+  ethMethods: EthMethodsERC20 | EthMethodsERC721;
+
+  tokenManagerJsonAbi: any;
+  tokenManagerAddress: string;
+
   hmySdk: Harmony;
   web3: Web3;
   logsMessenger: Messenger;
 
   tokens: ITokenInfo[] = [];
 
-  constructor() {
+  constructor(params: IHmyTokensTrackerParams) {
     this.hmySdk = createHmySdk();
     this.web3 = new Web3(`${process.env.ETH_NODE_URL}/${process.env.INFURA_PROJECT_ID}`);
     this.logsMessenger = new Messenger(new HttpProvider(process.env.HMY_NODE_URL));
 
+    this.tokenManagerJsonAbi = params.tokenManagerJsonAbi;
+    this.tokenManagerAddress = params.tokenManagerAddress;
+
     this.tokenManagerContract = this.hmySdk.contracts.createContract(
-      tokenManagerJson.abi,
-      process.env.TOKEN_MANAGER_CONTRACT
+      this.tokenManagerJsonAbi,
+      this.tokenManagerAddress
     );
 
+    this.ethMethods = params.ethMethods;
+
     if (process.env.HMY_TOKENS_TRACKER_ENABLE === 'true') {
-      this.tokens = [
-        {
-          name: 'Binance USD',
-          symbol: 'BUSD',
-          decimals: '18',
-          erc20Address: process.env.ETH_BUSD_CONTRACT,
-          hrc20Address: process.env.HMY_BUSD_CONTRACT,
-        },
-        {
-          name: 'ChainLink Token',
-          symbol: 'LINK',
-          decimals: '18',
-          erc20Address: process.env.ETH_LINK_CONTRACT,
-          hrc20Address: process.env.HMY_LINK_CONTRACT,
-        },
-      ];
+      if (params.type === 'erc20') {
+        this.tokens = [
+          {
+            name: 'Binance USD',
+            symbol: 'BUSD',
+            decimals: '18',
+            erc20Address: process.env.ETH_BUSD_CONTRACT,
+            hrc20Address: process.env.HMY_BUSD_CONTRACT,
+          },
+          {
+            name: 'ChainLink Token',
+            symbol: 'LINK',
+            decimals: '18',
+            erc20Address: process.env.ETH_LINK_CONTRACT,
+            hrc20Address: process.env.HMY_LINK_CONTRACT,
+          },
+        ];
+      }
 
       console.log('HMY_TOKENS_TRACKER_ENABLE: true');
 
@@ -118,7 +136,7 @@ export class HmyTokensTracker {
       try {
         for (let j = 0; j < logs.length; j++) {
           const token = logs[j];
-          const [name, symbol, decimals] = await ethMethodsERC20.tokenDetails(token.tokenReq);
+          const [name, symbol, decimals] = await this.ethMethods.tokenDetails(token.tokenReq);
 
           result.push({
             erc20Address: token.tokenReq,

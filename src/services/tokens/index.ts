@@ -1,6 +1,11 @@
 import axios from 'axios';
 import { DBService } from '../database';
-import { hmyTokensTracker, hmyMethodsERC20, hmyMethodsLINK } from '../../blockchain/hmy';
+import {
+  hmyTokensTrackerERC20,
+  hmyTokensTrackerERC721,
+  hmyMethodsERC20,
+  hmyMethodsLINK,
+} from '../../blockchain/hmy';
 import logger from '../../logger';
 import { divDecimals } from './helpers';
 
@@ -13,7 +18,7 @@ export interface IOperationService {
 export interface ITokenInfo {
   name: string;
   symbol: string;
-  decimals: string;
+  decimals?: string;
   erc20Address: string;
   hrc20Address: string;
   totalLocked: string;
@@ -86,7 +91,10 @@ export class Tokens {
   };
 
   getTotalLocked = async () => {
-    const tokens = hmyTokensTracker.getTokens();
+    const erc20Tokens = hmyTokensTrackerERC20.getTokens();
+    const erc721Tokens = hmyTokensTrackerERC721.getTokens();
+
+    const tokens = [].concat(erc20Tokens, erc721Tokens);
 
     const newTokens = [];
 
