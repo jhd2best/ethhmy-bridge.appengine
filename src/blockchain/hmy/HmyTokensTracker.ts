@@ -166,7 +166,7 @@ export class HmyTokensTracker {
     while (i > 0) {
       const newTokens = await this.getEvents({
         contract: this.tokenManagerContract,
-        address: process.env.TOKEN_MANAGER_CONTRACT,
+        address: this.tokenManagerAddress,
         event: 'TokenMapAck',
         fromBlock: Math.max(i - step, 0),
         toBlock: i,
@@ -193,7 +193,7 @@ export class HmyTokensTracker {
     if (latest > this.lastBlock) {
       const newTokens = await this.getEvents({
         contract: this.tokenManagerContract,
-        address: process.env.TOKEN_MANAGER_CONTRACT,
+        address: this.tokenManagerAddress,
         event: 'TokenMapAck',
         fromBlock: this.lastBlock,
         toBlock: latest,

@@ -94,8 +94,16 @@ export class Tokens {
     const erc20Tokens = hmyTokensTrackerERC20.getTokens();
     const erc721Tokens = hmyTokensTrackerERC721.getTokens();
 
-    const tokens = [].concat(erc20Tokens, erc721Tokens);
+    const erc20TokensLocked = await this.getTotalLockedByType(erc20Tokens, 'erc20');
+    const erc721TokensLocked = await this.getTotalLockedByType(erc721Tokens, 'erc721');
 
+    const allTokens = [].concat(erc20TokensLocked, erc721TokensLocked);
+
+    this.tokens = allTokens;
+    this.lastUpdateTime = Date.now();
+  };
+
+  getTotalLockedByType = async (tokens, type) => {
     const newTokens = [];
 
     for (let i = 0; i < tokens.length; i++) {
@@ -131,11 +139,11 @@ export class Tokens {
         totalLockedNormal,
         usdPrice,
         totalLockedUSD,
+        type,
       });
     }
 
-    this.tokens = newTokens;
-    this.lastUpdateTime = Date.now();
+    return newTokens;
   };
 
   getAllTokens = (params: { size: number; page: number }) => {
