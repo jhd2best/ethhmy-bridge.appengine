@@ -1,6 +1,6 @@
 import { ACTION_TYPE, OPERATION_TYPE, STATUS, TOKEN } from './interfaces';
 import { Action } from './Action';
-import { generateActionsPool } from './generateActionsPool';
+import { generateActionsPool } from './actions-pool';
 import logger from '../../logger';
 
 const log = logger.module('validator:operation');

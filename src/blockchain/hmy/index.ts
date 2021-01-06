@@ -4,6 +4,7 @@ import { ChainType } from '@harmony-js/utils';
 import { HmyMethods } from './HmyMethods';
 
 import { HmyMethodsERC20 } from './HmyMethodsERC20';
+import { HmyMethodsHRC20 } from './HmyMethodsHRC20';
 import { HmyEventsTracker } from './HmyEventsTracker';
 import { HmyTokensTracker } from './HmyTokensTracker';
 import { HmyMethodsERC721 } from './HmyMethodsERC721';
@@ -14,6 +15,7 @@ import tokenManagerJsonERC721 = require('../contracts/NFTTokenManager.json');
 
 export * from './HmyMethods';
 export * from './HmyMethodsERC20';
+export * from './HmyMethodsHRC20';
 export * from './HmyMethodsERC721';
 
 export const createHmySdk = () => {
@@ -54,6 +56,13 @@ export const hmyMethodsLINK = new HmyMethods({
 export const hmyMethodsERC20 = new HmyMethodsERC20({
   hmyTokenContractAddress: '',
   hmyManagerAddress: process.env.HMY_ERC20_MANAGER_CONTRACT,
+  hmyManagerMultiSigAddress: process.env.HMY_MULTISIG_WALLET,
+  hmyEventsTracker,
+});
+
+export const hmyMethodsHRC20 = new HmyMethodsHRC20({
+  hmyTokenContractAddress: '',
+  hmyManagerAddress: process.env.HMY_HRC20_MANAGER_CONTRACT,
   hmyManagerMultiSigAddress: process.env.HMY_MULTISIG_WALLET,
   hmyEventsTracker,
 });

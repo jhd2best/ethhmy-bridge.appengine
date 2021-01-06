@@ -7,6 +7,7 @@ export enum TOKEN {
   BUSD = 'busd',
   LINK = 'link',
   ERC20 = 'erc20',
+  HRC20 = 'hrc20',
   ETH = 'eth',
   ERC721 = 'erc721',
 }
@@ -18,7 +19,10 @@ export enum ACTION_TYPE {
   'lockToken' = 'lockToken',
   'waitingBlockNumber' = 'waitingBlockNumber',
   'mintToken' = 'mintToken',
+  'lockHmyToken' = 'lockHmyToken',
+  'unlockHmyToken' = 'unlockHmyToken',
   'mintTokenRollback' = 'mintTokenRollback',
+  'unlockHmyTokenRollback' = 'unlockHmyTokenRollback',
 
   // ONE_TO_ETH
   'approveHmyManger' = 'approveHmyManger',
@@ -26,6 +30,9 @@ export enum ACTION_TYPE {
   'waitingBlockNumberHarmony' = 'waitingBlockNumberHarmony',
   'unlockToken' = 'unlockToken',
   'unlockTokenRollback' = 'unlockTokenRollback',
+  'mintEthTokenRollback' = 'mintEthTokenRollback',
+  'burnEthToken' = 'burnEthToken',
+  'mintEthToken' = 'mintEthToken',
 }
 
 export enum STATUS {
