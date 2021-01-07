@@ -108,6 +108,7 @@ export class OperationService {
         id: params.id,
         type: params.type,
         erc20Address: params.erc20Address,
+        hrc20Address: params.hrc20Address,
         token: params.token,
         ethAddress: params.ethAddress,
         oneAddress: params.oneAddress,

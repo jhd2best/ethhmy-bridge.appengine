@@ -44,6 +44,7 @@ export class Operation {
     this.amount = params.amount;
     this.type = params.type;
     this.erc20Address = params.erc20Address;
+    this.hrc20Address = params.hrc20Address;
     this.token = params.token;
 
     this.timestamp = !!params.status ? params.timestamp : Math.round(+new Date() / 1000);
