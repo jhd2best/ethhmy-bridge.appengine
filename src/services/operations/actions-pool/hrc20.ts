@@ -14,7 +14,7 @@ export const hmyToEthHRC20 = (
   params: IOperationInitParams
 ) => {
   const getHRC20AddressAction = new Action({
-    type: ACTION_TYPE.getHRC20Address,
+    type: ACTION_TYPE.getERC20Address,
     callFunction: async () => {
       let transaction = {};
       let hrc20Address = await ethMethods.getMappingFor(params.hrc20Address);
@@ -30,13 +30,13 @@ export const hmyToEthHRC20 = (
   });
 
   const approveEthMangerAction = new Action({
-    type: ACTION_TYPE.approveHmyManger,
+    type: ACTION_TYPE.approveHRC20HmyManger,
     awaitConfirmation: true,
     callFunction: async hash => await hmyMethods.getTransactionReceipt(hash),
   });
 
   const lockTokenAction = new Action({
-    type: ACTION_TYPE.lockHmyToken,
+    type: ACTION_TYPE.lockHRC20Token,
     awaitConfirmation: true,
     callFunction: async hash => await hmyMethods.getTransactionReceipt(hash),
   });
@@ -52,7 +52,7 @@ export const hmyToEthHRC20 = (
   // });
 
   const mintTokenAction = new Action({
-    type: ACTION_TYPE.mintEthToken,
+    type: ACTION_TYPE.mintHRC20Token,
     startRollbackOnFail: true,
     callFunction: () => {
       return eventWrapper(ethMethods, 'Minted', lockTokenAction.transactionHash, async () => {
@@ -87,7 +87,7 @@ export const hmyToEthHRC20 = (
   });
 
   const unlockTokenRollbackAction = new Action({
-    type: ACTION_TYPE.unlockHmyTokenRollback,
+    type: ACTION_TYPE.unlockHRC20TokenRollback,
     callFunction: () => {
       return eventWrapper(hmyMethods, 'Unlocked', lockTokenAction.transactionHash, async () => {
         const approvalLog = hmyMethods.decodeApprovalLog(approveEthMangerAction.payload);
@@ -142,13 +142,13 @@ export const ethToOneHRC20 = (
   params: IOperationInitParams
 ) => {
   const approveEthMangerAction = new Action({
-    type: ACTION_TYPE.approveEthManger,
+    type: ACTION_TYPE.approveHRC20EthManger,
     awaitConfirmation: true,
     callFunction: hash => ethMethods.waitTransaction(hash),
   });
 
   const burnTokenAction = new Action({
-    type: ACTION_TYPE.burnEthToken,
+    type: ACTION_TYPE.burnHRC20Token,
     awaitConfirmation: true,
     callFunction: hash => ethMethods.waitTransaction(hash),
   });
@@ -164,7 +164,7 @@ export const ethToOneHRC20 = (
   });
 
   const unlockTokenAction = new Action({
-    type: ACTION_TYPE.unlockHmyToken,
+    type: ACTION_TYPE.unlockHRC20Token,
     startRollbackOnFail: true,
     callFunction: () => {
       return eventWrapper(hmyMethods, 'Unlocked', burnTokenAction.transactionHash, async () => {
@@ -199,7 +199,7 @@ export const ethToOneHRC20 = (
   });
 
   const mintTokenRollbackAction = new Action({
-    type: ACTION_TYPE.mintEthTokenRollback,
+    type: ACTION_TYPE.mintHRC20TokenRollback,
     callFunction: () => {
       return eventWrapper(ethMethods, 'Minted', burnTokenAction.transactionHash, async () => {
         const approvalLog = ethMethods.decodeApprovalLog(approveEthMangerAction.payload);

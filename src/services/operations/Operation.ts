@@ -63,7 +63,12 @@ export class Operation {
       const lastAction = params.actions[params.actions.length - 1];
 
       if (
-        [ACTION_TYPE.mintTokenRollback, ACTION_TYPE.unlockTokenRollback].includes(lastAction.type)
+        [
+          ACTION_TYPE.mintTokenRollback,
+          ACTION_TYPE.unlockTokenRollback,
+          ACTION_TYPE.mintHRC20TokenRollback,
+          ACTION_TYPE.unlockHRC20TokenRollback,
+        ].includes(lastAction.type)
       ) {
         this.actions = this.actions.concat(this.rollbackActions);
       }

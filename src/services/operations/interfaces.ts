@@ -19,10 +19,7 @@ export enum ACTION_TYPE {
   'lockToken' = 'lockToken',
   'waitingBlockNumber' = 'waitingBlockNumber',
   'mintToken' = 'mintToken',
-  'lockHmyToken' = 'lockHmyToken',
-  'unlockHmyToken' = 'unlockHmyToken',
   'mintTokenRollback' = 'mintTokenRollback',
-  'unlockHmyTokenRollback' = 'unlockHmyTokenRollback',
 
   // ONE_TO_ETH
   'approveHmyManger' = 'approveHmyManger',
@@ -30,9 +27,17 @@ export enum ACTION_TYPE {
   'waitingBlockNumberHarmony' = 'waitingBlockNumberHarmony',
   'unlockToken' = 'unlockToken',
   'unlockTokenRollback' = 'unlockTokenRollback',
-  'mintEthTokenRollback' = 'mintEthTokenRollback',
-  'burnEthToken' = 'burnEthToken',
-  'mintEthToken' = 'mintEthToken',
+
+  // HRC20
+  'approveHRC20HmyManger' = 'approveHRC20HmyManger',
+  'approveHRC20EthManger' = 'approveHRC20EthManger',
+  'getERC20Address' = 'getERC20Address',
+  'lockHRC20Token' = 'lockHRC20Token',
+  'unlockHRC20Token' = 'unlockHRC20Token',
+  'burnHRC20Token' = 'burnHRC20Token',
+  'mintHRC20Token' = 'mintHRC20Token',
+  'unlockHRC20TokenRollback' = 'unlockHRC20TokenRollback',
+  'mintHRC20TokenRollback' = 'mintHRC20TokenRollback',
 }
 
 export enum STATUS {
