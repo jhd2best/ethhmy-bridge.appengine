@@ -58,8 +58,14 @@ export const hmyToEthHRC20 = (
       return eventWrapper(ethMethods, 'Minted', lockTokenAction.transactionHash, async () => {
         const approvalLog = hmyMethods.decodeApprovalLog(approveEthMangerAction.payload);
 
-        if (approvalLog.spender != hmyMethods.hmyManager.address) {
-          throw new Error('approvalLog.spender != process.env.ETH_MANAGER_CONTRACT');
+        if (approvalLog.spender.toUpperCase() != hmyMethods.hmyManager.address.toUpperCase()) {
+          throw new Error(
+            'approvalLog.spender != process.env.ETH_MANAGER_CONTRACT' +
+              ':' +
+              approvalLog.spender +
+              ':' +
+              hmyMethods.hmyManager.address
+          );
         }
 
         const lockTokenLog = hmyMethods.decodeLockTokenLog(lockTokenAction.payload);
@@ -86,8 +92,14 @@ export const hmyToEthHRC20 = (
       return eventWrapper(hmyMethods, 'Unlocked', lockTokenAction.transactionHash, async () => {
         const approvalLog = hmyMethods.decodeApprovalLog(approveEthMangerAction.payload);
 
-        if (approvalLog.spender != hmyMethods.hmyManager.address) {
-          throw new Error('approvalLog.spender != process.env.ETH_MANAGER_CONTRACT');
+        if (approvalLog.spender.toUpperCase() != hmyMethods.hmyManager.address.toUpperCase()) {
+          throw new Error(
+            'approvalLog.spender != process.env.ETH_MANAGER_CONTRACT' +
+              ':' +
+              approvalLog.spender +
+              ':' +
+              hmyMethods.hmyManager.address
+          );
         }
 
         const lockTokenLog = hmyMethods.decodeLockTokenLog(lockTokenAction.payload);
