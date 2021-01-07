@@ -37,15 +37,6 @@ export class EthMethodsBase extends EventsConstructor {
     this.ethMultiSigManager = params.ethMultiSigManager;
     this.ethToken = params.ethToken;
     this.ethEventsTracker = params.ethEventsTracker;
-
-    // subscribe current manager to Submission events
-    this.ethEventsTracker.addTrack(
-      'Unlocked',
-      this.ethManager.contract,
-      this.eventHandler,
-      () => !!Object.keys(this.subscribers).length
-    );
-    this.ethEventsTracker.onEventHandler(this.eventHandler);
   }
 
   isWSConnected = () => {

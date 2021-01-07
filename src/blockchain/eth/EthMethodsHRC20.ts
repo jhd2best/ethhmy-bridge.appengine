@@ -1,11 +1,24 @@
 import BN from 'bn.js';
-import { EthMethodsBase } from './EthMethodsBase';
+import { EthMethodsBase, IEthMethodsInitParams } from './EthMethodsBase';
 import { encodeMintTokenHrc20 } from './eth-encoders';
 import erc20Json = require('../contracts/MyERC20.json');
 import { TransactionReceipt } from 'web3-core';
 import { sleep } from '../utils';
 
 export class EthMethodsHRC20 extends EthMethodsBase {
+  constructor(params: IEthMethodsInitParams) {
+    super(params);
+
+    // subscribe current manager to Submission events
+    this.ethEventsTracker.addTrack(
+      'Minted',
+      this.ethManager.contract,
+      this.eventHandler,
+      () => !!Object.keys(this.subscribers).length
+    );
+    this.ethEventsTracker.onEventHandler(this.eventHandler);
+  }
+
   getMappingFor = async hrc20TokenAddr => {
     const res = await this.ethManager.contract.methods.mappings(hrc20TokenAddr).call();
 

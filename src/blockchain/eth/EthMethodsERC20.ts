@@ -1,9 +1,22 @@
 import { TransactionReceipt } from 'web3-core';
 import erc20Json = require('../contracts/MyERC20.json');
-import { EthMethodsBase } from './EthMethodsBase';
+import { EthMethodsBase, IEthMethodsInitParams } from './EthMethodsBase';
 import { encodeUnlockTokenErc20, encodeUnlockEth } from './eth-encoders';
 
 export class EthMethodsERC20 extends EthMethodsBase {
+  constructor(params: IEthMethodsInitParams) {
+    super(params);
+
+    // subscribe current manager to Submission events
+    this.ethEventsTracker.addTrack(
+      'Unlocked',
+      this.ethManager.contract,
+      this.eventHandler,
+      () => !!Object.keys(this.subscribers).length
+    );
+    this.ethEventsTracker.onEventHandler(this.eventHandler);
+  }
+
   decodeLockTokenLog = (receipt: TransactionReceipt) => {
     return this.web3.eth.abi.decodeLog(
       [
