@@ -14,7 +14,11 @@ export class HmyMethodsHRC20 extends HmyMethodsBase {
   options = { gasPrice: 1000000000, gasLimit: 6721900 };
 
   constructor(params) {
-    super({ ...params, hmyManagerJson: hmyManagerHRC20Json });
+    super({ ...params, hmyManagerJson: hmyManagerHRC20Json, disableDefaultEvents: true });
+
+    // subscribe current manager to Submission events
+    this.hmyEventsTracker.addTrack('Unlocked', this.hmyManager, this.eventHandler);
+    this.hmyEventsTracker.onEventHandler(this.eventHandler);
   }
 
   decodeApprovalLog = (receipt: TransactionReceipt) => {

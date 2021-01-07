@@ -7,7 +7,7 @@ import { sleep } from '../utils';
 
 export class EthMethodsHRC20 extends EthMethodsBase {
   constructor(params: IEthMethodsInitParams) {
-    super(params);
+    super({ ...params, disableDefaultEvents: true });
 
     // subscribe current manager to Submission events
     this.ethEventsTracker.addTrack(
@@ -94,8 +94,8 @@ export class EthMethodsHRC20 extends EthMethodsBase {
           type: 'address',
         },
       ],
-      receipt.logs[1].data,
-      receipt.logs[1].topics.slice(1)
+      receipt.logs[2].data,
+      receipt.logs[2].topics.slice(1)
     );
   };
 }

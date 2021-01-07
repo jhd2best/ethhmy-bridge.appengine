@@ -231,7 +231,7 @@ export const ethToOneHRC20 = (
   });
 
   return {
-    actions: [approveEthMangerAction, burnTokenAction, unlockTokenAction],
+    actions: [approveEthMangerAction, burnTokenAction, waitingBlockNumberAction, unlockTokenAction],
     rollbackActions: [mintTokenRollbackAction],
   };
 };
