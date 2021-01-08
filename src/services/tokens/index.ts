@@ -8,6 +8,7 @@ import {
 } from '../../blockchain/hmy';
 import logger from '../../logger';
 import { divDecimals } from './helpers';
+import { ethTokensTracker } from '../../blockchain/eth';
 
 const log = logger.module('validator:tokensService');
 
@@ -92,12 +93,14 @@ export class Tokens {
 
   getTotalLocked = async () => {
     const erc20Tokens = hmyTokensTrackerERC20.getTokens();
+    const hrc20Tokens = ethTokensTracker.getTokens();
     const erc721Tokens = hmyTokensTrackerERC721.getTokens();
 
     const erc20TokensLocked = await this.getTotalLockedByType(erc20Tokens, 'erc20');
+    const hrc20TokensLocked = await this.getTotalLockedByType(hrc20Tokens, 'erc20');
     const erc721TokensLocked = await this.getTotalLockedByType(erc721Tokens, 'erc721');
 
-    const allTokens = [].concat(erc20TokensLocked, erc721TokensLocked);
+    const allTokens = [].concat(erc20TokensLocked, erc721TokensLocked, hrc20TokensLocked);
 
     this.tokens = allTokens;
     this.lastUpdateTime = Date.now();

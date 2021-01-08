@@ -10,7 +10,7 @@ const log = logger.module('validator:tokensTracker');
 
 const CHECK_EVENTS_INTERVAL = 30000;
 
-interface ITokenInfo {
+export interface ITokenInfo {
   name: string;
   symbol: string;
   decimals: string;
