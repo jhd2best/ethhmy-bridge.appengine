@@ -97,7 +97,7 @@ export class Tokens {
     const erc721Tokens = hmyTokensTrackerERC721.getTokens();
 
     const erc20TokensLocked = await this.getTotalLockedByType(erc20Tokens, 'erc20');
-    const hrc20TokensLocked = await this.getTotalLockedByType(hrc20Tokens, 'erc20');
+    const hrc20TokensLocked = await this.getTotalLockedByType(hrc20Tokens, 'hrc20');
     const erc721TokensLocked = await this.getTotalLockedByType(erc721Tokens, 'erc721');
 
     const allTokens = [].concat(erc20TokensLocked, erc721TokensLocked, hrc20TokensLocked);
