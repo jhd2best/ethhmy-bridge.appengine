@@ -1,7 +1,7 @@
 import { Harmony } from '@harmony-js/core';
 import { Contract } from '@harmony-js/contract';
 import { HmyMethodsBase } from './HmyMethodsBase';
-import { encodeMintTokenErc721 } from './hmy-encoders';
+import { encodeMintTokenErc721, encodeMintTokensErc721 } from './hmy-encoders';
 import logger from '../../logger';
 const log = logger.module('validator:hmyMethodsERC721');
 import { sleep } from '../utils';
@@ -36,6 +36,13 @@ export class HmyMethodsERC721 extends HmyMethodsBase {
     // console.log('before MultiSig mintToken: ', receiptId);
 
     const data = encodeMintTokenErc721(oneTokenAddr, amount, userAddr, receiptId);
+    return await this.submitTxHmy(data);
+  };
+
+  mintTokens = async (oneTokenAddr, userAddr, tokenIds, receiptId) => {
+    // console.log('before MultiSig mintToken: ', receiptId);
+
+    const data = encodeMintTokensErc721(oneTokenAddr, tokenIds, userAddr, receiptId);
     return await this.submitTxHmy(data);
   };
 

@@ -62,7 +62,7 @@ export const ethToOneERC721 = (
         //   throw new Error('approvalLog.spender != process.env.ETH_MANAGER_CONTRACT');
         // }
 
-        const lockTokenLog = ethMethods.decodeLockTokenLog(lockTokenAction.payload);
+        const lockTokenLog = ethMethods.decodeLockTokensLog(lockTokenAction.payload);
 
         // if (lockTokenLog.amount != approvalLog.value) {
         //   throw new Error('lockTokenLog.amount != approvalLog.value');
@@ -70,10 +70,10 @@ export const ethToOneERC721 = (
 
         const erc20Address = await hmyMethods.getMappingFor(lockTokenLog.token);
 
-        return await hmyMethods.mintToken(
+        return await hmyMethods.mintTokens(
           erc20Address,
           lockTokenLog.recipient,
-          lockTokenLog.amount,
+          lockTokenLog.tokenIds,
           lockTokenAction.transactionHash
         );
       });

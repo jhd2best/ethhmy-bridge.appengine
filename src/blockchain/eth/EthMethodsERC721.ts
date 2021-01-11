@@ -37,6 +37,49 @@ export class EthMethodsERC721 extends EthMethodsBase {
     );
   };
 
+  decodeLockTokensLog = (receipt: TransactionReceipt) => {
+    const res = [];
+
+    receipt.logs.forEach(log => {
+      try {
+        const result = this.web3.eth.abi.decodeLog(
+          [
+            {
+              indexed: true,
+              internalType: 'address',
+              name: 'token',
+              type: 'address',
+            },
+            {
+              indexed: true,
+              internalType: 'address',
+              name: 'sender',
+              type: 'address',
+            },
+            {
+              indexed: false,
+              internalType: 'uint256',
+              name: 'amount',
+              type: 'uint256',
+            },
+            {
+              indexed: false,
+              internalType: 'address',
+              name: 'recipient',
+              type: 'address',
+            },
+          ],
+          log.data,
+          log.topics.slice(1)
+        );
+
+        res.push(result);
+      } catch (e) {}
+    });
+
+    return { ...res[0], tokenIds: res.map(log => log.amount) };
+  };
+
   unlockToken = async (erc721Address, userAddr, tokenId, receiptId) => {
     console.log('before unlockTokenErc721: ', receiptId);
 
