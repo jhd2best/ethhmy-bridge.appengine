@@ -90,7 +90,7 @@ export const ethToOneERC721 = (
         //   throw new Error('approvalLog.spender != process.env.ETH_MANAGER_CONTRACT');
         // }
 
-        const lockTokenLog = ethMethods.decodeLockTokenLog(lockTokenAction.payload);
+        const lockTokenLog = ethMethods.decodeLockTokensLog(lockTokenAction.payload);
 
         // if (lockTokenLog.amount != approvalLog.value) {
         //   throw new Error('lockTokenLog.amount != approvalLog.value');
@@ -102,10 +102,10 @@ export const ethToOneERC721 = (
         //   transactionHash: lockTokenAction.transactionHash,
         // });
 
-        return await ethMethods.unlockToken(
+        return await ethMethods.unlockTokens(
           lockTokenLog.token,
           lockTokenLog.sender,
-          lockTokenLog.amount,
+          lockTokenLog.tokenIds,
           lockTokenAction.transactionHash
         );
       });
@@ -152,7 +152,8 @@ export const hmyToEthERC721 = (
         //   throw new Error('approvalLog.spender != hmyManager.address');
         // }
 
-        const burnTokenLog = hmyMethods.decodeBurnTokenLog(burnTokenAction.payload);
+        // the same like hmyMethods.decodeBurnTokenLog
+        const burnTokenLog = ethMethods.decodeLockTokensLog(burnTokenAction.payload);
 
         // if (burnTokenLog.amount != approvalLog.value) {
         //   throw new Error('burnTokenLog.amount != approvalLog.value');
@@ -162,14 +163,14 @@ export const hmyToEthERC721 = (
           'before unlockToken',
           params.erc20Address,
           burnTokenLog.recipient,
-          burnTokenLog.tokenId,
+          burnTokenLog.tokenIds,
           burnTokenAction.transactionHash
         );
 
-        return await ethMethods.unlockToken(
+        return await ethMethods.unlockTokens(
           params.erc20Address,
           burnTokenLog.recipient,
-          burnTokenLog.tokenId,
+          burnTokenLog.tokenIds,
           burnTokenAction.transactionHash
         );
       });
@@ -186,7 +187,8 @@ export const hmyToEthERC721 = (
         //   throw new Error('approvalLog.spender != hmyManager.address');
         // }
 
-        const burnTokenLog = hmyMethods.decodeBurnTokenLog(burnTokenAction.payload);
+        // the same like hmyMethods.decodeBurnTokenLog
+        const burnTokenLog = ethMethods.decodeLockTokensLog(burnTokenAction.payload);
 
         // if (burnTokenLog.amount != approvalLog.value) {
         //   throw new Error('burnTokenLog.amount != approvalLog.value');
@@ -198,10 +200,10 @@ export const hmyToEthERC721 = (
         //   transactionHash: burnTokenAction.transactionHash,
         // });
 
-        return await hmyMethods.mintToken(
+        return await hmyMethods.mintTokens(
           burnTokenLog.token,
           burnTokenLog.sender,
-          burnTokenLog.tokenId,
+          burnTokenLog.tokenIds,
           burnTokenAction.transactionHash
         );
       });

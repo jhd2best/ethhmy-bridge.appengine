@@ -1,7 +1,7 @@
 import { TransactionReceipt } from 'web3-core';
 import erc20Json = require('../contracts/MyERC20.json');
 import { EthMethodsBase } from './EthMethodsBase';
-import { encodeUnlockTokenErc721 } from './eth-encoders';
+import { encodeUnlockTokenErc721, encodeUnlockTokensErc721 } from './eth-encoders';
 
 export class EthMethodsERC721 extends EthMethodsBase {
   decodeLockTokenLog = (receipt: TransactionReceipt) => {
@@ -84,6 +84,13 @@ export class EthMethodsERC721 extends EthMethodsBase {
     console.log('before unlockTokenErc721: ', receiptId);
 
     const data = encodeUnlockTokenErc721(erc721Address, tokenId, userAddr, receiptId);
+    return await this.submitTxEth(data);
+  };
+
+  unlockTokens = async (erc721Address, userAddr, tokenIds, receiptId) => {
+    console.log('before unlockTokenErc721: ', receiptId);
+
+    const data = encodeUnlockTokensErc721(erc721Address, tokenIds, userAddr, receiptId);
     return await this.submitTxEth(data);
   };
 
