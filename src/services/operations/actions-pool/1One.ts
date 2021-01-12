@@ -52,6 +52,12 @@ export const ethToOneONE = (
           throw new Error('burnTokenLog.amount != approvalLog.value');
         }
 
+        const erc20Address = await ethMethods.getMappingFor(process.env.ONE_HRC20);
+
+        if (erc20Address.toUpperCase() != burnTokenLog.token.toUpperCase()) {
+          throw new Error('Bad token address');
+        }
+
         console.log(
           'before unlockToken',
           params.erc20Address,
@@ -112,6 +118,24 @@ export const hmyToEthONE = (
   ethMethods: ethContract.EthMethodsHRC20,
   params: IOperationInitParams
 ) => {
+  const oneHrc20Address = process.env.ONE_HRC20;
+
+  const getHRC20AddressAction = new Action({
+    type: ACTION_TYPE.getERC20Address,
+    callFunction: async () => {
+      let transaction = {};
+      let erc20Address = await ethMethods.getMappingFor(oneHrc20Address);
+
+      if (!Number(erc20Address)) {
+        const [name, symbol, decimals] = await hmyMethods.tokenDetails(oneHrc20Address);
+        transaction = await ethMethods.addToken(oneHrc20Address, name, '1' + symbol, decimals);
+        erc20Address = await ethMethods.getMappingFor(oneHrc20Address);
+      }
+
+      return { ...transaction, status: true, hrc20Address: oneHrc20Address, erc20Address };
+    },
+  });
+
   const lockTokenAction = new Action({
     type: ACTION_TYPE.lockHRC20Token,
     awaitConfirmation: true,
@@ -128,11 +152,14 @@ export const hmyToEthONE = (
         // if (Number(lockTokenLog.amount) != Number(params.amount)) {
         //   throw new Error('lockTokenLog.amount != params.amount');
         // }
+        if (oneHrc20Address.toUpperCase() != lockTokenLog.token.toUpperCase()) {
+          throw new Error('Bad token address');
+        }
 
-        const hrc20Address = process.env.ETH_HRC20;
+        const erc20Address = await ethMethods.getMappingFor(lockTokenLog.token);
 
         return await ethMethods.mintERC20Token(
-          hrc20Address,
+          erc20Address,
           lockTokenLog.recipient,
           lockTokenLog.amount,
           lockTokenAction.transactionHash
@@ -151,6 +178,10 @@ export const hmyToEthONE = (
           throw new Error('lockTokenLog.amount != params.amount');
         }
 
+        if (oneHrc20Address.toUpperCase() != lockTokenLog.token.toUpperCase()) {
+          throw new Error('Bad token address');
+        }
+
         return await hmyMethods.unlockTokenOne(
           lockTokenLog.sender,
           lockTokenLog.amount,
@@ -161,7 +192,7 @@ export const hmyToEthONE = (
   });
 
   return {
-    actions: [lockTokenAction, mintTokenAction],
+    actions: [getHRC20AddressAction, lockTokenAction, mintTokenAction],
     rollbackActions: [unlockTokenRollbackAction],
   };
 };

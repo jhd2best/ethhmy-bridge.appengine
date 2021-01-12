@@ -189,6 +189,7 @@ export const ethToOneHRC20 = (
         );
 
         return await hmyMethods.unlockToken(
+          // burnTokenLog.token ??
           params.hrc20Address,
           burnTokenLog.recipient,
           burnTokenLog.amount,
