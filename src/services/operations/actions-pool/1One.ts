@@ -127,8 +127,7 @@ export const hmyToEthONE = (
       let erc20Address = await ethMethods.getMappingFor(oneHrc20Address);
 
       if (!Number(erc20Address)) {
-        const [name, symbol, decimals] = await hmyMethods.tokenDetails(oneHrc20Address);
-        transaction = await ethMethods.addToken(oneHrc20Address, name, '1' + symbol, decimals);
+        transaction = await ethMethods.addToken(oneHrc20Address, 'Harmony ONE', 'ONE', 18);
         erc20Address = await ethMethods.getMappingFor(oneHrc20Address);
       }
 
