@@ -17,15 +17,15 @@ export const hmyToEthHRC20 = (
     type: ACTION_TYPE.getERC20Address,
     callFunction: async () => {
       let transaction = {};
-      let hrc20Address = await ethMethods.getMappingFor(params.hrc20Address);
+      let erc20Address = await ethMethods.getMappingFor(params.hrc20Address);
 
-      if (!Number(hrc20Address)) {
+      if (!Number(erc20Address)) {
         const [name, symbol, decimals] = await hmyMethods.tokenDetails(params.hrc20Address);
         transaction = await ethMethods.addToken(params.hrc20Address, name, '1' + symbol, decimals);
-        hrc20Address = await ethMethods.getMappingFor(params.hrc20Address);
+        erc20Address = await ethMethods.getMappingFor(params.hrc20Address);
       }
 
-      return { ...transaction, status: true, hrc20Address };
+      return { ...transaction, status: true, erc20Address };
     },
   });
 
