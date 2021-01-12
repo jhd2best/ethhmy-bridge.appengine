@@ -10,6 +10,7 @@ import { ethToOneERC20, hmyToEthERC20 } from './erc20';
 import { ethToOneETH, hmyToEthETH } from './1Eth';
 import { ethToOneERC721, hmyToEthERC721 } from './erc721';
 import { ethToOneHRC20, hmyToEthHRC20 } from './hrc20';
+import { ethToOneONE, hmyToEthONE } from './1One';
 
 export const generateActionsPool = (
   params: IOperationInitParams
@@ -28,6 +29,8 @@ export const generateActionsPool = (
         return hmyToEthETH(hmyContract.hmyMethodsERC20, ethContract.ethMethodsETH, params);
       case TOKEN.ERC721:
         return hmyToEthERC721(hmyContract.hmyMethodsERC721, ethContract.ethMethodsERC721, params);
+      case TOKEN.ONE:
+        return hmyToEthONE(hmyContract.hmyMethodsHRC20, ethContract.ethMethodsHRC20, params);
     }
   }
 
@@ -45,6 +48,8 @@ export const generateActionsPool = (
         return ethToOneETH(hmyContract.hmyMethodsERC20, ethContract.ethMethodsETH, params);
       case TOKEN.ERC721:
         return ethToOneERC721(hmyContract.hmyMethodsERC721, ethContract.ethMethodsERC721, params);
+      case TOKEN.ONE:
+        return ethToOneONE(hmyContract.hmyMethodsHRC20, ethContract.ethMethodsHRC20, params);
     }
   }
 

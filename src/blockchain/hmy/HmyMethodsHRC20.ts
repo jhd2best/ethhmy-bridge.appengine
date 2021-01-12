@@ -5,7 +5,7 @@ import logger from '../../logger';
 const log = logger.module('validator:hmyMethodsHRC20');
 import hmyManagerHRC20Json = require('../contracts/HmyManagerHRC20.json');
 import { TransactionReceipt } from 'web3-core';
-import { encodeUnlockTokenHrc20 } from './hmy-encoders';
+import { encodeUnlockTokenHrc20, encodeUnlockOne } from './hmy-encoders';
 import erc20Json = require('../contracts/MyERC20.json');
 
 export class HmyMethodsHRC20 extends HmyMethodsBase {
@@ -43,6 +43,13 @@ export class HmyMethodsHRC20 extends HmyMethodsBase {
     console.log('before unlockToken: ', receiptId);
 
     const data = encodeUnlockTokenHrc20(erc20Address, amount, userAddr, receiptId);
+    return await this.submitTxHmy(data);
+  };
+
+  unlockTokenOne = async (userAddr, amount, receiptId) => {
+    console.log('before unlockTokenOne: ', receiptId);
+
+    const data = encodeUnlockOne(amount, userAddr, receiptId);
     return await this.submitTxHmy(data);
   };
 
