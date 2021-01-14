@@ -20,8 +20,8 @@ export const ethToOneERC721 = (
       let hrc20Address = await hmyMethods.getMappingFor(params.erc20Address);
 
       if (!Number(hrc20Address)) {
-        const [name, symbol] = await ethMethods.tokenDetails(params.erc20Address);
-        transaction = await hmyMethods.addToken(params.erc20Address, name, '1' + symbol);
+        const [name, symbol, baseURI] = await ethMethods.tokenDetails(params.erc20Address);
+        transaction = await hmyMethods.addToken(params.erc20Address, name, '1' + symbol, baseURI);
         hrc20Address = await hmyMethods.getMappingFor(params.erc20Address);
       }
 

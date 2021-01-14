@@ -26,15 +26,23 @@ export class EthMethodsHRC20 extends EthMethodsBase {
   };
 
   addToken = async (hrc20TokenAddr, name, symbol, decimals) => {
-    const res = await this.ethManager.contract.methods
-      .addToken(process.env.ETH_TOKEN_MANAGER_CONTRACT, hrc20TokenAddr, name, symbol, decimals)
-      .send({
-        from: this.ethManager.account.address,
-        gas: process.env.ETH_GAS_LIMIT,
-        gasPrice: new BN(await this.web3.eth.getGasPrice()).mul(new BN(1)), //new BN(process.env.ETH_GAS_PRICE)
-      });
+    const firstOwner = await this.ethMultiSigManager.contract.methods.owners(0).call();
+    const validatorAddress = this.ethManager.account.address;
 
-    return res;
+    if (firstOwner.toLowerCase() === validatorAddress.toLowerCase()) {
+      // i am the first owner
+      const res = await this.ethManager.contract.methods
+        .addToken(process.env.ETH_TOKEN_MANAGER_CONTRACT, hrc20TokenAddr, name, symbol, decimals)
+        .send({
+          from: this.ethManager.account.address,
+          gas: process.env.ETH_GAS_LIMIT,
+          gasPrice: new BN(await this.web3.eth.getGasPrice()).mul(new BN(1)), //new BN(process.env.ETH_GAS_PRICE)
+        });
+
+      return res;
+    }
+
+    return {};
   };
 
   mintERC20Token = async (oneTokenAddr, userAddr, amount, receiptId) => {

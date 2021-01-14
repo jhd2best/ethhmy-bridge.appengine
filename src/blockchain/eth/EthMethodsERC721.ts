@@ -96,6 +96,10 @@ export class EthMethodsERC721 extends EthMethodsBase {
 
   tokenDetails = async contract => {
     const erc20Contract = new this.web3.eth.Contract(erc20Json.abi as any, contract);
-    return [await erc20Contract.methods.name().call(), await erc20Contract.methods.symbol().call()];
+    return [
+      await erc20Contract.methods.name().call(),
+      await erc20Contract.methods.symbol().call(),
+      await erc20Contract.methods.baseURI().call(),
+    ];
   };
 }

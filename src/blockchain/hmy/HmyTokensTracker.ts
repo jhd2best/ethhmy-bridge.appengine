@@ -34,6 +34,7 @@ interface IHmyTokensTrackerParams {
 }
 
 export class HmyTokensTracker {
+  type = '';
   lastBlock = 0;
   tokenManagerContract: Contract;
   ethMethods: EthMethodsERC20 | EthMethodsERC721;
@@ -59,6 +60,8 @@ export class HmyTokensTracker {
       this.tokenManagerJsonAbi,
       this.tokenManagerAddress
     );
+
+    this.type = params.type;
 
     this.ethMethods = params.ethMethods;
 
@@ -143,7 +146,7 @@ export class HmyTokensTracker {
             hrc20Address: token.tokenAck,
             name,
             symbol,
-            decimals,
+            decimals: this.type === 'erc20' ? decimals : null,
           });
         }
       } catch (e) {
