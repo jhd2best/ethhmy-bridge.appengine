@@ -1,5 +1,5 @@
 import { TransactionReceipt } from 'web3-core';
-import erc20Json = require('../contracts/MyERC20.json');
+import erc20Json = require('../contracts/MyERC721.json');
 import { EthMethodsBase } from './EthMethodsBase';
 import { encodeUnlockTokenErc721, encodeUnlockTokensErc721 } from './eth-encoders';
 
