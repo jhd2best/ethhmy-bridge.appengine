@@ -137,6 +137,10 @@ export const hmyToEthONE = (
           maxAwaitTime = maxAwaitTime - 3000;
           erc20Address = await ethMethods.getMappingFor(oneHrc20Address);
         }
+
+        if (!Number(erc20Address)) {
+          return { status: false, error: 'Rejected by timeout' };
+        }
       }
 
       return { ...transaction, status: true, hrc20Address: oneHrc20Address, erc20Address };
