@@ -35,7 +35,7 @@ export class EthMethodsHRC20 extends EthMethodsBase {
         .addToken(process.env.ETH_TOKEN_MANAGER_CONTRACT, hrc20TokenAddr, name, symbol, decimals)
         .send({
           from: this.ethManager.account.address,
-          gas: 800000,
+          gas: 4712388,
           gasPrice: new BN(await this.web3.eth.getGasPrice()).mul(new BN(1)), //new BN(process.env.ETH_GAS_PRICE)
         });
 
