@@ -6,6 +6,7 @@ import { ACTION_TYPE } from '../interfaces';
 import { eventWrapper } from './eventWrapper';
 
 import logger from '../../../logger';
+import { sleep } from '../../../blockchain/utils';
 const log = logger.module('validator:Erc20ActionPool');
 
 export const hmyToEthHRC20 = (
@@ -22,7 +23,14 @@ export const hmyToEthHRC20 = (
       if (!Number(erc20Address)) {
         const [name, symbol, decimals] = await hmyMethods.tokenDetails(params.hrc20Address);
         transaction = await ethMethods.addToken(params.hrc20Address, name, '1' + symbol, decimals);
-        erc20Address = await ethMethods.getMappingFor(params.hrc20Address);
+
+        let maxAwaitTime = 20 * 60 * 1000; // 20min
+
+        while (!Number(erc20Address) && maxAwaitTime > 0) {
+          await sleep(3000);
+          maxAwaitTime = maxAwaitTime - 3000;
+          erc20Address = await ethMethods.getMappingFor(params.hrc20Address);
+        }
       }
 
       return { ...transaction, status: true, erc20Address };

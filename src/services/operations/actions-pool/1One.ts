@@ -6,6 +6,7 @@ import { ACTION_TYPE } from '../interfaces';
 import { eventWrapper } from './eventWrapper';
 
 import logger from '../../../logger';
+import { sleep } from '../../../blockchain/utils';
 const log = logger.module('validator:1ETHActionsPool');
 
 export const ethToOneONE = (
@@ -128,7 +129,14 @@ export const hmyToEthONE = (
 
       if (!Number(erc20Address)) {
         transaction = await ethMethods.addToken(oneHrc20Address, 'Harmony ONE', '1ONE', 18);
-        erc20Address = await ethMethods.getMappingFor(oneHrc20Address);
+
+        let maxAwaitTime = 20 * 60 * 1000; // 20min
+
+        while (!Number(erc20Address) && maxAwaitTime > 0) {
+          await sleep(3000);
+          maxAwaitTime = maxAwaitTime - 3000;
+          erc20Address = await ethMethods.getMappingFor(oneHrc20Address);
+        }
       }
 
       return { ...transaction, status: true, hrc20Address: oneHrc20Address, erc20Address };
@@ -165,10 +173,6 @@ export const hmyToEthONE = (
     callFunction: () => {
       return eventWrapper(hmyMethods, 'Unlocked', lockTokenAction.transactionHash, async () => {
         const lockTokenLog = ethMethods.decodeLockTokenOneLog(lockTokenAction.payload);
-
-        if (lockTokenLog.amount != params.amount) {
-          throw new Error('lockTokenLog.amount != params.amount');
-        }
 
         return await hmyMethods.unlockTokenOne(
           lockTokenAction.payload.from,
