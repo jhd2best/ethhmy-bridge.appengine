@@ -32,7 +32,7 @@ export const ethToOneERC721 = (
   const approveEthMangerAction = new Action({
     type: ACTION_TYPE.approveEthManger,
     awaitConfirmation: true,
-    callFunction: async hash => await ethMethods.waitTransaction(hash),
+    callFunction: hash => Promise.resolve({ status: true, transactionHash: hash }),
   });
 
   const lockTokenAction = new Action({
@@ -132,7 +132,7 @@ export const hmyToEthERC721 = (
   const approveHmyMangerAction = new Action({
     type: ACTION_TYPE.approveHmyManger,
     awaitConfirmation: true,
-    callFunction: hash => hmyMethods.getTransactionReceipt(hash),
+    callFunction: hash => Promise.resolve({ status: true, transactionHash: hash }),
   });
 
   const burnTokenAction = new Action({
