@@ -1,10 +1,14 @@
 import { DBService } from '../database';
 import { IOperationInitParams, Operation } from './Operation';
 import { createError } from '../../routes/helpers';
-import { ACTION_TYPE, OPERATION_TYPE, STATUS } from './interfaces';
+import { ACTION_TYPE, OPERATION_TYPE, STATUS, TOKEN } from './interfaces';
 import { hmy } from '../../blockchain/hmy';
 import { normalizeEthKey } from '../../blockchain/utils';
-import { validateEthBalanceNonZero, validateOneBalanceNonZero } from './validations';
+import {
+  getTokenUSDPrice,
+  validateEthBalanceNonZero,
+  validateOneBalanceNonZero,
+} from './validations';
 import moment from 'moment';
 
 export interface IOperationService {
@@ -97,6 +101,14 @@ export class OperationService {
       throw createError(500, 'User eth balance is to low');
     }
 
+    if (params.type === OPERATION_TYPE.ONE_ETH) {
+      const tokenPrice = await getTokenUSDPrice(params.token, params.erc20Address);
+
+      if (tokenPrice && Number(tokenPrice) * Number(params.amount) < 100) {
+        throw createError(500, 'Minimum amount must be more than $100');
+      }
+    }
+
     return true;
   };
 
@@ -154,6 +166,10 @@ export class OperationService {
     action.setTransactionHash(params.transactionHash);
 
     return operation.toObject();
+  };
+
+  getTokenUSDPrice = (token: TOKEN, erc20Address?: string) => {
+    return getTokenUSDPrice(token, erc20Address);
   };
 
   getAllOperations = (params: {
