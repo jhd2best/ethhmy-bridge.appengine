@@ -71,6 +71,12 @@ export const getTokenUSDPrice = (token: TOKEN, erc20Address?: string) => {
         } catch (e) {}
         break;
 
+      case TOKEN.ONE:
+        try {
+          usdPrice = await getTokenPrice('ONE');
+        } catch (e) {}
+        break;
+
       case TOKEN.LINK:
         try {
           usdPrice = await getTokenPrice('LINK');
