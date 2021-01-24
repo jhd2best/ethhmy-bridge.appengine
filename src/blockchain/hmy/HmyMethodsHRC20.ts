@@ -49,7 +49,9 @@ export class HmyMethodsHRC20 extends HmyMethodsBase {
   unlockTokenOne = async (userAddr, amount, receiptId) => {
     console.log('before unlockTokenOne: ', receiptId);
 
-    const data = encodeUnlockOne(amount, userAddr, receiptId);
+    const addrHex = this.hmySdk.crypto.getAddress(userAddr).checksum;
+
+    const data = encodeUnlockOne(amount, addrHex, receiptId);
     return await this.submitTxHmy(data);
   };
 
