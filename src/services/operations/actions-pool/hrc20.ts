@@ -204,6 +204,17 @@ export const ethToOneHRC20 = (
           throw new Error('burnTokenLog.amount != approvalLog.value');
         }
 
+        const [name, symbol, dec] = await hmyMethods.tokenDetails(params.hrc20Address);
+        const hmyDecimals = Number('0x' + dec);
+
+        const erc20Address = await ethMethods.getMappingFor(params.hrc20Address);
+
+        const [ethName, ethSymbol, ethDecimals] = await ethMethods.tokenDetails(erc20Address);
+
+        if (ethDecimals !== hmyDecimals) {
+          throw new Error('Decimals is wrong');
+        }
+
         console.log(
           'before unlockToken',
           params.hrc20Address,
