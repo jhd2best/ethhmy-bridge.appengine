@@ -45,7 +45,7 @@ export const hmyToEthHRC20 = (
       }
 
       const [ethName, ethSymbol, ethDecimals] = await ethMethods.tokenDetails(erc20Address);
-      if (ethDecimals !== hmyDecimals) {
+      if (Number(ethDecimals) !== Number(hmyDecimals)) {
         return { status: false, error: 'Decimals is wrong' };
       }
 
@@ -211,7 +211,7 @@ export const ethToOneHRC20 = (
 
         const [ethName, ethSymbol, ethDecimals] = await ethMethods.tokenDetails(erc20Address);
 
-        if (ethDecimals !== hmyDecimals) {
+        if (Number(ethDecimals) !== Number(hmyDecimals)) {
           throw new Error('Decimals is wrong');
         }
 
