@@ -215,6 +215,10 @@ export const ethToOneHRC20 = (
           throw new Error('Decimals is wrong');
         }
 
+        if (erc20Address.toLowerCase() !== burnTokenLog.token.toLowerCase()) {
+          throw new Error('Address is wrong');
+        }
+
         console.log(
           'before unlockToken',
           params.hrc20Address,
