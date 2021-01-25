@@ -18,11 +18,18 @@ export const hmyToEthHRC20 = (
     type: ACTION_TYPE.getERC20Address,
     callFunction: async () => {
       let transaction = {};
+      const [name, symbol, dec] = await hmyMethods.tokenDetails(params.hrc20Address);
+      const hmyDecimals = Number('0x' + dec);
+
       let erc20Address = await ethMethods.getMappingFor(params.hrc20Address);
 
       if (!Number(erc20Address)) {
-        const [name, symbol, decimals] = await hmyMethods.tokenDetails(params.hrc20Address);
-        transaction = await ethMethods.addToken(params.hrc20Address, name, '1' + symbol, decimals);
+        transaction = await ethMethods.addToken(
+          params.hrc20Address,
+          name,
+          '1' + symbol,
+          hmyDecimals
+        );
 
         let maxAwaitTime = 20 * 60 * 1000; // 20min
 
@@ -35,6 +42,11 @@ export const hmyToEthHRC20 = (
         if (!Number(erc20Address)) {
           return { status: false, error: 'Rejected by timeout' };
         }
+      }
+
+      const [ethName, ethSymbol, ethDecimals] = await ethMethods.tokenDetails(erc20Address);
+      if (ethDecimals !== hmyDecimals) {
+        return { status: false, error: 'Decimals is wrong' };
       }
 
       return { ...transaction, status: true, erc20Address };

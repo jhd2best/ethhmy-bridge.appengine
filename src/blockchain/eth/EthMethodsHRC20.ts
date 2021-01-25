@@ -106,4 +106,13 @@ export class EthMethodsHRC20 extends EthMethodsBase {
       receipt.logs[2].topics.slice(1)
     );
   };
+
+  tokenDetails = async contract => {
+    const erc20Contract = new this.web3.eth.Contract(erc20Json.abi as any, contract);
+    return [
+      await erc20Contract.methods.name().call(),
+      await erc20Contract.methods.symbol().call(),
+      await erc20Contract.methods.decimals().call(),
+    ];
+  };
 }
