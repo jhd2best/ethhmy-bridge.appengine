@@ -1,8 +1,8 @@
-import { EventsConstructor } from '../../blockchain/helpers/EventsConstructor';
-import logger from '../../logger';
+import { EventsConstructor } from '../../../blockchain/helpers/EventsConstructor';
+import logger from '../../../logger';
 const log = logger.module('validator:eventWrapper');
 
-const WAIT_TIMEOUT = 20 * 60 * 1000; // 20 min
+const WAIT_TIMEOUT = 60 * 60 * 1000; // 60 min
 const WAIT_TIMEOUT_SHORT = 5 * 60 * 1000; // 5 min
 
 export const eventWrapper = (

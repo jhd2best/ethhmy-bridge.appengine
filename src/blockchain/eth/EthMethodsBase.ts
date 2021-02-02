@@ -1,8 +1,9 @@
 import BN from 'bn.js';
-import { AVG_BLOCK_TIME, BLOCK_TO_FINALITY, sleep, withDecimals } from '../utils';
 import { TransactionReceipt } from 'web3-core';
-import { EthManager } from './EthManager';
 import Web3 from 'web3';
+
+import { AVG_BLOCK_TIME, BLOCK_TO_FINALITY, sleep, withDecimals } from '../utils';
+import { EthManager } from './EthManager';
 import { EventsConstructor } from '../helpers/EventsConstructor';
 import { EthEventsTracker } from './EthEventsTracker';
 import logger from '../../logger';
@@ -20,6 +21,7 @@ export interface IEthMethodsInitParams {
   ethToken: EthManager;
   ethMultiSigManager: EthManager;
   ethEventsTracker: EthEventsTracker;
+  disableDefaultEvents?: boolean;
 }
 
 export class EthMethodsBase extends EventsConstructor {
@@ -38,14 +40,16 @@ export class EthMethodsBase extends EventsConstructor {
     this.ethToken = params.ethToken;
     this.ethEventsTracker = params.ethEventsTracker;
 
-    // subscribe current manager to Submission events
-    this.ethEventsTracker.addTrack(
-      'Unlocked',
-      this.ethManager.contract,
-      this.eventHandler,
-      () => !!Object.keys(this.subscribers).length
-    );
-    this.ethEventsTracker.onEventHandler(this.eventHandler);
+    if (!params.disableDefaultEvents) {
+      // subscribe current manager to Submission events
+      this.ethEventsTracker.addTrack(
+        'Unlocked',
+        this.ethManager.contract,
+        this.eventHandler,
+        () => !!Object.keys(this.subscribers).length
+      );
+      this.ethEventsTracker.onEventHandler(this.eventHandler);
+    }
   }
 
   isWSConnected = () => {
@@ -181,6 +185,27 @@ export class EthMethodsBase extends EventsConstructor {
       ],
       receipt.logs[1].data,
       receipt.logs[1].topics.slice(1)
+    );
+  };
+
+  decodeLockTokenOneLog = (receipt: TransactionReceipt) => {
+    return this.web3.eth.abi.decodeLog(
+      [
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'amount',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'address',
+          name: 'recipient',
+          type: 'address',
+        },
+      ],
+      receipt.logs[0].data,
+      receipt.logs[0].topics.slice(1)
     );
   };
 

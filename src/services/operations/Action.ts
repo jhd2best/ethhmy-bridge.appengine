@@ -4,6 +4,7 @@ import { createError } from '../../routes/helpers';
 import { sleep } from '../../blockchain/utils';
 import { TransactionReceipt } from 'web3-core';
 import logger from '../../logger';
+
 const log = logger.module('validator:action');
 
 const AWAIT_STEP_LONG = 20 * 1000; // 20 sec
@@ -18,6 +19,12 @@ const isEth = (type: ACTION_TYPE) =>
     ACTION_TYPE.lockToken,
     ACTION_TYPE.waitingBlockNumber,
     ACTION_TYPE.unlockTokenRollback,
+
+    // HRC20
+    ACTION_TYPE.approveHRC20EthManger,
+    ACTION_TYPE.burnHRC20Token,
+    ACTION_TYPE.mintHRC20Token,
+    ACTION_TYPE.mintHRC20TokenRollback,
   ].includes(type);
 
 export type TActionCallFunction = (

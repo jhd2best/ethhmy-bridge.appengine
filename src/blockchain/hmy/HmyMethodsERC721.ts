@@ -1,7 +1,7 @@
 import { Harmony } from '@harmony-js/core';
 import { Contract } from '@harmony-js/contract';
 import { HmyMethodsBase } from './HmyMethodsBase';
-import { encodeMintTokenErc721 } from './hmy-encoders';
+import { encodeMintTokenErc721, encodeMintTokensErc721 } from './hmy-encoders';
 import logger from '../../logger';
 const log = logger.module('validator:hmyMethodsERC721');
 import { sleep } from '../utils';
@@ -24,9 +24,9 @@ export class HmyMethodsERC721 extends HmyMethodsBase {
     return res;
   };
 
-  addToken = async (erc20TokenAddr, name, symbol) => {
+  addToken = async (erc20TokenAddr, name, symbol, baseURI = '') => {
     const res = await this.hmyManager.contract.methods
-      .addToken(process.env.NFT_TOKEN_MANAGER_CONTRACT, erc20TokenAddr, name, symbol)
+      .addToken(process.env.NFT_TOKEN_MANAGER_CONTRACT, erc20TokenAddr, name, symbol, baseURI)
       .send(this.options);
 
     return res;
@@ -36,6 +36,13 @@ export class HmyMethodsERC721 extends HmyMethodsBase {
     // console.log('before MultiSig mintToken: ', receiptId);
 
     const data = encodeMintTokenErc721(oneTokenAddr, amount, userAddr, receiptId);
+    return await this.submitTxHmy(data);
+  };
+
+  mintTokens = async (oneTokenAddr, userAddr, tokenIds, receiptId) => {
+    // console.log('before MultiSig mintToken: ', receiptId);
+
+    const data = encodeMintTokensErc721(oneTokenAddr, tokenIds, userAddr, receiptId);
     return await this.submitTxHmy(data);
   };
 

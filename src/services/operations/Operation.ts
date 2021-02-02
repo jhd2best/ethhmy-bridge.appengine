@@ -1,6 +1,6 @@
 import { ACTION_TYPE, OPERATION_TYPE, STATUS, TOKEN } from './interfaces';
 import { Action } from './Action';
-import { generateActionsPool } from './generateActionsPool';
+import { generateActionsPool } from './actions-pool';
 import logger from '../../logger';
 
 const log = logger.module('validator:operation');
@@ -44,6 +44,7 @@ export class Operation {
     this.amount = params.amount;
     this.type = params.type;
     this.erc20Address = params.erc20Address;
+    this.hrc20Address = params.hrc20Address;
     this.token = params.token;
 
     this.timestamp = !!params.status ? params.timestamp : Math.round(+new Date() / 1000);
@@ -62,7 +63,12 @@ export class Operation {
       const lastAction = params.actions[params.actions.length - 1];
 
       if (
-        [ACTION_TYPE.mintTokenRollback, ACTION_TYPE.unlockTokenRollback].includes(lastAction.type)
+        [
+          ACTION_TYPE.mintTokenRollback,
+          ACTION_TYPE.unlockTokenRollback,
+          ACTION_TYPE.mintHRC20TokenRollback,
+          ACTION_TYPE.unlockHRC20TokenRollback,
+        ].includes(lastAction.type)
       ) {
         this.actions = this.actions.concat(this.rollbackActions);
       }

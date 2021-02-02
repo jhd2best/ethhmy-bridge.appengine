@@ -23,6 +23,7 @@ interface IHmyMethodsInitParams {
   hmyEventsTracker: HmyEventsTracker;
   hmyTokenContractAddress: string;
   hmyManagerJson?: any;
+  disableDefaultEvents?: boolean;
 }
 
 export class HmyMethodsBase extends EventsConstructor {
@@ -44,6 +45,7 @@ export class HmyMethodsBase extends EventsConstructor {
     hmyManagerMultiSigAddress,
     hmyEventsTracker,
     hmyManagerJson,
+    disableDefaultEvents,
   }: IHmyMethodsInitParams) {
     super();
 
@@ -63,9 +65,11 @@ export class HmyMethodsBase extends EventsConstructor {
 
     this.hmyEventsTracker = hmyEventsTracker;
 
-    // subscribe current manager to Submission events
-    this.hmyEventsTracker.addTrack('Minted', this.hmyManager, this.eventHandler);
-    this.hmyEventsTracker.onEventHandler(this.eventHandler);
+    if (!disableDefaultEvents) {
+      // subscribe current manager to Submission events
+      this.hmyEventsTracker.addTrack('Minted', this.hmyManager, this.eventHandler);
+      this.hmyEventsTracker.onEventHandler(this.eventHandler);
+    }
   }
 
   initHmySdk = () => {

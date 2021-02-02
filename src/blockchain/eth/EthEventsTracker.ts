@@ -7,8 +7,9 @@ import { Contract } from 'web3-eth-contract';
 const CHECK_EVENTS_INTERVAL = 10000;
 
 interface IEthEventTrackerParams {
-  ethMultiSigManager: EthManager;
+  ethManager: EthManager;
   web3: Web3;
+  eventName: string;
 }
 
 type EventHandler = (event: IEventData) => void;
@@ -17,6 +18,7 @@ export class EthEventsTracker {
   lastBlock = 0;
   ethMultiSigManager: EthManager;
   web3: Web3;
+  eventName: string;
 
   subscribers: Record<string, EventHandler> = {};
   tracks: Record<
@@ -31,7 +33,8 @@ export class EthEventsTracker {
 
   constructor(params: IEthEventTrackerParams) {
     this.web3 = params.web3;
-    this.ethMultiSigManager = params.ethMultiSigManager;
+    this.ethMultiSigManager = params.ethManager;
+    this.eventName = params.eventName;
 
     setInterval(this.checkEvents, CHECK_EVENTS_INTERVAL);
   }
@@ -57,20 +60,27 @@ export class EthEventsTracker {
     const latest = await this.web3.eth.getBlockNumber();
 
     if (latest > this.lastBlock) {
-      const submissionEvents = await this.ethMultiSigManager.contract.getPastEvents('Submission', {
-        filter: {},
-        fromBlock: this.lastBlock,
-        toBlock: latest,
-      });
+      const submissionEvents = await this.ethMultiSigManager.contract.getPastEvents(
+        this.eventName,
+        {
+          filter: {},
+          fromBlock: this.lastBlock,
+          toBlock: latest,
+        }
+      );
 
       if (submissionEvents.length) {
-        console.log('New submission events: ', submissionEvents.length);
+        console.log(`New ${this.eventName} events: `, submissionEvents.length);
       }
 
       submissionEvents.forEach(async event => {
-        const transaction = await this.ethMultiSigManager.contract.methods
-          .transactions(event.returnValues.transactionId)
-          .call();
+        let transaction;
+
+        if (this.eventName === 'Submission') {
+          transaction = await this.ethMultiSigManager.contract.methods
+            .transactions(event.returnValues.transactionId)
+            .call();
+        }
 
         Object.values(this.subscribers).forEach(eventHandler =>
           eventHandler({ ...event, transaction })

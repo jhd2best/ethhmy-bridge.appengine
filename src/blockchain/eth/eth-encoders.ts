@@ -133,3 +133,75 @@ export const encodeUnlockTokenErc721 = (erc721Address, tokenId, recipient, recei
     [erc721Address, tokenId, recipient, receiptId]
   );
 };
+
+export const encodeUnlockTokensErc721 = (erc721Address, tokenIds, recipient, receiptId) => {
+  return web3.eth.abi.encodeFunctionCall(
+    {
+      constant: false,
+      inputs: [
+        {
+          internalType: 'address',
+          name: 'ethTokenAddr',
+          type: 'address',
+        },
+        {
+          internalType: 'uint256[]',
+          name: 'tokenIds',
+          type: 'uint256[]',
+        },
+        {
+          internalType: 'address',
+          name: 'recipient',
+          type: 'address',
+        },
+        {
+          internalType: 'bytes32',
+          name: 'receiptId',
+          type: 'bytes32',
+        },
+      ],
+      name: 'unlockTokens',
+      outputs: [],
+      payable: false,
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    [erc721Address, tokenIds, recipient, receiptId]
+  );
+};
+
+export const encodeMintTokenHrc20 = (hrc20Addr, amount, recipient, transactionHash) => {
+  return web3.eth.abi.encodeFunctionCall(
+    {
+      constant: false,
+      inputs: [
+        {
+          internalType: 'address',
+          name: 'ethToken',
+          type: 'address',
+        },
+        {
+          internalType: 'uint256',
+          name: 'amount',
+          type: 'uint256',
+        },
+        {
+          internalType: 'address',
+          name: 'recipient',
+          type: 'address',
+        },
+        {
+          internalType: 'bytes32',
+          name: 'receiptId',
+          type: 'bytes32',
+        },
+      ],
+      name: 'mintToken',
+      outputs: [],
+      payable: false,
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    [hrc20Addr, amount, recipient, transactionHash]
+  );
+};

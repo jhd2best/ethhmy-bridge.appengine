@@ -1,8 +1,14 @@
 import axios from 'axios';
 import { DBService } from '../database';
-import { hmyTokensTracker, hmyMethodsERC20, hmyMethodsLINK } from '../../blockchain/hmy';
+import {
+  hmyTokensTrackerERC20,
+  hmyTokensTrackerERC721,
+  hmyMethodsERC20,
+  hmyMethodsLINK,
+} from '../../blockchain/hmy';
 import logger from '../../logger';
 import { divDecimals } from './helpers';
+import { ethTokensTracker } from '../../blockchain/eth';
 
 const log = logger.module('validator:tokensService');
 
@@ -13,7 +19,7 @@ export interface IOperationService {
 export interface ITokenInfo {
   name: string;
   symbol: string;
-  decimals: string;
+  decimals?: string;
   erc20Address: string;
   hrc20Address: string;
   totalLocked: string;
@@ -86,8 +92,21 @@ export class Tokens {
   };
 
   getTotalLocked = async () => {
-    const tokens = hmyTokensTracker.getTokens();
+    const erc20Tokens = hmyTokensTrackerERC20.getTokens();
+    const hrc20Tokens = ethTokensTracker.getTokens();
+    const erc721Tokens = hmyTokensTrackerERC721.getTokens();
 
+    const erc20TokensLocked = await this.getTotalLockedByType(erc20Tokens, 'erc20');
+    const hrc20TokensLocked = await this.getTotalLockedByType(hrc20Tokens, 'hrc20');
+    const erc721TokensLocked = await this.getTotalLockedByType(erc721Tokens, 'erc721');
+
+    const allTokens = [].concat(erc20TokensLocked, erc721TokensLocked, hrc20TokensLocked);
+
+    this.tokens = allTokens;
+    this.lastUpdateTime = Date.now();
+  };
+
+  getTotalLockedByType = async (tokens, type) => {
     const newTokens = [];
 
     for (let i = 0; i < tokens.length; i++) {
@@ -123,11 +142,11 @@ export class Tokens {
         totalLockedNormal,
         usdPrice,
         totalLockedUSD,
+        type,
       });
     }
 
-    this.tokens = newTokens;
-    this.lastUpdateTime = Date.now();
+    return newTokens;
   };
 
   getAllTokens = (params: { size: number; page: number }) => {

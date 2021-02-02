@@ -92,6 +92,15 @@ export const routes = (app, services: IServices) => {
   );
 
   app.get(
+    '/token-price',
+    asyncHandler(async (req, res) => {
+      const data = await services.operations.getTokenUSDPrice(req.query.token, req.query.erc20);
+
+      return res.json(data);
+    })
+  );
+
+  app.get(
     '/version',
     asyncHandler(async (req, res) => {
       return res.json({ version: '9.0.0' });
